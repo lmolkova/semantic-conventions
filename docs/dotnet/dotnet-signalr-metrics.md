@@ -29,7 +29,7 @@ This metric is required.
 Corresponding `EventCounter` name is `connections-duration`; Meter name is `Microsoft.AspNetCore.Http.Connections`
 <!-- endsemconv -->
 
-<!-- semconv metric.signalr.server.connection.duration -->
+<!-- semconv metric.signalr.server.connection.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `signalr.http_transport.status` | string | TODO [1] | `TODO` | Recommended |
@@ -56,7 +56,7 @@ This metric is required.
 Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Http.Connections`
 <!-- endsemconv -->
 
-<!-- semconv metric.signalr.server.active_connections -->
+<!-- semconv metric.signalr.server.active_connections(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `signalr.http_transport.status` | string | TODO [1] | `TODO` | Recommended |

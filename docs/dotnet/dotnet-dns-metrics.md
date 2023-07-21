@@ -33,7 +33,7 @@ of **`[TODO]`**.
 **[1]:** Meter name is `System.Net.NameResolution`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.dns.lookup.duration -->
+<!-- semconv metric.dotnet.dns.lookup.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `question.name` | string | The name being queried. [1] | `www.example.com`; `dot.net` | Required |

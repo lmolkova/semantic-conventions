@@ -31,7 +31,7 @@ This metric is required.
 **[1]:** Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.active_connections -->
+<!-- semconv metric.kestrel.active_connections(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |
@@ -53,7 +53,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.connection.duration -->
+<!-- semconv metric.kestrel.connection.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `exception.type` | string | The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it. [1] | `java.net.ConnectException`; `OSError` | Recommended |
@@ -88,7 +88,7 @@ Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 **TODO: do we ever will have other rejection reasons**
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.rejected_connections -->
+<!-- semconv metric.kestrel.rejected_connections(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |
@@ -110,7 +110,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.queued_connections -->
+<!-- semconv metric.kestrel.queued_connections(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |
@@ -132,7 +132,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.queued_requests -->
+<!-- semconv metric.kestrel.queued_requests(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |
@@ -159,7 +159,7 @@ This metric is required.
 Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.upgraded_connections -->
+<!-- semconv metric.kestrel.upgraded_connections(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |
@@ -181,7 +181,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.tls_handshake.duration -->
+<!-- semconv metric.kestrel.tls_handshake.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `exception.type` | string | The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it. [1] | `java.net.ConnectException`; `OSError` | Recommended |
@@ -209,7 +209,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 <!-- endsemconv -->
 
-<!-- semconv metric.kestrel.active_tls_handshakes -->
+<!-- semconv metric.kestrel.active_tls_handshakes(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `kestrel.endpoint` | string | TODO [1] | `TODO` | Recommended |

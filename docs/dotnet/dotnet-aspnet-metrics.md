@@ -42,7 +42,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Routing`.
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.routing.successful_matches -->
+<!-- semconv metric.aspnet.routing.successful_matches(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.routing.fallback` | string | TODO | `TODO` | Required |
@@ -67,7 +67,7 @@ This metric is required.
 **[1]:** An unmatched request may be handled by later middleware, such as the static files or authentication middleware. Meter name is `Microsoft.AspNetCore.Routing`
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.routing.failed_matches -->
+<!-- semconv metric.aspnet.routing.failed_matches(full) -->
 <!-- endsemconv -->
 
 ## Exception metrics
@@ -87,7 +87,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.Diagnostics`
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.diagnostics_handler.exceptions -->
+<!-- semconv metric.aspnet.diagnostics_handler.exceptions(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `exception.result` | string | TODO | `TODO` | Required |
@@ -113,7 +113,7 @@ This metric is required.
 **[1]:** Meter name is `Microsoft.AspNetCore.RateLimiting`
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.active_request_leases -->
+<!-- semconv metric.aspnet.rate_limiting.active_request_leases(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |
@@ -134,7 +134,7 @@ This metric is required.
 **TODO do we need attributes?, can we explain what it means better**`
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.request_lease.duration -->
+<!-- semconv metric.aspnet.rate_limiting.request_lease.duration(full) -->
 <!-- endsemconv -->
 
 ### Metric: `aspnet.rate_limiting.queued_requests`
@@ -153,7 +153,7 @@ This metric is required.
 **TODO: if they are queued, should they have reject reason ? **
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.queued_requests -->
+<!-- semconv metric.aspnet.rate_limiting.queued_requests(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |
@@ -179,7 +179,7 @@ This metric is required.
 **TODO: if they are queued, should they have reject reason ? **
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.queued_request.duration -->
+<!-- semconv metric.aspnet.rate_limiting.queued_request.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |
@@ -203,7 +203,7 @@ Meter name is `Microsoft.AspNetCore.RateLimiting`
 **TODO: can we report aspnet.rate_limiting.request count instead and have reject_reason to count failed/successful ?**
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.rejected_requests -->
+<!-- semconv metric.aspnet.rate_limiting.rejected_requests(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |

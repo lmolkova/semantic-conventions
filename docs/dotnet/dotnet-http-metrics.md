@@ -39,7 +39,7 @@ This metric is required.
 **[1]:** Corresponding `EventCounter` names are `*-connections-current-total`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.http.client.connections.usage -->
+<!-- semconv metric.dotnet.http.client.connections.usage(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `connection.state` | string | Connection state. | `active`; `idle` | Required |
@@ -73,7 +73,7 @@ This metric is required.
 **[1]:** Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.http.client.connection.duration -->
+<!-- semconv metric.dotnet.http.client.connection.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [1] | `3.1.1` | Recommended |
@@ -111,7 +111,7 @@ This metric is required.
 **[1]:** Corresponding `EventCounter` name is `current-requests`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.http.client.active_requests -->
+<!-- semconv metric.dotnet.http.client.active_requests(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `http.request.method` | string | HTTP request method. [1] | `GET`; `POST`; `HEAD` | Required |
@@ -138,6 +138,21 @@ Instrumentations for specific web frameworks that consider HTTP methods to be ca
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
 **[2]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
+
+`http.request.method` has the following list of well-known values. If one of them applies, then the respective value MUST be used, otherwise a custom value MAY be used.
+
+| Value  | Description |
+|---|---|
+| `CONNECT` | CONNECT method. |
+| `DELETE` | DELETE method. |
+| `GET` | GET method. |
+| `HEAD` | HEAD method. |
+| `OPTIONS` | OPTIONS method. |
+| `PATCH` | PATCH method. |
+| `POST` | POST method. |
+| `PUT` | PUT method. |
+| `TRACE` | TRACE method. |
+| `_OTHER` | Any HTTP method that the instrumentation has no prior knowledge of. |
 <!-- endsemconv -->
 
 ### Metric: `http.client.failed_requests`
@@ -156,7 +171,7 @@ This metric is required.
 **[1]:** Corresponding `EventCounter` name is `requests-failed`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.http.client.failed_requests -->
+<!-- semconv metric.dotnet.http.client.failed_requests(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `http.request.method` | string | HTTP request method. [1] | `GET`; `POST`; `HEAD` | Required |
@@ -183,6 +198,21 @@ Instrumentations for specific web frameworks that consider HTTP methods to be ca
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
 **[2]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
+
+`http.request.method` has the following list of well-known values. If one of them applies, then the respective value MUST be used, otherwise a custom value MAY be used.
+
+| Value  | Description |
+|---|---|
+| `CONNECT` | CONNECT method. |
+| `DELETE` | DELETE method. |
+| `GET` | GET method. |
+| `HEAD` | HEAD method. |
+| `OPTIONS` | OPTIONS method. |
+| `PATCH` | PATCH method. |
+| `POST` | POST method. |
+| `PUT` | PUT method. |
+| `TRACE` | TRACE method. |
+| `_OTHER` | Any HTTP method that the instrumentation has no prior knowledge of. |
 <!-- endsemconv -->
 
 ## HTTP server
@@ -221,7 +251,7 @@ This metric is required.
 **TODO Any reason not to put it into aspnet? seems ASP.NET -specific (middleware, app code), not necessarily HTTP?**
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.server.unhandled_requests -->
+<!-- semconv metric.aspnet.server.unhandled_requests(full) -->
 <!-- endsemconv -->
 
 [DocumentStatus]: https://github.com/open-telemetry/opentelemetry-specification/tree/v1.22.0/specification/document-status.md
