@@ -1,5 +1,5 @@
 groups:
-  - id: kestrel
+  - id: kestrel.common_attributes
     prefix: kestrel
     type: attribute_group
     brief: Kestrel attributes
@@ -26,8 +26,7 @@ groups:
     brief: Number of connections that are currently active on the server.
     instrument: updowncounter
     unit: "{connection}"
-    note: |
-      Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    note: Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Server.Kestrel`
     attributes:
       - ref: kestrel.endpoint
 
@@ -37,8 +36,7 @@ groups:
     brief: The duration of connections on the server.
     instrument: histogram
     unit: "s"
-    note: |
-      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
     attributes:
       - ref: kestrel.endpoint
       - ref: url.scheme
@@ -67,8 +65,7 @@ groups:
     brief: Number of connections that are currently queued and are waiting to start.
     instrument: updowncounter
     unit: "{connection}"
-    note: |
-      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
     attributes:
       - ref: kestrel.endpoint
 
@@ -79,8 +76,7 @@ groups:
     brief: Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.
     instrument: updowncounter
     unit: "{connection}"
-    note: |
-      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
     attributes:
       - ref: kestrel.endpoint
       - ref: url.scheme

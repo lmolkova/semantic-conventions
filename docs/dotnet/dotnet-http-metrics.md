@@ -197,16 +197,12 @@ All Http server metrics are reported by `Microsoft.AspNetCore.Hosting ` meter.
 
 Follows common [http.server.duration](../http/http-metrics.md#metric-httpserverduration)
 
-Corresponding `EventCounter` (without dimensions) is `http-client-requests-duration`
-
 ### Metric: `http.server.active_requests`
 
 **TODO: Opt-in address and port?**
 **TODO: method cardinality?**
 
 Follows common [http.server.active_requests](../http/http-metrics.md#metric-httpserveractive_requests)
-
-Corresponding `EventCounter` (without dimensions) is `http-client-current-requests`
 
 ### Metric: `http.server.unhandled_requests`
 

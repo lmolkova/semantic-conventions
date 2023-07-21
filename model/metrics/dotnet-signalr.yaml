@@ -1,5 +1,5 @@
 groups:
-  - id: signalr
+  - id: signalr.common_attributes
     prefix: signalr
     type: attribute_group
     brief: SignalR attributes
