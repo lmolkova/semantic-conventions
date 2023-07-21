@@ -2,23 +2,18 @@ groups:
   - id: kestrel.common_attributes
     prefix: kestrel
     type: attribute_group
-    brief: Kestrel attributes
+    brief: Common kestrel attributes
+    note: "**TODO: Let's pick relevant attributes instead of kestrel.endpoint from this list, and/or use `url.full`**"
     attributes:
-      - id: endpoint
-        type: string
-        brief: TODO
-        examples: ["TODO"]
-        note: "**TODO: why not server.**? What's KEstrel-specific about it**"
-  - id: tls
-    prefix: tls
-    type: attribute_group
-    brief: TLS attributes
-    attributes:
-      - id: protocol
-        type: string
-        brief: TODO
-        examples: ["TODO"]
-        note: "**TODO: why not network.protocol.***?"
+      #- ref: server.address
+      #- ref: server.port
+      #- ref: server.socket.address
+      #- ref: url.scheme
+      - ref: url.full
+      - ref: network.protocol.name
+      - ref: network.protocol.version
+      - ref: network.transport
+      - ref: network.type
 
   - id: metric.kestrel.active_connections
     type: metric
@@ -27,8 +22,7 @@ groups:
     instrument: updowncounter
     unit: "{connection}"
     note: Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Server.Kestrel`
-    attributes:
-      - ref: kestrel.endpoint
+    extends: kestrel.common_attributes
 
   - id: metric.kestrel.connection.duration
     type: metric
@@ -37,13 +31,9 @@ groups:
     instrument: histogram
     unit: "s"
     note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    extends: kestrel.common_attributes
     attributes:
-      - ref: kestrel.endpoint
-      - ref: url.scheme
-      - ref: network.protocol.version
-      - ref: tls.protocol
-      - ref: exception.type
-        note: "**TODO: Let's define common attribute for error reason/status**"
+      - ref: dotnet.error.code
 
   - id: metric.kestrel.rejected_connections
     type: metric
@@ -56,8 +46,7 @@ groups:
       Meter name is `Microsoft.AspNetCore.Server.Kestrel`
 
       **TODO: do we ever will have other rejection reasons**
-    attributes:
-      - ref: kestrel.endpoint
+    extends: kestrel.common_attributes
 
   - id: metric.kestrel.queued_connections
     type: metric
@@ -66,9 +55,7 @@ groups:
     instrument: updowncounter
     unit: "{connection}"
     note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
-    attributes:
-      - ref: kestrel.endpoint
-
+    extends: kestrel.common_attributes
 
   - id: metric.kestrel.queued_requests
     type: metric
@@ -77,10 +64,7 @@ groups:
     instrument: updowncounter
     unit: "{connection}"
     note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
-    attributes:
-      - ref: kestrel.endpoint
-      - ref: url.scheme
-      - ref: network.protocol.version
+    extends: kestrel.common_attributes
 
   - id: metric.kestrel.upgraded_connections
     type: metric
@@ -91,8 +75,7 @@ groups:
     note: |
       The number only tracks HTTP/1.1 connections. **TODO: can we add protocol info in dimensions so we can extend it to other versions/protocols? **
       Meter name is `Microsoft.AspNetCore.Server.Kestrel`
-    attributes:
-      - ref: kestrel.endpoint
+    extends: kestrel.common_attributes
 
   - id: metric.kestrel.tls_handshake.duration
     type: metric
@@ -101,12 +84,9 @@ groups:
     instrument: histogram
     unit: "s"
     note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    extends: kestrel.common_attributes
     attributes:
-      - ref: kestrel.endpoint
-      - ref: tls.protocol
-      - ref: exception.type
-        note: "**TODO: Let's define common attribute for error reason/status**"
-
+      - ref: dotnet.error.code
 
   - id: metric.kestrel.active_tls_handshakes
     type: metric
@@ -115,5 +95,4 @@ groups:
     instrument: updowncounter
     unit: "{handshake}"
     note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
-    attributes:
-      - ref: kestrel.endpoint
+    extends: kestrel.common_attributes

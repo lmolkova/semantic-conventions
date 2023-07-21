@@ -8,11 +8,19 @@ groups:
         type: string
         brief: TODO
         examples: ["TODO"]
-      - id: rate_limiting.reject_reason
-        type: string
-        brief: TODO
-        examples: ["TODO"]
-        note: "**TODO should it be an enum?**"
+      - id: rate_limiting.result
+        type:
+          allow_custom_values: true
+          members:
+            - id: acquired
+              value: 'acquired'
+              brief: 'lease acquired'
+            - id: rejected_reason1
+              value: 'rejected_reason1'
+              brief: 'TODO'
+            #...
+        brief: Rate-limiting result, shows whether lease was acquired or contains rejection reason
+        examples: ["acquired", "rejected_reason1"]
       - id: routing.fallback
         type: string
         brief: TODO
@@ -21,42 +29,46 @@ groups:
         type: string
         brief: TODO
         examples: ["TODO"]
+      - id: match_status
+        type:
+          allow_custom_values: true
+          members:
+            - id: success
+              value: 'success'
+              brief: 'No error'
+            - id: failure
+              value: 'failure'
+              brief: 'failure'
+        brief: Match result - success or failure
+        examples: ["success", "failure"]
 
   # misc
   - id: metric.aspnet.server.unhandled_requests
     type: metric
-    metric_name: http.server.unhandled_requests
+    metric_name: aspnet.unhandled_requests
     brief: Number of requests that reached the end of the middleware pipeline without being handled by application code.
     instrument: updowncounter
     unit: "{request}"
     note: |
-      Meter name is `Microsoft.AspNetCore.Hosting`.
-      **TODO Any reason not to put it into aspnet? seems ASP.NET -specific (middleware, app code), not necessarily HTTP?**
+      Meter name is `Microsoft.AspNetCore.Hosting`.**
 
   # routing
-  - id: metric.aspnet.routing.successful_matches
+  - id: metric.aspnet.routing.matches
     type: metric
     metric_name: aspnet.routing.successful_matches
     brief: Number of requests that successfully matched to an endpoint.
     instrument: counter
     unit: "{match}"
     note: >
-     Meter name is `Microsoft.AspNetCore.Routing`.
+      An unmatched request may be handled by later middleware, such as the static files or authentication middleware.
+      Meter name is `Microsoft.AspNetCore.Routing`.
     attributes:
       - ref: http.route
         requirement_level: required
       - ref: aspnet.routing.fallback
         requirement_level: required
-
-  - id: metric.aspnet.routing.failed_matches
-    type: metric
-    metric_name: aspnet.routing.failed_matches
-    brief: Number of requests that failed to match to an endpoint.
-    note: >
-      An unmatched request may be handled by later middleware, such as the static files or authentication middleware.
-      Meter name is `Microsoft.AspNetCore.Routing`
-    instrument: counter
-    unit: "{match}"
+      - ref: aspnet.match_status
+        requirement_level: required
 
   # diagnostics
   - id: metric.aspnet.diagnostics_handler.exceptions
@@ -70,11 +82,7 @@ groups:
       - ref: exception.type
       - ref: aspnet.handler
         requirement_level: required
-      - id: exception.result
-        type: string
-        requirement_level: required
-        brief: TODO
-        examples: ["TODO"]
+      - ref: dotnet.error.code
 
   # rate_limiting
   - id: metric.aspnet.rate_limiting.active_request_leases
@@ -108,7 +116,6 @@ groups:
       Meter name is `Microsoft.AspNetCore.RateLimiting`
 
       **TODO: I don't really understand what this duration is, can we improve name, brief or description to explain? **
-      **TODO: if they are queued, should they have reject reason ? **
     attributes:
       - ref: aspnet.rate_limiting.policy
         requirement_level: required
@@ -121,26 +128,21 @@ groups:
     unit: "{request}"
     note: |
       Meter name is `Microsoft.AspNetCore.RateLimiting`
-
-      **TODO: if they are queued, should they have reject reason ? **
     attributes:
       - ref: aspnet.rate_limiting.policy
         requirement_level: required
-      - ref: aspnet.rate_limiting.reject_reason
 
-  - id: metric.aspnet.rate_limiting.rejected_requests
+  - id: metric.aspnet.rate_limiting.requests
     type: metric
-    metric_name: aspnet.rate_limiting.rejected_requests
-    brief: Number of requests that failed to acquire a rate limiting lease.
+    metric_name: aspnet.rate_limiting.requests
+    brief: Number of requests that tried to acquire a rate limiting lease.
     instrument: counter
     unit: "{request}"
     note: |
       Requests could be rejected by global or endpoint rate limiting policies. Or the request could be cancelled while waiting for the lease.
 
       Meter name is `Microsoft.AspNetCore.RateLimiting`
-
-      **TODO: can we report aspnet.rate_limiting.request count instead and have reject_reason to count failed/successful ?**
     attributes:
       - ref: aspnet.rate_limiting.policy
         requirement_level: required
-      - ref: aspnet.rate_limiting.reject_reason
+      - ref: aspnet.rate_limiting.result

@@ -61,6 +61,30 @@ groups:
       - ref: server.address
       - ref: server.socket.address
       - ref: server.port
+      - ref: dotnet.error.code
+      - ref: dotnet.http.request.error
+
+  - id: metric.dotnet.http.client.duration
+    type: metric
+    metric_name: http.client.duration
+    brief: "Measures the duration of outbound HTTP requests."
+    instrument: histogram
+    unit: "s"
+    extends: metric_attributes.http.client
+    attributes:
+      - ref: dotnet.error.code
+      - ref: dotnet.http.request.error
+
+  - id: metric.dotnet.http.server.duration
+    type: metric
+    metric_name: http.server.duration
+    brief: "Measures the duration of inbound HTTP requests."
+    instrument: histogram
+    unit: "s"
+    extends: metric_attributes.http.server
+    attributes:
+      - ref: dotnet.error.code
+      - ref: dotnet.http.request.error
 
   - id: metric.dotnet.http.client.active_requests
     type: metric
@@ -69,21 +93,6 @@ groups:
     instrument: updowncounter
     unit: "{request}"
     note: Corresponding `EventCounter` name is `current-requests`; Meter name is `System.Net.Http`.
-    attributes:
-      - ref: http.request.method
-      - ref: url.scheme
-      - ref: network.protocol.version
-      - ref: server.address
-      - ref: server.socket.address
-      - ref: server.port
-
-  - id: metric.dotnet.http.client.failed_requests
-    type: metric
-    metric_name: http.client.failed_requests
-    brief: "Number of outbound HTTP requests that have failed."
-    instrument: counter
-    unit: "{request}"
-    note: Corresponding `EventCounter` name is `requests-failed`; Meter name is `System.Net.Http`.
     attributes:
       - ref: http.request.method
       - ref: url.scheme

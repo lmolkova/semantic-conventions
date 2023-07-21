@@ -4,40 +4,28 @@ groups:
     type: attribute_group
     brief: SignalR attributes
     attributes:
-      - id: http_transport.status
-        type: string
-        brief: TODO
-        examples: ["TODO"]
-        note: "**TODO: why not signalr.status? What's HTTP-specific about it**"
-      - id: http_transport.transport
-        type: string
-        brief: TODO
-        examples: ["TODO"]
-        note: "**TODO: why not network.transport?**"
+      - ref: dotnet.error.code
+      - ref: network.protocol.name
+      - ref: network.protocol.version
+      - ref: network.transport
 
   - id: metric.signalr.server.connection.duration
     type: metric
-    metric_name: signalr_http_transport.connection.duration
+    metric_name: signalr.server.connection.duration
     brief: The duration of connections on the server.
     instrument: histogram
     unit: "s"
-    note: |
-      **TODO: why http_transport? can we report protocol name as dimension and not a metric name?**
-      **TODO: we should do signalr.server**
-      Corresponding `EventCounter` name is `connections-duration`; Meter name is `Microsoft.AspNetCore.Http.Connections`
-    attributes:
-      - ref: signalr.http_transport.status
-      - ref: signalr.http_transport.transport
+    note: Corresponding `EventCounter` name is `connections-duration`; Meter name is `Microsoft.AspNetCore.Http.Connections`
+    extends: signalr.common_attributes
 
   - id: metric.signalr.server.active_connections
     type: metric
-    metric_name: signalr_http_transport.active_connections
+    metric_name: signalr.server.active_connections
     brief: Number of connections that are currently active on the server.
     instrument: histogram
     unit: "s"
-    note: |
-      **TODO: why http_transport? can we report protocol as dimension and not a metric name?**
-      **TODO: we should do signalr.server**
-      Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Http.Connections`
+    note: Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Http.Connections`
     attributes:
-      - ref: signalr.http_transport.status
+      - ref: network.protocol.name
+      - ref: network.protocol.version
+      - ref: network.transport

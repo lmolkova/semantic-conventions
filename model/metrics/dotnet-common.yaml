@@ -1,0 +1,48 @@
+groups:
+  - id: dotnet.common_attributes
+    prefix: dotnet
+    type: attribute_group
+    brief: Common .NET attributes
+    attributes:
+      - id: error.code
+        type:
+          allow_custom_values: true
+          members:
+            - id: ran_to_completion
+              value: 'RanToCompletion'
+              brief: 'No error'
+            - id: canceled
+              value: 'Canceled'
+              brief: 'Canceled'
+            - id: faulted
+              value: 'Faulted'
+              brief: 'Faulted'
+              note: When error code is set to `other`, it's recommended accompany this attribute with a domain-specific error code when it's known,
+                    such as `http.request.error` or `http.response.status_code` for HTTP errors.
+        brief: General-purpose error code reported by .NET, as a started it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus.
+        examples: ["Canceled", "RanToCompletion"]
+      - id: http.request.error
+        type:
+          allow_custom_values: true
+          members:
+            - id: unknown
+              value: 'Unknown'
+              brief: 'Unknown error'
+            - id: name_resolution
+              value: 'NameResolutionError'
+              brief: 'NameResolutionError'
+            - id: connection
+              value: 'ConnectionError'
+              brief: 'ConnectionError'
+            - id: secure_connection
+              value: 'SecureConnectionError'
+              brief: 'SecureConnectionError'
+            - id: http_protocol
+              value: 'HttpProtocolError'
+              brief: 'HttpProtocolError'
+            - id: extended_connection_not_supported
+              value: 'ExtendedConnectNotSupported'
+              brief: 'ExtendedConnectNotSupported'
+            # ...
+        brief: HTTP Request error as defined inhttps://github.com/dotnet/runtime/blob/c430570a01c103bc7f117be573f37d8ce8a129b8/src/libraries/System.Net.Http/src/System/Net/Http/HttpRequestError.cs
+        examples: ['extended_connection_not_supported', 'http_protocol']
