@@ -1,0 +1,87 @@
+groups:
+  - id: metric.dotnet.http.client.connections.usage
+    type: metric
+    metric_name: http.client.connections.usage
+    brief: "Number of outbound HTTP connections that are currently active or idle on the client"
+    instrument: updowncounter
+    unit: "{connection}"
+    note:
+      Corresponding `EventCounter` names are `http-client-current-connections` and `http-client-current-idle-connections`;
+      Meter name is `System.Net.Http`.
+    attributes:
+      - id: connection.state
+        type:
+          members:
+            - id: active
+              value: "active"
+              brief: 'active state.'
+            - id: idle
+              value: "idle"
+              brief: 'idle state.'
+        brief: Connection state.
+        requirement_level: required
+        examples: ["active", "idle"]
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: server.address
+      - ref: server.socket.address
+      - ref: server.port
+
+  - id: metric.dotnet.http.client.connection.duration
+    type: metric
+    metric_name: http.client.connections.duration
+    brief: "The duration of outbound HTTP connections."
+    instrument: histogram
+    unit: "s"
+    note: Corresponding `EventCounter` name is `http-client-requests-duration`; Meter name is `System.Net.Http`.
+    attributes:
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: server.address
+      - ref: server.socket.address
+      - ref: server.port
+
+  - id: metric.dotnet.http.client.active_requests
+    type: metric
+    metric_name: http.client.active_requests
+    brief: "Number of outbound HTTP requests that have failed."
+    instrument: updowncounter
+    unit: "{request}"
+    note: Corresponding `EventCounter` name is `http-client-current-requests`; Meter name is `System.Net.Http`.
+    attributes:
+      - ref: http.request.method
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: server.address
+      - ref: server.socket.address
+      - ref: server.port
+
+  - id: metric.dotnet.http.client.failed_requests
+    type: metric
+    metric_name: http.client.failed_requests
+    brief: "Number of outbound HTTP requests that have failed."
+    instrument: counter
+    unit: "{request}"
+    note: Corresponding `EventCounter` name is `http-client-failed-requests`; Meter name is `System.Net.Http`.
+    attributes:
+      - ref: http.request.method
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: server.address
+      - ref: server.socket.address
+      - ref: server.port
+
+  - id: dotnet.http.client.request.time_in_queue
+    type: metric
+    metric_name: http.client.request.time_in_queue
+    brief: "The amount of time requests spent on a queue waiting for an available connection."
+    instrument: histogram
+    unit: "s"
+    note: Corresponding `EventCounter` name is `http-client-requests-queue-duration`; Meter name is `System.Net.Http`.
+    attributes:
+      - ref: http.request.method
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: server.address
+      - ref: server.socket.address
+      - ref: server.port

@@ -1,0 +1,21 @@
+groups:
+  - id: metric.signalr_http_transport.connections.duration
+    type: metric
+    metric_name: signalr_http_transport.connections.duration
+    brief: The duration of connections on the server.
+    instrument: histogram
+    unit: "s"
+    attributes:
+      - id: question.name1
+        type: string
+        brief: The name being queried.
+        requirement_level: required
+        examples: ["www.example.com", "dot.net"]
+        note: |
+          The name being queried.
+
+          If the name field contains non-printable
+          characters (below 32 or above 126), those characters should be represented
+          as escaped base 10 integers (\DDD). Back slashes and quotes should be escaped.
+          Tabs, carriage returns, and line feeds should be converted to \t, \r, and
+          \n respectively.
