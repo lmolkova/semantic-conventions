@@ -8,6 +8,17 @@ This document defines semantic conventions for HTTP metrics emitted by .NET comp
 
 <!-- toc -->
 
+- [HTTP client](#http-client)
+  * [Metric: `http.client.connections.usage`](#metric-httpclientconnectionsusage)
+  * [Metric: `http.client.connection.duration`](#metric-httpclientconnectionduration)
+  * [Metric: `http.client.duration`](#metric-httpclientduration)
+  * [Metric: `http.client.active_requests`](#metric-httpclientactive_requests)
+  * [Metric: `http.client.failed_requests`](#metric-httpclientfailed_requests)
+- [HTTP server](#http-server)
+  * [Metric: `http.server.duration`](#metric-httpserverduration)
+  * [Metric: `http.server.active_requests`](#metric-httpserveractive_requests)
+  * [Metric: `http.server.unhandled_requests`](#metric-httpserverunhandled_requests)
+
 <!-- tocstop -->
 
 ## HTTP client
@@ -25,7 +36,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `http.client.connections.usage` | UpDownCounter | `{connection}` | Number of outbound HTTP connections that are currently active or idle on the client [1] |
 
-**[1]:** Corresponding `EventCounter` names are `http-client-current-connections` and `http-client-current-idle-connections`; Meter name is `System.Net.Http`.
+**[1]:** Corresponding `EventCounter` names are `*-connections-current-total`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
 <!-- semconv metric.dotnet.http.client.connections.usage -->
@@ -57,9 +68,9 @@ This metric is required.
 <!-- semconv metric.dotnet.http.client.connection.duration(metric_table) -->
 | Name     | Instrument Type | Unit (UCUM) | Description    |
 | -------- | --------------- | ----------- | -------------- |
-| `http.client.connections.duration` | Histogram | `s` | The duration of outbound HTTP connections. [1] |
+| `http.client.connection.duration` | Histogram | `s` | The duration of outbound HTTP connections. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `http-client-requests-duration`; Meter name is `System.Net.Http`.
+**[1]:** Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
 <!-- semconv metric.dotnet.http.client.connection.duration -->
@@ -97,7 +108,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `http.client.active_requests` | UpDownCounter | `{request}` | Number of outbound HTTP requests that have failed. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `http-client-current-requests`; Meter name is `System.Net.Http`.
+**[1]:** Corresponding `EventCounter` name is `current-requests`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
 <!-- semconv metric.dotnet.http.client.active_requests -->
@@ -142,7 +153,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `http.client.failed_requests` | Counter | `{request}` | Number of outbound HTTP requests that have failed. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `http-client-failed-requests`; Meter name is `System.Net.Http`.
+**[1]:** Corresponding `EventCounter` name is `requests-failed`; Meter name is `System.Net.Http`.
 <!-- endsemconv -->
 
 <!-- semconv metric.dotnet.http.client.failed_requests -->
@@ -210,7 +221,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `http.server.unhandled_requests` | UpDownCounter | `{request}` | Number of requests that reached the end of the middleware pipeline without being handled by application code. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `http-server-unhandled-requests`; Meter name is `Microsoft.AspNetCore.Hosting`.
+**[1]:** Meter name is `Microsoft.AspNetCore.Hosting`.
 **TODO Any reason not to put it into aspnet? seems ASP.NET -specific (middleware, app code), not necessarily HTTP?**
 <!-- endsemconv -->
 

@@ -8,6 +8,18 @@ This document defines semantic conventions for ASP.NET Core metrics, not specifi
 
 <!-- toc -->
 
+- [Routing](#routing)
+  * [Metric: `aspnet.routing.successful_matches`](#metric-aspnetroutingsuccessful_matches)
+  * [Metric: `aspnet.routing.failed_matches`](#metric-aspnetroutingfailed_matches)
+- [Exception metrics](#exception-metrics)
+  * [Metric: `aspnet.diagnostics_handler.exceptions`](#metric-aspnetdiagnostics_handlerexceptions)
+- [Rate-limiting](#rate-limiting)
+  * [Metric: `aspnet.rate_limiting.active_request_leases`](#metric-aspnetrate_limitingactive_request_leases)
+  * [Metric: `aspnet.rate_limiting.request_lease.duration`](#metric-aspnetrate_limitingrequest_leaseduration)
+  * [Metric: `aspnet.rate_limiting.queued_requests`](#metric-aspnetrate_limitingqueued_requests)
+  * [Metric: `aspnet.rate_limiting.queued_requests.duration`](#metric-aspnetrate_limitingqueued_requestsduration)
+  * [Metric: `aspnet.rate_limiting.rejected_requests`](#metric-aspnetrate_limitingrejected_requests)
+
 <!-- tocstop -->
 
 ## Routing
@@ -27,7 +39,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `aspnet.routing.successful_matches` | Counter | `{match}` | Number of requests that successfully matched to an endpoint. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `routing-match-success`; Meter name is `Microsoft.AspNetCore.Routing`
+**[1]:** Meter name is `Microsoft.AspNetCore.Routing`.
 <!-- endsemconv -->
 
 <!-- semconv metric.aspnet.routing.successful_matches -->
@@ -52,7 +64,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `aspnet.routing.failed_matches` | Counter | `{match}` | Number of requests that failed to match to an endpoint. [1] |
 
-**[1]:** An unmatched request may be handled by later middleware, such as the static files or authentication middleware. Corresponding `EventCounter` name is `routing-match-failure`; Meter name is `Microsoft.AspNetCore.Routing`
+**[1]:** An unmatched request may be handled by later middleware, such as the static files or authentication middleware. Meter name is `Microsoft.AspNetCore.Routing`
 <!-- endsemconv -->
 
 <!-- semconv metric.aspnet.routing.failed_matches -->
@@ -72,7 +84,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `aspnet.diagnostics_handler.exceptions` | Counter | `{exception}` | Number of exceptions caught by exception handling middleware. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `diagnostics-handler-exception`; Meter name is `Microsoft.AspNetCore.Diagnostics`
+**[1]:** Meter name is `Microsoft.AspNetCore.Diagnostics`
 <!-- endsemconv -->
 
 <!-- semconv metric.aspnet.diagnostics_handler.exceptions -->
@@ -98,7 +110,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `aspnet.rate_limiting.active_request_leases` | UpDownCounter | `{request}` | Number of requests that are currently active on the server that hold a rate limiting lease. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `rate-limiting-current-leased-requests; Meter name is `Microsoft.AspNetCore.RateLimiting`
+**[1]:** Meter name is `Microsoft.AspNetCore.RateLimiting`
 <!-- endsemconv -->
 
 <!-- semconv metric.aspnet.rate_limiting.active_request_leases -->
@@ -107,22 +119,22 @@ This metric is required.
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |
 <!-- endsemconv -->
 
-### Metric: `aspnet.rate_limiting.request_leases.duration`
+### Metric: `aspnet.rate_limiting.request_lease.duration`
 
 **Status**: [Experimental][DocumentStatus]
 
 This metric is required.
 
-<!-- semconv metric.aspnet.rate_limiting.request_leases.duration(metric_table) -->
+<!-- semconv metric.aspnet.rate_limiting.request_lease.duration(metric_table) -->
 | Name     | Instrument Type | Unit (UCUM) | Description    |
 | -------- | --------------- | ----------- | -------------- |
-| `aspnet.rate_limiting.request_leases.duration` | Histogram | `s` | The duration of rate limiting lease held by requests on the server. [1] |
+| `aspnet.rate_limiting.request_lease.duration` | Histogram | `s` | The duration of rate limiting lease held by requests on the server. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `rate-limiting-lease-failed-requests `; Meter name is `Microsoft.AspNetCore.RateLimiting`
+**[1]:** Meter name is `Microsoft.AspNetCore.RateLimiting`
 **TODO do we need attributes?, can we explain what it means better**`
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.request_leases.duration -->
+<!-- semconv metric.aspnet.rate_limiting.request_lease.duration -->
 <!-- endsemconv -->
 
 ### Metric: `aspnet.rate_limiting.queued_requests`
@@ -136,7 +148,7 @@ This metric is required.
 | -------- | --------------- | ----------- | -------------- |
 | `aspnet.rate_limiting.queued_requests` | UpDownCounter | `{request}` | Number of requests that are currently queued, waiting to acquire a rate limiting lease. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `rate-limiting-current-queued-requests`; Meter name is `Microsoft.AspNetCore.RateLimiting`
+**[1]:** Meter name is `Microsoft.AspNetCore.RateLimiting`
 
 **TODO: if they are queued, should they have reject reason ? **
 <!-- endsemconv -->
@@ -156,18 +168,18 @@ This metric is required.
 
 This metric is required.
 
-<!-- semconv metric.aspnet.rate_limiting.queued_requests.duration(metric_table) -->
+<!-- semconv metric.aspnet.rate_limiting.queued_request.duration(metric_table) -->
 | Name     | Instrument Type | Unit (UCUM) | Description    |
 | -------- | --------------- | ----------- | -------------- |
-| `aspnet.rate_limiting.queued_requests.duration` | Histogram | `s` | The duration of request in a queue, waiting to acquire a rate limiting lease. [1] |
+| `aspnet.rate_limiting.queued_request.duration` | Histogram | `s` | The duration of request in a queue, waiting to acquire a rate limiting lease. [1] |
 
-**[1]:** Corresponding `EventCounter` name is `rate-limiting-queued-request-duration`; Meter name is `Microsoft.AspNetCore.RateLimiting`
+**[1]:** Meter name is `Microsoft.AspNetCore.RateLimiting`
 
 **TODO: I don't really understand what this duration is, can we improve name, brief or description to explain? **
 **TODO: if they are queued, should they have reject reason ? **
 <!-- endsemconv -->
 
-<!-- semconv metric.aspnet.rate_limiting.queued_requests.duration -->
+<!-- semconv metric.aspnet.rate_limiting.queued_request.duration -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.rate_limiting.policy` | string | TODO | `TODO` | Required |
@@ -186,7 +198,7 @@ This metric is required.
 
 **[1]:** Requests could be rejected by global or endpoint rate limiting policies. Or the request could be cancelled while waiting for the lease.
 
-Corresponding `EventCounter` name is `rate-limiting-lease-failed-requests `; Meter name is `Microsoft.AspNetCore.RateLimiting`
+Meter name is `Microsoft.AspNetCore.RateLimiting`
 
 **TODO: can we report aspnet.rate_limiting.request count instead and have reject_reason to count failed/successful ?**
 <!-- endsemconv -->

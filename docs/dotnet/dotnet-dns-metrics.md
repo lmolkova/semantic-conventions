@@ -8,6 +8,9 @@ This document defines semantic conventions for DNS metrics emitted by .NET.
 
 <!-- toc -->
 
+- [DNS metrics](#dns-metrics)
+  * [Metric: `dns.lookups.duration`](#metric-dnslookupsduration)
+
 <!-- tocstop -->
 
 ## DNS metrics
@@ -22,15 +25,15 @@ This metric SHOULD be specified with
 [`ExplicitBucketBoundaries`](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.22.0/specification/metrics/api.md#instrument-advice)
 of **`[TODO]`**.
 
-<!-- semconv metric.dotnet.dns.lookups.duration(metric_table) -->
+<!-- semconv metric.dotnet.dns.lookup.duration(metric_table) -->
 | Name     | Instrument Type | Unit (UCUM) | Description    |
 | -------- | --------------- | ----------- | -------------- |
-| `dns.lookups.duration` | Histogram | `s` | Measures the time take to perform a DNS lookup. [1] |
+| `dns.lookup.duration` | Histogram | `s` | Measures the time take to perform a DNS lookup. [1] |
 
 **[1]:** Meter name is `System.Net.NameResolution`.
 <!-- endsemconv -->
 
-<!-- semconv metric.dotnet.dns.lookups.duration -->
+<!-- semconv metric.dotnet.dns.lookup.duration -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `question.name` | string | The name being queried. [1] | `www.example.com`; `dot.net` | Required |

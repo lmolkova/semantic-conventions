@@ -1,21 +1,123 @@
 groups:
-  - id: metric.dotnet.dns.lookups.duration1
+  - id: kestrel
+    prefix: kestrel
+    type: attribute_group
+    brief: Kestrel attributes
+    attributes:
+      - id: endpoint
+        type: string
+        brief: TODO
+        examples: ["TODO"]
+        note: "**TODO: why not server.**? What's KEstrel-specific about it**"
+  - id: tls
+    prefix: tls
+    type: attribute_group
+    brief: TLS attributes
+    attributes:
+      - id: protocol
+        type: string
+        brief: TODO
+        examples: ["TODO"]
+        note: "**TODO: why not network.protocol.***?"
+
+  - id: metric.kestrel.active_connections
     type: metric
-    metric_name: dns.lookups.duration
-    brief: Measures the time take to perform a DNS lookup.
+    metric_name: kestrel.active_connections
+    brief: Number of connections that are currently active on the server.
+    instrument: updowncounter
+    unit: "{connection}"
+    note: |
+      Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
+
+  - id: metric.kestrel.connection.duration
+    type: metric
+    metric_name: kestrel.connection.duration
+    brief: The duration of connections on the server.
     instrument: histogram
     unit: "s"
+    note: |
+      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
     attributes:
-      - id: question.name2
-        type: string
-        brief: The name being queried.
-        requirement_level: required
-        examples: ["www.example.com", "dot.net"]
-        note: |
-          The name being queried.
+      - ref: kestrel.endpoint
+      - ref: url.scheme
+      - ref: network.protocol.version
+      - ref: tls.protocol
+      - ref: exception.type
+        note: "**TODO: Let's define common attribute for error reason/status**"
 
-          If the name field contains non-printable
-          characters (below 32 or above 126), those characters should be represented
-          as escaped base 10 integers (\DDD). Back slashes and quotes should be escaped.
-          Tabs, carriage returns, and line feeds should be converted to \t, \r, and
-          \n respectively.
+  - id: metric.kestrel.rejected_connections
+    type: metric
+    metric_name: kestrel.rejected_connections
+    brief: Number of connections rejected by the server.
+    instrument: counter
+    unit: "{connection}"
+    note: |
+      Connections are rejected when the currently active count exceeds the value configured with MaxConcurrentConnections.
+      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+
+      **TODO: do we ever will have other rejection reasons**
+    attributes:
+      - ref: kestrel.endpoint
+
+  - id: metric.kestrel.queued_connections
+    type: metric
+    metric_name: kestrel.queued_connections
+    brief: Number of connections that are currently queued and are waiting to start.
+    instrument: updowncounter
+    unit: "{connection}"
+    note: |
+      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
+
+
+  - id: metric.kestrel.queued_requests
+    type: metric
+    metric_name: kestrel.queued_requests
+    brief: Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.
+    instrument: updowncounter
+    unit: "{connection}"
+    note: |
+      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
+      - ref: url.scheme
+      - ref: network.protocol.version
+
+  - id: metric.kestrel.upgraded_connections
+    type: metric
+    metric_name: kestrel.upgraded_connections
+    brief: Number of connections that are currently upgraded (WebSockets). .
+    instrument: updowncounter
+    unit: "{connection}"
+    note: |
+      The number only tracks HTTP/1.1 connections. **TODO: can we add protocol info in dimensions so we can extend it to other versions/protocols? **
+      Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
+
+  - id: metric.kestrel.tls_handshake.duration
+    type: metric
+    metric_name: kestrel.tls_handshake.duration
+    brief: The duration of TLS handshakes on the server.
+    instrument: histogram
+    unit: "s"
+    note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
+      - ref: tls.protocol
+      - ref: exception.type
+        note: "**TODO: Let's define common attribute for error reason/status**"
+
+
+  - id: metric.kestrel.active_tls_handshakes
+    type: metric
+    metric_name: active_tls_handshakes
+    brief: Number of TLS handshakes that are currently in progress on the server.
+    instrument: updowncounter
+    unit: "{handshake}"
+    note: Meter name is `Microsoft.AspNetCore.Server.Kestrel`
+    attributes:
+      - ref: kestrel.endpoint
