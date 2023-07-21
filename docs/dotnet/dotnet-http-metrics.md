@@ -126,6 +126,8 @@ Follows common [http.client.duration](../http/http-metrics.md#metric-httpclientd
 | `http.response.status_code` | int | [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6). | `200` | Conditionally Required: If and only if one was received/sent. |
 | [`network.protocol.name`](../general/attributes.md) | string | [OSI Application Layer](https://osi-model.com/application-layer/) or non-OSI equivalent. The value SHOULD be normalized to lowercase. | `amqp`; `http`; `mqtt` | Recommended |
 | [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [2] | `3.1.1` | Recommended |
+| [`server.address`](../general/attributes.md) | string | Host identifier of the ["URI origin"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to. [3] | `example.com` | Required |
+| [`server.port`](../general/attributes.md) | int | Port identifier of the ["URI origin"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to. [4] | `80`; `8080`; `443` | Conditionally Required: [5] |
 | [`server.socket.address`](../general/attributes.md) | string | Physical server IP address or Unix socket address. If set from the client, should simply use the socket's peer address, and not attempt to find any actual server IP (i.e., if set from client, this may represent some proxy server instead of the logical server). | `10.5.3.2` | Recommended: If different than `server.address`. |
 
 **[1]:** HTTP request method value SHOULD be "known" to the instrumentation.
@@ -145,6 +147,18 @@ Instrumentations for specific web frameworks that consider HTTP methods to be ca
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
 **[2]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
+
+**[3]:** Determined by using the first of the following that applies
+
+- Host identifier of the [request target](https://www.rfc-editor.org/rfc/rfc9110.html#target.resource)
+  if it's sent in absolute-form
+- Host identifier of the `Host` header
+
+SHOULD NOT be set if capturing it would require an extra DNS lookup.
+
+**[4]:** When [request target](https://www.rfc-editor.org/rfc/rfc9110.html#target.resource) is absolute URI, `server.port` MUST match URI port identifier, otherwise it MUST match `Host` header port identifier.
+
+**[5]:** If not default (`80` for `http` scheme, `443` for `https`).
 
 `dotnet.error.code` has the following list of well-known values. If one of them applies, then the respective value MUST be used, otherwise a custom value MAY be used.
 
@@ -265,10 +279,12 @@ Follows common [http.server.duration](../http/http-metrics.md#metric-httpserverd
 | `dotnet.http.request.error` | string | HTTP Request error as defined inhttps://github.com/dotnet/runtime/blob/c430570a01c103bc7f117be573f37d8ce8a129b8/src/libraries/System.Net.Http/src/System/Net/Http/HttpRequestError.cs | `extended_connection_not_supported`; `http_protocol` | Recommended |
 | `http.request.method` | string | HTTP request method. [1] | `GET`; `POST`; `HEAD` | Required |
 | `http.response.status_code` | int | [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6). | `200` | Conditionally Required: If and only if one was received/sent. |
+| `http.route` | string | The matched route (path template in the format used by the respective server framework). See note below [2] | `/users/:userID?`; `{controller}/{action}/{id?}` | Conditionally Required: If and only if it's available |
 | [`network.protocol.name`](../general/attributes.md) | string | [OSI Application Layer](https://osi-model.com/application-layer/) or non-OSI equivalent. The value SHOULD be normalized to lowercase. | `amqp`; `http`; `mqtt` | Recommended |
-| [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [2] | `3.1.1` | Recommended |
-| [`server.address`](../general/attributes.md) | string | Name of the local HTTP server that received the request. [3] | `example.com` | Opt-In |
-| [`server.port`](../general/attributes.md) | int | Port of the local HTTP server that received the request. [4] | `80`; `8080`; `443` | Opt-In |
+| [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [3] | `3.1.1` | Recommended |
+| [`server.address`](../general/attributes.md) | string | Name of the local HTTP server that received the request. [4] | `example.com` | Opt-In |
+| [`server.port`](../general/attributes.md) | int | Port of the local HTTP server that received the request. [5] | `80`; `8080`; `443` | Opt-In |
+| [`url.scheme`](../url/url.md) | string | The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol. | `https`; `ftp`; `telnet` | Recommended |
 
 **[1]:** HTTP request method value SHOULD be "known" to the instrumentation.
 By default, this convention defines "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods)
@@ -286,9 +302,12 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
-**[2]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
+**[2]:** MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
+SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
 
-**[3]:** Determined by using the first of the following that applies
+**[3]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
+
+**[4]:** Determined by using the first of the following that applies
 
 - The [primary server name](/docs/http/http-spans.md#http-server-definitions) of the matched virtual host. MUST only
   include host identifier.
@@ -298,7 +317,7 @@ Tracing instrumentations that do so, MUST also set `http.request.method_original
 
 SHOULD NOT be set if only IP address is available and capturing name would require a reverse DNS lookup.
 
-**[4]:** Determined by using the first of the following that applies
+**[5]:** Determined by using the first of the following that applies
 
 - Port identifier of the [primary server host](/docs/http/http-spans.md#http-server-definitions) of the matched virtual host.
 - Port identifier of the [request target](https://www.rfc-editor.org/rfc/rfc9110.html#target.resource)
