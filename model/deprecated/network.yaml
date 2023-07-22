@@ -78,7 +78,7 @@ groups:
         type: string
         stability: deprecated
         brief: Deprecated, use `network.protocol.name`.
-        examples: ['amqp', 'http', 'mqtt']
+        examples: ['amqp', 'http', 'mqtt', 'websockets']
       - id: protocol.version
         type: string
         stability: deprecated

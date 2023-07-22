@@ -75,7 +75,7 @@ This metric is required.
 <!-- semconv metric.dotnet.http.client.connection.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
-| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a started it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
+| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
 | `dotnet.http.request.error` | string | HTTP Request error as defined inhttps://github.com/dotnet/runtime/blob/c430570a01c103bc7f117be573f37d8ce8a129b8/src/libraries/System.Net.Http/src/System/Net/Http/HttpRequestError.cs | `extended_connection_not_supported`; `http_protocol` | Recommended |
 | [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [1] | `3.1.1` | Recommended |
 | [`server.address`](../general/attributes.md) | string | Logical server hostname, matches server FQDN if available, and IP or socket address if FQDN is not known. | `example.com` | Recommended |
@@ -120,7 +120,7 @@ Follows common [http.client.duration](../http/http-metrics.md#metric-httpclientd
 <!-- semconv metric.dotnet.http.client.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
-| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a started it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
+| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
 | `dotnet.http.request.error` | string | HTTP Request error as defined inhttps://github.com/dotnet/runtime/blob/c430570a01c103bc7f117be573f37d8ce8a129b8/src/libraries/System.Net.Http/src/System/Net/Http/HttpRequestError.cs | `extended_connection_not_supported`; `http_protocol` | Recommended |
 | `http.request.method` | string | HTTP request method. [1] | `GET`; `POST`; `HEAD` | Required |
 | `http.response.status_code` | int | [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6). | `200` | Conditionally Required: If and only if one was received/sent. |
@@ -275,7 +275,7 @@ Follows common [http.server.duration](../http/http-metrics.md#metric-httpserverd
 <!-- semconv metric.dotnet.http.server.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
-| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a started it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
+| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
 | `dotnet.http.request.error` | string | HTTP Request error as defined inhttps://github.com/dotnet/runtime/blob/c430570a01c103bc7f117be573f37d8ce8a129b8/src/libraries/System.Net.Http/src/System/Net/Http/HttpRequestError.cs | `extended_connection_not_supported`; `http_protocol` | Recommended |
 | `http.request.method` | string | HTTP request method. [1] | `GET`; `POST`; `HEAD` | Required |
 | `http.response.status_code` | int | [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6). | `200` | Conditionally Required: If and only if one was received/sent. |

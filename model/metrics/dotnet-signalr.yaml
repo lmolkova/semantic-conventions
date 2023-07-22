@@ -4,28 +4,48 @@ groups:
     type: attribute_group
     brief: SignalR attributes
     attributes:
-      - ref: dotnet.error.code
+      - id: signalr.transport
+        brief: SignalR transport - https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md
+        type:
+          allow_custom_values: true
+          members:
+            - id: server_sent_events
+              value: 'ServerSentEvents'
+              brief: 'ServerSentEvents'
+            - id: long_polling
+              value: 'LongPolling'
+              brief: 'LongPolling'
+        note: websockets are recoded in `network.protocol.name` attribute and `signalr.transport` is not set.
+        requirement_level:
+          conditionally_required: if HTTP SignalR transport is used
       - ref: network.protocol.name
+        requirement_level:
+          recommended: if not default (`http`)
+        examples: ["http", "websockets"]
       - ref: network.protocol.version
       - ref: network.transport
 
-  - id: metric.signalr.server.connection.duration
+  - id: metric.signalr.http.server.connection.duration
     type: metric
-    metric_name: signalr.server.connection.duration
-    brief: The duration of connections on the server.
+    metric_name: signalr.http.server.connection.duration
+    brief: The duration of the HTTP connections on the server.
     instrument: histogram
     unit: "s"
-    note: Corresponding `EventCounter` name is `connections-duration`; Meter name is `Microsoft.AspNetCore.Http.Connections`
+    note: |
+      Only reported for HTTP SignalR transport.
+      Corresponding `EventCounter` name is `connections-duration`; Meter name is `Microsoft.AspNetCore.Http.Connections`
     extends: signalr.common_attributes
+    attributes:
+      - ref: http.response.status_code
+      - ref: dotnet.error.code
 
-  - id: metric.signalr.server.active_connections
+  - id: metric.signalr.http.server.active_connections
     type: metric
-    metric_name: signalr.server.active_connections
+    metric_name: signalr.http.server.active_connections
     brief: Number of connections that are currently active on the server.
     instrument: histogram
     unit: "s"
-    note: Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Http.Connections`
-    attributes:
-      - ref: network.protocol.name
-      - ref: network.protocol.version
-      - ref: network.transport
+    note: |
+      Only reported for HTTP SignalR transport.
+      Corresponding `EventCounter` name is `current-connections`; Meter name is `Microsoft.AspNetCore.Http.Connections`
+    extends: signalr.common_attributes
