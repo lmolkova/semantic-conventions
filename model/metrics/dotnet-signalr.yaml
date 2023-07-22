@@ -4,7 +4,7 @@ groups:
     type: attribute_group
     brief: SignalR attributes
     attributes:
-      - id: signalr.transport
+      - id: transport
         brief: SignalR transport - https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md
         type:
           allow_custom_values: true

@@ -7,7 +7,7 @@ groups:
     unit: "s"
     note: Meter name is `System.Net.NameResolution`.
     attributes:
-      - id: question.name
+      - id: dns.question.name
         type: string
         brief: The name being queried.
         requirement_level: required
@@ -30,7 +30,7 @@ groups:
     note:
       Corresponding `EventCounter` names are `*-connections-current-total`; Meter name is `System.Net.Http`.
     attributes:
-      - id: connection.state
+      - id: dotnet.connection.state
         type:
           members:
             - id: active

@@ -36,7 +36,7 @@ of **`[TODO]`**.
 <!-- semconv metric.dotnet.dns.lookup.duration(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
-| `question.name` | string | The name being queried. [1] | `www.example.com`; `dot.net` | Required |
+| `dns.question.name` | string | The name being queried. [1] | `www.example.com`; `dot.net` | Required |
 
 **[1]:** The name being queried.
 

@@ -41,7 +41,7 @@ This metric is required.
 <!-- semconv metric.dotnet.http.client.connections.usage(full) -->
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
-| `connection.state` | string | Connection state. | `active`; `idle` | Required |
+| `dotnet.connection.state` | string | Connection state. | `active`; `idle` | Required |
 | [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [1] | `3.1.1` | Recommended |
 | [`server.address`](../general/attributes.md) | string | Logical server hostname, matches server FQDN if available, and IP or socket address if FQDN is not known. | `example.com` | Recommended |
 | [`server.port`](../general/attributes.md) | int | Logical server port number | `80`; `8080`; `443` | Recommended |
@@ -50,7 +50,7 @@ This metric is required.
 
 **[1]:** `network.protocol.version` refers to the version of the protocol used and might be different from the protocol client's version. If the HTTP client used has a version of `0.27.2`, but sends HTTP version `1.1`, this attribute should be set to `1.1`.
 
-`connection.state` MUST be one of the following:
+`dotnet.connection.state` MUST be one of the following:
 
 | Value  | Description |
 |---|---|
