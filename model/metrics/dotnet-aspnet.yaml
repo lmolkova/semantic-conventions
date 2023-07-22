@@ -35,7 +35,7 @@ groups:
           members:
             - id: success
               value: 'success'
-              brief: 'No error'
+              brief: 'matched'
             - id: failure
               value: 'failure'
               brief: 'failure'

@@ -32,7 +32,7 @@ Corresponding `EventCounter` name is `connections-duration`; Meter name is `Micr
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `signalr.transport` | string | SignalR transport - https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md [1] | `ServerSentEvents` | Conditionally Required: if HTTP SignalR transport is used |
-| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
+| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal statuses of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
 | `http.response.status_code` | int | [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6). | `200` | Conditionally Required: If and only if one was received/sent. |
 | [`network.protocol.name`](../general/attributes.md) | string | [OSI Application Layer](https://osi-model.com/application-layer/) or non-OSI equivalent. The value SHOULD be normalized to lowercase. | `http`; `websockets` | Recommended: if not default (`http`) |
 | [`network.protocol.version`](../general/attributes.md) | string | Version of the application layer protocol used. See note below. [2] | `3.1.1` | Recommended |

@@ -19,7 +19,7 @@ groups:
               brief: 'Faulted'
               note: When error code is set to `other`, it's recommended accompany this attribute with a domain-specific error code when it's known,
                     such as `http.request.error` or `http.response.status_code` for HTTP errors.
-        brief: General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus.
+        brief: General-purpose error code reported by .NET, as a starter it supports terminal statuses of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus.
         examples: ["Canceled", "RanToCompletion"]
       - id: http.request.error
         type:

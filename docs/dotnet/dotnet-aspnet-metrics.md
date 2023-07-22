@@ -53,7 +53,7 @@ SHOULD include the [application root](/docs/http/http-spans.md#http-server-defin
 
 | Value  | Description |
 |---|---|
-| `success` | No error |
+| `success` | matched |
 | `failure` | failure |
 <!-- endsemconv -->
 
@@ -78,7 +78,7 @@ This metric is required.
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `aspnet.handler` | string | TODO | `TODO` | Required |
-| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal states of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
+| `dotnet.error.code` | string | General-purpose error code reported by .NET, as a starter it supports terminal statuses of .NET task https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskstatus. | `Canceled`; `RanToCompletion` | Recommended |
 | `exception.type` | string | The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it. | `java.net.ConnectException`; `OSError` | Recommended |
 
 `dotnet.error.code` has the following list of well-known values. If one of them applies, then the respective value MUST be used, otherwise a custom value MAY be used.
