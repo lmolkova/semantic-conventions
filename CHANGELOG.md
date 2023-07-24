@@ -11,6 +11,9 @@ release.
 
 ### Features
 
+- Add .NET 8.0 metrics for HTTP client, ASP.NET Core, SignalR server and Kestrel.
+  ([#283](https://github.com/open-telemetry/semantic-conventions/pull/283))
+
 ### Fixes
 
 ## v1.22.0 (2023-10-12)
