@@ -381,11 +381,11 @@ If the route cannot be determined, the `name` attribute MUST be set as defined i
 | [`client.socket.address`](../general/attributes.md) | string | Client address of the socket connection - IP address or Unix domain socket name. [4] | `/tmp/my.sock`; `127.0.0.1` | Recommended: If different than `client.address`. |
 | [`client.socket.port`](../general/attributes.md) | int | Client port number of the socket connection. [5] | `35555` | Recommended: If different than `client.port`. |
 | [`server.address`](../general/attributes.md) | string | Name of the local HTTP server that received the request. [6] | `example.com` | Recommended |
-| [`server.port`](../general/attributes.md) | int | Port of the local HTTP server that received the request. [7] | `80`; `8080`; `443` | Recommended: [8] |
-| [`server.socket.address`](../general/attributes.md) | string | Local socket address. Useful in case of a multi-IP host. [9] | `10.5.3.2` | Opt-In |
-| [`server.socket.port`](../general/attributes.md) | int | Local socket port. Useful in case of a multi-port host. [10] | `16456` | Opt-In |
-| [`url.path`](../url/url.md) | string | The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component [11] | `/search` | Required |
-| [`url.query`](../url/url.md) | string | The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component [12] | `q=OpenTelemetry` | Conditionally Required: If and only if one was received/sent. |
+| [`server.port`](../general/attributes.md) | int | Port of the local HTTP server that received the request. [7] | `80`; `8080`; `443` | Recommended |
+| [`server.socket.address`](../general/attributes.md) | string | Local socket address. Useful in case of a multi-IP host. [8] | `10.5.3.2` | Opt-In |
+| [`server.socket.port`](../general/attributes.md) | int | Local socket port. Useful in case of a multi-port host. [9] | `16456` | Opt-In |
+| [`url.path`](../url/url.md) | string | The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component [10] | `/search` | Required |
+| [`url.query`](../url/url.md) | string | The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component [11] | `q=OpenTelemetry` | Conditionally Required: If and only if one was received/sent. |
 | [`url.scheme`](../url/url.md) | string | The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol. | `http`; `https` | Required |
 
 **[1]:** MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
@@ -418,22 +418,18 @@ SHOULD NOT be set if only IP address is available and capturing name would requi
   if it's sent in absolute-form.
 - Port identifier of the `Host` header
 
-**[8]:** If not default (`80` for `http` scheme, `443` for `https`).
-
-**[9]:** When observed from the client side, this SHOULD represent the immediate server peer address.
+**[8]:** When observed from the client side, this SHOULD represent the immediate server peer address.
 When observed from the server side, this SHOULD represent the physical server address.
 
-**[10]:** When observed from the client side, this SHOULD represent the immediate server peer port.
+**[9]:** When observed from the client side, this SHOULD represent the immediate server peer port.
 When observed from the server side, this SHOULD represent the physical server port.
 
-**[11]:** When missing, the value is assumed to be `/`
+**[10]:** When missing, the value is assumed to be `/`
 
-**[12]:** Sensitive content provided in query string SHOULD be scrubbed when instrumentations can identify it.
+**[11]:** Sensitive content provided in query string SHOULD be scrubbed when instrumentations can identify it.
 
 Following attributes MUST be provided **at span creation time** (when provided at all), so they can be considered for sampling decisions:
 
-* [`server.address`](../general/attributes.md)
-* [`server.port`](../general/attributes.md)
 * [`url.path`](../url/url.md)
 * [`url.query`](../url/url.md)
 * [`url.scheme`](../url/url.md)
