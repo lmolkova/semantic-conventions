@@ -13,10 +13,10 @@ groups:
           This SHOULD be set as an instrumentation scope attribute when creating a `Tracer` as long as OpenTelemetry in a given language allows to do so.
       - id: schema_url
         requirement_level:
-          conditionally_required: if and only if OpenTelemetry in a given language doesn't provide a standard way to set schema_url (i.e. .NET) # https://opentelemetry.io/docs/reference/specification/schemas/#schema-url
+          conditionally_required: if and only if OpenTelemetry in a given language doesn't provide a standard way to set `schema_url` (.NET) # https://github.com/dotnet/runtime/issues/93795
         type: string
-        brief: 'OpenTelemetry Schema URL including schema version. Only 1.23.0 is supported.'
-        examples: ['https://opentelemetry.io/schemas/1.23.0']
+        brief: 'OpenTelemetry Schema URL including schema version. Only TODO is supported.'
+        examples: ['https://opentelemetry.io/schemas/TODO']
 
   # public API (logical calls)
   - id: azure.sdk.api
@@ -52,8 +52,8 @@ groups:
       - ref: url.full
       - ref: http.request.method
         note: >
-          Azure SDKs support "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods)
-          and the PATCH method defined in [RFC5789](https://www.rfc-editor.org/rfc/rfc5789.html)
+          Azure SDKs support HTTP methods listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods)
+          and the `PATCH`` method defined in [RFC5789](https://www.rfc-editor.org/rfc/rfc5789.html)
       - ref: http.request.resend_count
       - ref: http.response.status_code
       - ref: error.type

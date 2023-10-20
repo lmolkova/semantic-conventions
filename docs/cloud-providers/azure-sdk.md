@@ -36,12 +36,12 @@ API-level spans produced by Azure SDK have the following attributes:
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `az.namespace` | string | [Namespace](https://docs.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) of Azure service request is made against. [1] | `Microsoft.Storage`; `Microsoft.KeyVault`; `Microsoft.ServiceBus` | Required |
-| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only 1.23.0 is supported. | `https://opentelemetry.io/schemas/1.23.0` | Conditionally Required: [2] |
+| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only TODO is supported. | `https://opentelemetry.io/schemas/TODO` | Conditionally Required: [2] |
 | `error.type` | string | Describes a class of error the operation ended with. [3] | `java.net.UnknownHostException`; `System.Threading.Tasks.OperationCanceledException`; `azure.core.exceptions.ServiceRequestError` | Recommended |
 
 **[1]:** This SHOULD be set as an instrumentation scope attribute when creating a `Tracer` as long as OpenTelemetry in a given language allows to do so.
 
-**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set schema_url (i.e. .NET)
+**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set `schema_url` (.NET)
 
 **[3]:** The `error.type` SHOULD be predictable and SHOULD have low cardinality.
 Instrumentations SHOULD document the list of errors they report.
@@ -75,7 +75,7 @@ Azure SDK implements a valid subset of stable part of [OpenTelemetry HTTP spans 
 |---|---|---|---|---|
 | `az.client_request_id` | string | Value of the [x-ms-client-request-id] header (or other request-id header, depending on the service) sent by the client. | `eb178587-c05a-418c-a695-ae9466c5303c` | Conditionally Required: only if present. |
 | `az.namespace` | string | [Namespace](https://docs.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) of Azure service request is made against. [1] | `Microsoft.Storage`; `Microsoft.KeyVault`; `Microsoft.ServiceBus` | Required |
-| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only 1.23.0 is supported. | `https://opentelemetry.io/schemas/1.23.0` | Conditionally Required: [2] |
+| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only TODO is supported. | `https://opentelemetry.io/schemas/TODO` | Conditionally Required: [2] |
 | `az.service_request_id` | string | Value of the [x-ms-request-id]  header (or other request-id header, depending on the service) sent by the server in response. | `3f828ae5-ecb9-40ab-88d9-db0420af30c6` | Conditionally Required: if and only if one was received |
 | `error.type` | string | Describes a class of error the operation ended with. [3] | `timeout`; `java.net.UnknownHostException`; `server_certificate_invalid`; `500` | Conditionally Required: If request has ended with an error. |
 | [`http.request.method`](../attributes-registry/http.md) | string | HTTP request method. [4] | `GET`; `POST`; `HEAD` | Required |
@@ -88,7 +88,7 @@ Azure SDK implements a valid subset of stable part of [OpenTelemetry HTTP spans 
 
 **[1]:** This SHOULD be set as an instrumentation scope attribute when creating a `Tracer` as long as OpenTelemetry in a given language allows to do so.
 
-**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set schema_url (i.e. .NET)
+**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set `schema_url` (.NET)
 
 **[3]:** If the request fails with an error before response status code was sent or received,
 `error.type` SHOULD be set to exception type (its fully-qualified class name, if applicable)
@@ -107,7 +107,7 @@ additional filters are applied.
 
 If the request has completed successfully, instrumentations SHOULD NOT set `error.type`.
 
-**[4]:** Azure SDKs support "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods) and the PATCH method defined in [RFC5789](https://www.rfc-editor.org/rfc/rfc5789.html)
+**[4]:** Azure SDKs support HTTP methods listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods) and the `PATCH`` method defined in [RFC5789](https://www.rfc-editor.org/rfc/rfc5789.html)
 
 **[5]:** The resend count SHOULD be updated each time an HTTP request gets resent by the client, regardless of what was the cause of the resending (e.g. redirection, authorization failure, 503 Server Unavailable, network issues, or any other).
 
@@ -145,7 +145,7 @@ Messaging SDKs produce three kinds of spans:
 | Attribute  | Type | Description  | Examples  | Requirement Level |
 |---|---|---|---|---|
 | `az.namespace` | string | [Namespace](https://docs.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) of Azure service request is made against. [1] | `Microsoft.Storage`; `Microsoft.KeyVault`; `Microsoft.ServiceBus` | Required |
-| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only 1.23.0 is supported. | `https://opentelemetry.io/schemas/1.23.0` | Conditionally Required: [2] |
+| `az.schema_url` | string | OpenTelemetry Schema URL including schema version. Only TODO is supported. | `https://opentelemetry.io/schemas/TODO` | Conditionally Required: [2] |
 | [`messaging.batch.message_count`](../messaging/messaging-spans.md) | int | The number of messages sent, received, or processed in the scope of the batching operation. [3] | `0`; `1`; `2` | Conditionally Required: [4] |
 | `messaging.destination.name` | string | The message destination name [5] | `MyQueue`; `MyTopic` | Recommended |
 | `messaging.message.id` | string | A value used by the messaging system as an identifier for the message, represented as a string. | `452a7c7c7c7048c2f887f61572b18fc2` | Recommended |
@@ -156,7 +156,7 @@ Messaging SDKs produce three kinds of spans:
 
 **[1]:** This SHOULD be set as an instrumentation scope attribute when creating a `Tracer` as long as OpenTelemetry in a given language allows to do so.
 
-**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set schema_url (i.e. .NET)
+**[2]:** if and only if OpenTelemetry in a given language doesn't provide a standard way to set `schema_url` (.NET)
 
 **[3]:** Instrumentations SHOULD NOT set `messaging.batch.message_count` on spans that operate with a single message. When a messaging client library supports both batch and single-message API for the same operation, instrumentations SHOULD use `messaging.batch.message_count` for batching APIs and SHOULD NOT use it for single-message APIs.
 
