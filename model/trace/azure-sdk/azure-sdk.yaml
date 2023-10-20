@@ -1,0 +1,92 @@
+groups:
+  - id: azure.sdk
+    brief: 'Azure SDK attributes.'
+    type: attribute_group
+    prefix: az
+    attributes:
+      - id: namespace
+        requirement_level: required
+        type: string
+        brief: '[Namespace](https://docs.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) of Azure service request is made against.'
+        examples: ['Microsoft.Storage', 'Microsoft.KeyVault', 'Microsoft.ServiceBus']
+        note: >
+          This SHOULD be set as an instrumentation scope attribute when creating a `Tracer` as long as OpenTelemetry in a given language allows to do so.
+      - id: schema_url
+        requirement_level:
+          conditionally_required: if and only if OpenTelemetry in a given language doesn't provide a standard way to set schema_url (i.e. .NET) # https://opentelemetry.io/docs/reference/specification/schemas/#schema-url
+        type: string
+        brief: 'OpenTelemetry Schema URL including schema version. Only 1.23.0 is supported.'
+        examples: ['https://opentelemetry.io/schemas/1.23.0']
+
+  # public API (logical calls)
+  - id: azure.sdk.api
+    type: span
+    span_kind: internal
+    extends: azure.sdk
+    brief: 'Describes Azure SDK API calls spans.'
+    note: >
+      Represents public surface API calls that wrap an Azure service call.
+
+      Span name SHOULD match `<short-class-name.method>` pattern. Class and method name SHOULD match API user called close enough for users
+      to understand which method span matches to.
+      For example, `BlobClient.Download` could be used for different overloads of download method, it can also coexist with `BlobClient.DownloadToFile` or
+      `BlobClient.DownloadAsync`.
+    attributes:
+      - ref: error.type
+        examples: ['java.net.UnknownHostException', 'System.Threading.Tasks.OperationCanceledException', 'azure.core.exceptions.ServiceRequestError']
+
+  # HTTP spans
+  - id: azure.sdk.http
+    type: span
+    span_kind: client
+    extends: attributes.http.client
+    brief: 'Describes HTTP client spans created per HTTP request (try).'
+    note: >
+      This conventions follows [OpenTelemetry HTTP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md)
+      but omits some optional/recommended attributes. It also adds request-id attributes supported by Azure services.
+    attributes:
+      - ref: server.address
+        note: Describes host component of Azure service endpoint.
+      - ref: server.port
+        note: Describes port component of Azure service endpoint.
+      - ref: url.full
+      - ref: http.request.method
+        note: >
+          Azure SDKs support "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods)
+          and the PATCH method defined in [RFC5789](https://www.rfc-editor.org/rfc/rfc5789.html)
+      - ref: http.request.resend_count
+      - ref: http.response.status_code
+      - ref: error.type
+      - ref: user_agent.original
+      - ref: az.namespace
+      - ref: az.schema_url
+      - id: az.client_request_id
+        type: string
+        requirement_level:
+          conditionally_required: only if present.
+        brief: 'Value of the [x-ms-client-request-id] header (or other request-id header, depending on the service) sent by the client.'
+        examples: ['eb178587-c05a-418c-a695-ae9466c5303c']
+      - id: az.service_request_id
+        type: string
+        requirement_level:
+          conditionally_required: if and only if one was received
+        brief: 'Value of the [x-ms-request-id]  header (or other request-id header, depending on the service) sent by the server in response.'
+        examples: ['3f828ae5-ecb9-40ab-88d9-db0420af30c6']
+
+  # messaging
+  - id: azure.sdk.messaging
+    type: span
+    brief: 'Describes Azure messaging SDKs spans.'
+    attributes:
+      - ref: messaging.system
+        sampling_relevant: true
+        examples: ['eventhubs', 'servicebus']
+      - ref: messaging.destination.name
+        sampling_relevant: true
+      - ref: messaging.operation
+      - ref: messaging.batch.message_count
+      - ref: messaging.message.id
+      - ref: server.address
+      - ref: server.port
+      - ref: az.namespace
+      - ref: az.schema_url
