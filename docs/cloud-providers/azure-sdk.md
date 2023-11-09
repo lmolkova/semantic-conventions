@@ -4,7 +4,7 @@ linkTitle: Azure SDK
 
 # Semantic conventions for Azure SDK spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Mixed][DocumentStatus]
 
 This document describes tracing semantic conventions adopted by Azure SDK. Instrumentations live in Azure SDK repos and are shipped along with Azure SDK artifacts.
 
@@ -22,6 +22,8 @@ Azure SDK produces spans for public API calls and nested HTTP client spans. AMQP
 Azure SDKs follow OpenTelemetry semantic conventions when applicable, but adopt new versions of conventions at their own pace. Telemetry consumers MAY use [SchemaUrl](https://opentelemetry.io/docs/specs/otel/schemas/#schema-url) to detect which version of semantic conventions are emitted by Azure SDKs.
 
 ## Public API calls
+
+**Status**: [Stable][DocumentStatus]
 
 Azure SDK SHOULD create a span for each call to service methods, that is, public APIs that involve communication with Azure services.
 
@@ -140,7 +142,9 @@ In addition to common attributes listed in the table above, certain Azure client
 | `az.remoterendering.session.id` | string | A session id uniquely identifying the conversion for the given [Azure Remote Rendering](https://learn.microsoft.com/windows/mixed-reality/develop/mixed-reality-cloud-services#azure-remote-rendering) account. | `contoso-session-8c28813adc28` | Recommended |
 <!-- endsemconv -->
 
-## HTTP Client
+## HTTP Client spans
+
+**Status**: [Stable][DocumentStatus]
 
 Azure SDK implements a valid subset of stable part of [OpenTelemetry HTTP spans conventions](/docs/http/http-spans.md) and create a span per HTTP call (attempt).
 
@@ -206,6 +210,8 @@ Instrumentation supports [W3C Trace context](https://w3c.github.io/trace-context
 
 ## Messaging SDKs
 
+**Status**: [Experimental][DocumentStatus]
+
 Messaging span semantics apply to Azure Event Hubs and Service Bus SDKs and follow [OpenTelemetry Messaging spans conventions v1.22.0](https://github.com/open-telemetry/semantic-conventions/blob/v1.22.0/docs/messaging/messaging-spans.md).
 
 Azure SDK will update messaging semantic conventions as messaging specification evolves.
@@ -257,3 +263,5 @@ The following attributes can be important for making sampling decisions and SHOU
 * [`messaging.operation`](../attributes-registry/messaging.md)
 * [`messaging.system`](../attributes-registry/messaging.md)
 <!-- endsemconv -->
+
+[DocumentStatus]: https://github.com/open-telemetry/opentelemetry-specification/tree/v1.26.0/specification/document-status.md
