@@ -185,3 +185,73 @@ groups:
         sampling_relevant: true
       - ref: az.schema_url
         sampling_relevant: true
+
+  # appconfiguration
+  - id: azure.sdk.appconfiguration
+    type: span
+    brief: 'Describes Azure AppConfiguration SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.appconfiguration.key
+
+  # cognitivelanguage
+  - id: azure.sdk.cognitivelanguage
+    type: span
+    brief: 'Describes Azure QuestionAnswering SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.cognitivelanguage.project.name
+      - ref: az.cognitivelanguage.deployment.name
+
+  # digitaltwins
+  - id: azure.sdk.digitaltwins
+    type: span
+    brief: 'Describes Azure DigitalTwins SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.digitaltwins.twin.id
+      - ref: az.digitaltwins.component.name
+      - ref: az.digitaltwins.relationship.name
+      - ref: az.digitaltwins.model.id
+      - ref: az.digitaltwins.job.id
+      - ref: az.digitaltwins.query
+      - ref: az.digitaltwins.event_route.id
+      - ref: az.digitaltwins.message.id
+
+  # keyvault certificates
+  - id: azure.sdk.keyvault.certificates
+    type: span
+    brief: 'Describes Azure KeyVault Certificates SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.keyvault.certificate.name
+      - ref: az.keyvault.certificate.version
+      - ref: az.keyvault.certificate.issuer.name
+
+  # keyvault keys
+  - id: azure.sdk.keyvault.keys
+    type: span
+    brief: 'Describes Azure KeyVault Keys SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.keyvault.key.name
+      - ref: az.keyvault.key.version
+      - ref: az.keyvault.key.id
+
+  # keyvault secrets
+  - id: azure.sdk.keyvault.secrets
+    type: span
+    brief: 'Describes Azure KeyVault Secrets SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.keyvault.secret.name
+      - ref: az.keyvault.secret.version
+
+  # remote rendering
+  - id: azure.sdk.remoterendering
+    type: span
+    brief: 'Describes Azure KeyVault Secrets SDK spans.'
+    extends: azure.sdk.api
+    attributes:
+      - ref: az.remoterendering.conversion.id
+      - ref: az.remoterendering.session.id

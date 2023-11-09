@@ -66,6 +66,80 @@ it's RECOMMENDED to:
 | `_OTHER` | A fallback error value to be used when the instrumentation doesn't define a custom value. |
 <!-- endsemconv -->
 
+In addition to common attributes listed in the table above, certain Azure client libraries in .NET emit other library-specific attributes.
+
+### Azure Application Configuration attributes
+
+<!-- semconv azure.sdk.appconfiguration -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.appconfiguration.key` | string | Value of the Azure Application Configuration property [key](https://learn.microsoft.com/azure/azure-app-configuration/concept-key-value). | `AppName:Service1:ApiEndpoint` | Recommended |
+<!-- endsemconv -->
+
+### Azure Cognitive Language Question Answering SDK attributes
+
+<!-- semconv azure.sdk.cognitivelanguage -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.cognitivelanguage.deployment.name` | string | Name of the [Azure Questions Answering](https://learn.microsoft.com/azure/ai-services/language-service/question-answering) deployment. | `production` | Recommended |
+| `az.cognitivelanguage.project.name` | string | Name of the [Azure Questions Answering](https://learn.microsoft.com/azure/ai-services/language-service/question-answering) project. | `production` | Recommended |
+<!-- endsemconv -->
+
+### Azure Digital Twins attributes
+
+<!-- semconv azure.sdk.digitaltwins -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.digitaltwins.component.name` | string | The name of the digital twin component. | `thermostat` | Recommended |
+| `az.digitaltwins.event_route.id` | string | The [event route](https://learn.microsoft.com/azure/digital-twins/concepts-route-events) identifier used by the digital twin. | `6f8741b1` | Recommended |
+| `az.digitaltwins.job.id` | string | Digital twin job id. | `test-job` | Recommended |
+| `az.digitaltwins.message.id` | string | A unique message identifier (in the scope of the digital twin id) used to de-duplicate telemetry messages. | `a40896c5ab954ab1` | Recommended |
+| `az.digitaltwins.model.id` | string | The digital twin model id. | `dtmi:example:Room23;1` | Recommended |
+| `az.digitaltwins.query` | string | Digital twin graph query. | `SELECT * FROM DIGITALTWINS WHERE Name = "DSouza"` | Recommended |
+| `az.digitaltwins.relationship.name` | string | The name of the relationship between twins. | `contains` | Recommended |
+| `az.digitaltwins.twin.id` | string | The unique identifier of the [digital twin](https://learn.microsoft.com/azure/digital-twins/concepts-twins-graph). | `edf41622` | Recommended |
+<!-- endsemconv -->
+
+### Azure KeyVault attributes
+
+#### Azure KeyVault Certificates attributes
+
+<!-- semconv azure.sdk.keyvault.certificates -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.keyvault.certificate.issuer.name` | string | Azure KeyVault certificate version. | `issuer01` | Recommended |
+| `az.keyvault.certificate.name` | string | Azure KeyVault certificate name. | `selfSignedCert01` | Recommended |
+| `az.keyvault.certificate.version` | string | Azure KeyVault certificate version. | `c3d31d7b36c942ad83ef36fc0785a4fc` | Recommended |
+<!-- endsemconv -->
+
+#### Azure KeyVault Keys attributes
+
+<!-- semconv azure.sdk.keyvault.keys -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.keyvault.key.id` | string | Azure KeyVault key id (full URL). | `"https://myvault.vault.azure.net/keys/CreateSoftKeyTest/78deebed173b48e48f55abf87ed4cf71` | Recommended |
+| `az.keyvault.key.name` | string | Azure KeyVault key name. | `test-key` | Recommended |
+| `az.keyvault.key.version` | string | Azure KeyVault key version. | `3d31e6e5c4c14eaf9be8d42c00225088` | Recommended |
+<!-- endsemconv -->
+
+#### Azure KeyVault Secrets attributes
+
+<!-- semconv azure.sdk.keyvault.secrets -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.keyvault.secret.name` | string | Azure KeyVault secret name. | `test-secret` | Recommended |
+| `az.keyvault.secret.version` | string | Azure KeyVault secret version. | `4387e9f3d6e14c459867679a90fd0f79` | Recommended |
+<!-- endsemconv -->
+
+#### Azure Mixed Reality Remote Rendering attributes
+
+<!-- semconv azure.sdk.remoterendering -->
+| Attribute  | Type | Description  | Examples  | Requirement Level |
+|---|---|---|---|---|
+| `az.remoterendering.conversion.id` | string | A conversion id uniquely identifying the conversion for the given [Azure Remote Rendering](https://learn.microsoft.com/windows/mixed-reality/develop/mixed-reality-cloud-services#azure-remote-rendering) account. | `contoso-conversion-6fae2bfb754e` | Recommended |
+| `az.remoterendering.session.id` | string | A session id uniquely identifying the conversion for the given [Azure Remote Rendering](https://learn.microsoft.com/windows/mixed-reality/develop/mixed-reality-cloud-services#azure-remote-rendering) account. | `contoso-session-8c28813adc28` | Recommended |
+<!-- endsemconv -->
+
 ## HTTP Client
 
 Azure SDK implements a valid subset of stable part of [OpenTelemetry HTTP spans conventions](/docs/http/http-spans.md) and create a span per HTTP call (attempt).
