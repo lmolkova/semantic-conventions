@@ -1,0 +1,20 @@
+groups:
+  - id: metric.key-transaction.duration
+    type: metric
+    metric_name: key-transaction.elapsed.duration
+    stability: experimental
+    brief: "Duration of a key transaction from the beginning and to the current service"
+    instrument: histogram
+    unit: "s"
+    attributes:
+      - ref: key_transaction.name
+        requirement_level: required
+      - ref: error.type
+        requirement_level:
+          conditionally_required: if and only if the key transaction is ended with an error
+      - ref: key_transaction.life_cycle
+        requirement_level: required
+
+
+
+

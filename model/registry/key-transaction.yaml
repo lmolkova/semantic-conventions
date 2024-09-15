@@ -1,0 +1,47 @@
+groups:
+  - id: registry.key_transaction
+    type: attribute_group
+    display_name: Key Transaction
+    brief: >
+      Key Transaction attributes.
+    attributes:
+      - id: key_transaction.name
+        type: string
+        stability: experimental
+        brief: >
+          The name of the key transaction assigned by the application.
+        examples: ['process-order']
+      - id: key_transaction.life_cycle.something
+        type:
+          members:
+            - id: started
+              value: started
+              stability: experimental
+            - id: ended
+              value: ended
+              stability: experimental
+        stability: experimental
+        brief: >
+          The life cycle of the key transaction.
+        examples: ['started']
+      - id: key_transaction.start_time
+        type: template[string]
+        stability: experimental
+        brief: >
+          The time when the key transaction started, `<key>` represents the key transaction name,
+          and value represents the start timestamp TODO.
+        examples: [ 'key_transaction.start_time.process_order=2024-01-23T13:47:06Z' ]
+      - id: key_transaction.life_cycle
+        type: template[string]
+        stability: experimental
+        brief: >
+        examples: [ 'key_transaction.life_cycle.process_order=ended' ]
+
+  - id: key_transaction_aux.attributes
+    attributes:
+      - ref: key_transaction.names
+        type: string[]
+      - ref: key_transaction.life_cycle[]
+        requirement_level:
+          conditionally_required: if started or ended
+
