@@ -17,6 +17,10 @@ Resource Log events.
 <!-- markdownlint-disable -->
 
 The event name MUST be `az.resource.log`.
+**Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
+
+**Description:** Describes Azure Resource Log event, see [Azure Resource Log Top-level Schema](https://learn.microsoft.com/azure/azure-monitor/essentials/resource-logs-schema#top-level-common-schema) for more details.
+
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|

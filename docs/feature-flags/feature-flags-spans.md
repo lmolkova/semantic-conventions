@@ -49,6 +49,10 @@ A flag evaluation SHOULD be recorded as an Event on the span during which it occ
 <!-- markdownlint-disable -->
 
 The event name MUST be `feature_flag`.
+**Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
+
+**Description:** This semantic convention defines the attributes used to represent a feature flag evaluation as an event.
+
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|

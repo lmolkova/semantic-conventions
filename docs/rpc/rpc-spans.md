@@ -266,6 +266,9 @@ and one received message will be recorded for both client and server spans.
 <!-- markdownlint-disable -->
 
 The event name MUST be `rpc.message`.
+**Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
+
+**Description:** RPC received/sent message.
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|

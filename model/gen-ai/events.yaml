@@ -14,6 +14,19 @@ groups:
     brief: >
       This event describes the instructions passed to the GenAI system inside the prompt.
     extends: gen_ai.common.event.attributes
+    body:
+      id: gen_ai.system.message
+      requirement_level: opt_in
+      type: map
+      fields:
+        - id: content
+          type: undefined
+          stability: experimental
+          brief: >
+            The contents of the system message.
+          examples: ["You're a friendly bot that answers questions about OpenTelemetry."]
+          requirement_level: opt_in
+
 
   - id: gen_ai.user.message
     name: gen_ai.user.message

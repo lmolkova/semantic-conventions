@@ -45,6 +45,10 @@ The table below indicates which attributes should be added to the
 <!-- markdownlint-disable -->
 
 The event name MUST be `feature_flag`.
+**Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
+
+**Description:** This document defines attributes for feature flag evaluations represented using Log Records.
+
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
