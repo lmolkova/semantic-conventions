@@ -11,8 +11,7 @@ groups:
     name: gen_ai.system.message
     type: event
     stability: experimental
-    brief: >
-      This event describes the instructions passed to the GenAI system inside the prompt.
+    brief: This event describes the instructions passed to the GenAI system inside the prompt.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.system.message
@@ -30,7 +29,7 @@ groups:
           type: string
           stability: experimental
           brief: >
-            Role.
+            The actual role of the message author as passed in the message.
           examples: ["system", "instruction"]
           requirement_level:
             conditionally_required: if available and not equal to `system`.`
@@ -58,7 +57,7 @@ groups:
           type: string
           stability: experimental
           brief: >
-            Role.
+            The actual role of the message author as passed in the message.
           examples: ["user", "customer"]
           requirement_level:
             conditionally_required: if available and not equal to `user`.
@@ -79,14 +78,14 @@ groups:
           type: undefined
           stability: experimental
           brief: >
-            The contents of the tool message.
+            The contents of the assistant message.
           examples: ["The weather in Paris is rainy and overcast, with temperatures around 57°F."]
           requirement_level: opt_in
         - id: role
           type: string
           stability: experimental
           brief: >
-            Role.
+            The actual role of the message author as passed in the message.
           examples: ["assistant", "bot"]
           requirement_level:
             conditionally_required: if available and not equal to `assistant`.
@@ -157,7 +156,7 @@ groups:
           type: string
           stability: experimental
           brief: >
-            Role.
+            The actual role of the message author as passed in the message.
           examples: ["tool", "function"]
           requirement_level:
             conditionally_required: if available and not equal to `tool`.
@@ -217,7 +216,7 @@ groups:
               type: string
               stability: experimental
               brief: >
-                Role.
+                The actual role of the message author as passed in the message.
               examples: ["assistant", "bot"]
               requirement_level:
                 conditionally_required: if available and not equal to `assistant`.
