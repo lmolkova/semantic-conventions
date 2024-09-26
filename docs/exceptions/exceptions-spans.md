@@ -50,12 +50,13 @@ their types.
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable -->
 
-The event name MUST be `exception`.
+
 **Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
 
-**Description:** This document defines the attributes used to report a single exception associated with a span.
+This document defines the attributes used to report a single exception associated with a span.
 
 
+The event name MUST be `exception`.
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
 | [`exception.message`](/docs/attributes-registry/exception.md) | string | The exception message. | `Division by zero`; `Can't convert 'int' object to str implicitly` | `Conditionally Required` [1] | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |

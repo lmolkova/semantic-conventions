@@ -1,15 +1,15 @@
 {#- Macros for simplifying creating "Event" documentation. -#}
 {% import 'stability.j2' as stability %}
+{% import 'body_field_table.j2' as bft %}
+
 {% macro header(event) %}
 **Status:** {{ stability.badge(event.stability, event.deprecated) }}
 
 {{ event.brief }}
 
 {% if event.name %}The event name MUST be `{{ event.name }}`.
-
 {% endif %}{% endmacro %}
 
-{% macro body(event) %}{% if event.body %}
-
-THIS IS THE BODY
+{% macro body(body) %}{% if body %}{{ bft.generate(body.fields) }}
 {% endif %}{% endmacro %}
+

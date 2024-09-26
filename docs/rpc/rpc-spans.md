@@ -265,11 +265,12 @@ and one received message will be recorded for both client and server spans.
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable -->
 
-The event name MUST be `rpc.message`.
+
 **Status:** ![Experimental](https://img.shields.io/badge/-experimental-blue)
 
-**Description:** RPC received/sent message.
+RPC received/sent message.
 
+The event name MUST be `rpc.message`.
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
 | [`rpc.message.compressed_size`](/docs/attributes-registry/rpc.md) | int | Compressed size of the message in bytes. |  | `Recommended` | ![Experimental](https://img.shields.io/badge/-experimental-blue) |
