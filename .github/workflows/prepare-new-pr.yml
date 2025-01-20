@@ -1,8 +1,9 @@
 name: 'Prepare new PR'
 on:
   pull_request_target:
-    types: [opened, synchronize]
-    #branches: [ 'main*' ]
+    types: [opened, synchronize, reopened]
+    branches: [ 'main*' ]
+    paths: ['.chloggen/*']
 
 jobs:
   get-change-details:
@@ -31,6 +32,7 @@ jobs:
     permissions:
       pull-requests: write
     #if: ${{ github.repository_owner == 'open-telemetry' }}
+    if: ${{ needs.get-change-details.outputs.change_type != '' }}
     steps:
       - uses: actions/checkout@v4
 
