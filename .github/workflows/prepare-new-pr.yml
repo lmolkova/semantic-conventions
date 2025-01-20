@@ -37,11 +37,10 @@ jobs:
     permissions:
       pull-requests: write
     if: |
-      ${{ needs.get-change-details.outputs.change_type != '' }} &&
-      ${{ github.repository_owner != 'open-telemetry' }}
+      needs.get-change-details.outputs.change_type != '' &&
+      needs.get-change-details.outputs.change_type != null &&
+      github.repository_owner != 'open-telemetry'
     steps:
-      - uses: actions/checkout@v4
-
       - name: Set label on PR
         run: gh pr edit "${PR}" --add-label "${CHANGE_TYPE}" || true
         env:
