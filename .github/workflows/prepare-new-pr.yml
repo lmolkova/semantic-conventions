@@ -34,7 +34,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run prepare-new-pr.sh
-        run: ./.github/workflows/scripts/prepare-new-pr.sh
+        run: gh pr edit "${PR}" --add-label "${CHANGE_TYPE}" || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ needs.get-change-details.outputs.change_type }}
+          PR: ${{ github.event.pull_request.number }}
+          CHANGE_TYPE: ${{ needs.get-change-details.outputs.change_type }}
