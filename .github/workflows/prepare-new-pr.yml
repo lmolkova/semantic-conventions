@@ -27,13 +27,14 @@ jobs:
 
   prepare-new-pr:
     runs-on: ubuntu-latest
+    needs: get-change-details
     permissions:
       pull-requests: write
     #if: ${{ github.repository_owner == 'open-telemetry' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run prepare-new-pr.sh
+      - name: Set label on PR
         run: gh pr edit "${PR}" --add-label "${CHANGE_TYPE}" || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
