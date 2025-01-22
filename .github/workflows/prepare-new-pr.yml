@@ -18,8 +18,8 @@ jobs:
       # sparse checkout to only get the .chloggen directory
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: agent-sc
+          repository: gyliu513/semantic-conventions
           path: prchangelog
           sparse-checkout: .chloggen
 
