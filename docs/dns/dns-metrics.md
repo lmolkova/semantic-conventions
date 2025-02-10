@@ -4,7 +4,7 @@ linkTitle: DNS
 
 # Semantic conventions for DNS queries
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions to apply when instrumenting DNS queries.
 

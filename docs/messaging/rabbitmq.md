@@ -4,7 +4,7 @@ linkTitle: RabbitMQ
 
 # Semantic conventions for RabbitMQ
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [RabbitMQ](https://www.rabbitmq.com/) extend and override the [Messaging Semantic Conventions](README.md).
 

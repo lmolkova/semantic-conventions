@@ -4,7 +4,7 @@ linkTitle: Spans
 
 # Semantic conventions for FaaS spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines how to describe an instance of a function that runs without provisioning
 or managing of servers (also known as serverless functions or Function as a Service (FaaS)) with spans.

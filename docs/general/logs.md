@@ -5,7 +5,7 @@ aliases: [logs-general]
 
 # General logs attributes
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The attributes described in this section are rather generic.
 They may be used in any Log Record they apply to.

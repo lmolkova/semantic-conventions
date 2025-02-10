@@ -4,7 +4,7 @@ linkTitle: Spans
 
 # Semantic conventions for CloudEvents spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- prettier-ignore-start -->
 

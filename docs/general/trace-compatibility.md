@@ -4,7 +4,7 @@ linkTitle: Tracing compatibility
 
 # Semantic conventions for tracing compatibility components
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines trace semantic conventions used by the
 compatibility components, e.g. OpenTracing Shim layer.

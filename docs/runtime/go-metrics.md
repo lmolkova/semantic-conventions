@@ -4,7 +4,7 @@ linkTitle: Go
 
 # Semantic conventions for Go runtime metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document describes semantic conventions for Go runtime metrics in OpenTelemetry.
 These metrics are obtained from Go's [`runtime/metrics`][RuntimeMetrics] package.

@@ -4,7 +4,7 @@ linkTitle: Kubernetes
 
 # Semantic conventions for Kubernetes metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 ## K8s Metrics
 

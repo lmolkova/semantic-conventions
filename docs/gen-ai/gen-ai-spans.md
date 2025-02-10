@@ -4,7 +4,7 @@ linkTitle: Spans
 
 # Semantic conventions for generative AI spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

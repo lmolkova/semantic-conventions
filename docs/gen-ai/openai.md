@@ -4,7 +4,7 @@ linkTitle: OpenAI
 
 # Semantic conventions for OpenAI operations
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

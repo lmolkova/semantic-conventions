@@ -4,7 +4,7 @@ linkTitle: JSON-RPC
 
 # Semantic conventions for JSON-RPC
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [JSON-RPC](https://www.jsonrpc.org/) extend and override the [RPC spans](rpc-spans.md) and [RPC metrics](rpc-metrics.md) Semantic Conventions
 that describe common RPC operations attributes in addition to the Semantic Conventions

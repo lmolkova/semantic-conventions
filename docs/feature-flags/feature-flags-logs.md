@@ -4,7 +4,7 @@ linkTitle: Logs
 
 # Semantic conventions for feature flags in logs
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions for recording feature flag evaluations as
 a [log record](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.41.0/specification/logs/data-model.md#log-and-event-record-definition) emitted through the

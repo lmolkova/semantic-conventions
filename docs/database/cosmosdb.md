@@ -4,7 +4,7 @@ linkTitle: Cosmos DB
 
 # Semantic conventions for Microsoft Azure Cosmos DB
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

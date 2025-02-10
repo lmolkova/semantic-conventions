@@ -4,7 +4,7 @@ linkTitle: Common
 
 # Semantic conventions for common hardware metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

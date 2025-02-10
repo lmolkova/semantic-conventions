@@ -4,7 +4,7 @@ linkTitle: URL
 
 # Semantic conventions for URL
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions that describe URL and its components.
 

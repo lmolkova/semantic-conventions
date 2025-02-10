@@ -4,7 +4,7 @@ linkTitle: Events
 
 # Semantic conventions for generative AI events
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

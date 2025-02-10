@@ -4,7 +4,7 @@ linkTitle: Metrics
 
 # Semantic conventions for messaging client metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

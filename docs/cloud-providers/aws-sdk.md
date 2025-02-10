@@ -4,7 +4,7 @@ linkTitle: AWS SDK
 
 # Semantic conventions for AWS SDK
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions to apply when instrumenting the AWS SDK. They map request or response
 parameters in AWS SDK API calls to attributes on a Span. The conventions have been collected over time based

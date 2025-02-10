@@ -222,7 +222,7 @@ a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentatio
 
 ## Compute Unit
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Attributes defining a compute unit (e.g. Container, Process, Function as a Service):
 
@@ -233,7 +233,7 @@ Attributes defining a compute unit (e.g. Container, Process, Function as a Servi
 
 ## Compute Instance
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Attributes defining a computing instance (e.g. host):
 
@@ -241,7 +241,7 @@ Attributes defining a computing instance (e.g. host):
 
 ## Environment
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Attributes defining a running environment (e.g. Operating System, Cloud, Data Center, Deployment Service):
 
@@ -264,7 +264,7 @@ the exact version used to identify an artifact. This may be a semantic version, 
 
 ## Cloud-Provider-Specific Attributes
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Attributes that are only applicable to resources from a specific cloud provider. Currently, these
 resources can only be defined for providers listed as a valid `cloud.provider` in

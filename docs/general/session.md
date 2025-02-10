@@ -4,7 +4,7 @@ linkTitle: Session
 
 # Semantic conventions for session
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions to apply to client-side applications when tracking sessions.
 

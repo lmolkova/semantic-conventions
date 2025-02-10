@@ -4,7 +4,7 @@ linkTitle: Container
 
 # Semantic conventions for container metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 ## Container Metrics
 

@@ -4,7 +4,7 @@ linkTitle: Metrics
 
 # Semantic conventions for generative AI metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

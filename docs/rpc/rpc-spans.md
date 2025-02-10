@@ -4,7 +4,7 @@ linkTitle: Spans
 
 # Semantic conventions for RPC spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines how to describe remote procedure calls
 (also called "remote method invocations" / "RMI") with spans.

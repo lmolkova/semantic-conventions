@@ -4,7 +4,7 @@ linkTitle: Events
 
 # Semantic conventions for Azure resource log events
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions for instrumentations that emit Azure
 Resource Log events.

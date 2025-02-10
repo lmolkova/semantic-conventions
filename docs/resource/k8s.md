@@ -1,6 +1,6 @@
 # Kubernetes
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Useful resources to understand Kubernetes objects and metadata:
 

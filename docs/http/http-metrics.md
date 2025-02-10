@@ -901,7 +901,7 @@ This metric is optional.
 
 ### Metric: `http.client.active_requests`
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This metric is optional.
 

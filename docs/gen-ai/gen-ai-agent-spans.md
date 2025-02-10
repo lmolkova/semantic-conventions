@@ -4,7 +4,7 @@ linkTitle: Generative AI traces
 
 # Semantic Conventions for GenAI agent and framework spans
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- Re-generate TOC with `markdown-toc --no-first-h1 -i` -->
 

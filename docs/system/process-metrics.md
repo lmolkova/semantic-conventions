@@ -4,7 +4,7 @@ linkTitle: OS process
 
 # Semantic conventions for OS process metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document describes instruments and attributes for common OS process level
 metrics in OpenTelemetry. Also consider the [general metric semantic

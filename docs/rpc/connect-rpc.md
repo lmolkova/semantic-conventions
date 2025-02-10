@@ -4,7 +4,7 @@ linkTitle: Connect
 
 # Semantic conventions for Connect RPC
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [Connect](http://connect.build) extend and override the [RPC spans](rpc-spans.md) and [RPC metrics](rpc-metrics.md) Semantic Conventions
 that describe common RPC operations attributes in addition to the Semantic Conventions

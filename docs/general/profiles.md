@@ -4,7 +4,7 @@ linkTitle: Profiles
 
 # General profiles attributes
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

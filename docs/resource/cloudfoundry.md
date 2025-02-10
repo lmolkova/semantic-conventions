@@ -1,6 +1,6 @@
 # CloudFoundry
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 Useful resources to understand CloudFoundry metadata:
 

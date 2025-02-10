@@ -4,7 +4,7 @@ linkTitle: GraphQL server
 
 # Semantic conventions for GraphQL server
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions to apply when instrumenting the GraphQL implementation. They map GraphQL
 operations to attributes on a Span.

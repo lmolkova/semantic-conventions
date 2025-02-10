@@ -4,7 +4,7 @@ linkTitle: CLI programs
 
 # Semantic conventions for CLI (command line interface) programs
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions to apply when instrumenting CLI programs, both as a caller and as callee. This document is intended for short-lived programs that end their execution, i.e. not daemon or long running background tasks.
 

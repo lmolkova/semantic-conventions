@@ -1,6 +1,6 @@
 # Instrumenting AWS Lambda
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines how to apply semantic conventions when instrumenting an AWS Lambda request handler. AWS
 Lambda largely follows the conventions for [FaaS][faas] while [HTTP](/docs/http/http-spans.md) conventions are also

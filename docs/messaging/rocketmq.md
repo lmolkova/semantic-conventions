@@ -4,7 +4,7 @@ linkTitle: RocketMQ
 
 # Semantic conventions for RocketMQ
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [Apache RocketMQ](https://rocketmq.apache.org/) extend and override the [Messaging Semantic Conventions](README.md).
 

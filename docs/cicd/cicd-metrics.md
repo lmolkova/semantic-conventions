@@ -4,7 +4,7 @@ linkTitle: CICD
 
 # Semantic conventions for CICD metrics
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

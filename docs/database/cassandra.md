@@ -4,7 +4,7 @@ linkTitle: Cassandra
 
 # Semantic conventions for Cassandra
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

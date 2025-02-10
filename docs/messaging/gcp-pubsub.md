@@ -4,7 +4,7 @@ linkTitle: Google Cloud Pub/Sub
 
 # Semantic conventions for Google Cloud Pub/Sub
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [Google Cloud Pub/Sub](https://cloud.google.com/pubsub) extend and override the [Messaging Semantic Conventions](README.md).
 

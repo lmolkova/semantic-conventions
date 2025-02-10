@@ -4,7 +4,7 @@ linkTitle: Elasticsearch
 
 # Semantic conventions for Elasticsearch
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

@@ -4,7 +4,7 @@ linkTitle: Azure AI Inference
 
 # Semantic conventions for Azure AI Inference
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 The Semantic Conventions for [Azure AI Inference](https://learn.microsoft.com/azure/ai-studio) extend and override the [GenAI Semantic Conventions](README.md).
 

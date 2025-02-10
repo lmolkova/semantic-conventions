@@ -4,7 +4,7 @@ linkTitle: Events
 
 # Semantic conventions for mobile events
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 This document defines semantic conventions for instrumentations that emit
 events on mobile platforms. All mobile events MUST use a namespace of

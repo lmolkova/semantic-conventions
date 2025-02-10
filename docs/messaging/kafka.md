@@ -4,7 +4,7 @@ linkTitle: Kafka
 
 # Semantic conventions for Kafka
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 

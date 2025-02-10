@@ -4,7 +4,7 @@ linkTitle: DynamoDB
 
 # Semantic conventions for AWS DynamoDB
 
-**Status**: [Experimental][DocumentStatus]
+**Status**: [Development][DocumentStatus]
 
 <!-- toc -->
 
