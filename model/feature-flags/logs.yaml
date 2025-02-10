@@ -2,7 +2,7 @@ groups:
   - id: event.feature_flag.evaluation
     type: event
     name: feature_flag.evaluation
-    stability: experimental
+    stability: development
     brief: >
       Defines feature flag evaluation as an event.
     note: >
@@ -56,7 +56,7 @@ groups:
       fields:
         - id: value
           type: undefined
-          stability: experimental
+          stability: development
           brief: The evaluated value of the feature flag.
           requirement_level:
             conditionally_required: >

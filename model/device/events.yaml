@@ -1,6 +1,6 @@
 groups:
   - id: event.device.app.lifecycle
-    stability: experimental
+    stability: development
     type: event
     name: device.app.lifecycle
     brief: >
@@ -22,7 +22,7 @@ groups:
       requirement_level: required
       fields:
         - id: ios.state
-          stability: experimental
+          stability: development
           requirement_level:
             conditionally_required: if and only if `os.name` is `ios`
           note: >
@@ -61,7 +61,7 @@ groups:
                 The app is about to terminate. Associated with UIKit notification `applicationWillTerminate`.
               stability: development
         - id: android.state
-          stability: experimental
+          stability: development
           requirement_level:
             conditionally_required: if and only if `os.name` is `android`
           brief: >
