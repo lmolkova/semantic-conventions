@@ -11,6 +11,7 @@ This document defines semantic conventions for systems (such as processes, runti
 System semantic conventions are defined for the following metrics:
 
 * [System](system-metrics.md): For standard system metrics.
+  * [Linux](linux-system-metrics.md): For Linux-specific system metrics
 * [Container](container-metrics.md): For container-related metrics.
 * [CPU](cpu-metrics.md): For CPU-related metrics.
 * [K8s](k8s-metrics.md): For K8s-related metrics.

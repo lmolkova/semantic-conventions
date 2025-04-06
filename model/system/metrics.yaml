@@ -343,10 +343,10 @@ groups:
     unit: "{process}"
     attributes: []
 
-  # system.linux.* metrics
-  - id: metric.system.linux.memory.available
+  # linux.system.* metrics
+  - id: metric.linux.system.memory.available
     type: metric
-    metric_name: system.linux.memory.available
+    metric_name: linux.system.memory.available
     stability: development
     brief: "An estimate of how much memory is available for starting new applications, without causing swapping"
     note: |
@@ -359,9 +359,9 @@ groups:
     unit: "By"
     attributes: []
 
-  - id: metric.system.linux.memory.slab.usage
+  - id: metric.linux.system.memory.slab.usage
     type: metric
-    metric_name: system.linux.memory.slab.usage
+    metric_name: linux.system.memory.slab.usage
     stability: development
     brief: "Reports the memory used by the Linux kernel for managing caches of frequently used objects."
     note: |
