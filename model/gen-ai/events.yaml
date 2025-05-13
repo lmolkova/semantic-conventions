@@ -6,33 +6,51 @@ groups:
       Describes common Gen AI event attributes.
     attributes:
       - ref: gen_ai.system
+      - ref: gen_ai.operation.name
+      - ref: gen_ai.request.model
+      - ref: gen_ai.conversation.id
+        requirement_level:
+          conditionally_required: when available
 
-  - id: event.gen_ai.inputs
-    name: gen_ai.inputs
+
+  - id: event.gen_ai.operation.start
+    name: gen_ai.operation.start
+    type: event
+    #severity: debug
+    stability: development
+    brief: >
+      The chat history provided to the model or agent as an input excluding
+      the system message/instructions.
+    extends: gen_ai.common.event.attributes
+    attributes:
+      - ref: gen_ai.system.instructions
+      - ref: gen_ai.system.instructions_ref
+      - ref: gen_ai.input.messages
+      - ref: gen_ai.input.messages_ref
+      - ref: gen_ai.tool.definition
+
+  - id: event.gen_ai.response.chunk
+    name: gen_ai.response.chunk
     type: event
     # severity: debug
     stability: development
     brief: >
-      This event represents the whole input to the GenAI model in the model-specific
-      format.
-    extends: gen_ai.common.event.attributes
-    body:
-      id: gen_ai.inputs
-      requirement_level: opt_in
-      stability: development
-      type: undefined
+      Verbatim streamign messages returned by the model or agent in response.
 
-  - id: event.gen_ai.outputs
-    name: gen_ai.outputs
+  - id: event.gen_ai.operation.end
+    name: gen_ai.operation.end
     type: event
     # severity: debug
     stability: development
     brief: >
-      This event represents the whole output received from the GenAI model in the
-      model-specific format.
+      Messages returned by the model or agent in response.
     extends: gen_ai.common.event.attributes
-    body:
-      id: gen_ai.outputs
-      requirement_level: opt_in
-      stability: development
-      type: undefined
+    attributes:
+      - ref: gen_ai.output.messages
+      - ref: gen_ai.output.messages_ref
+      - ref: gen_ai.output.type
+      - ref: gen_ai.response.model
+      - ref: gen_ai.usage.input_tokens
+      - ref: gen_ai.usage.output_tokens
+      - ref: gen_ai.response.id
+      - ref: error.type

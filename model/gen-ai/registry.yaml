@@ -363,7 +363,9 @@ groups:
       - id: gen_ai.input.messages
         stability: development
         type: string  # any
-        brief: The chat history excluding the system message/instructions.
+        brief: >
+          The chat history provided to the model or agent as an input excluding
+          the system message/instructions.
         note: |
           Messages MUST be provided in the order they were sent to the model or agent.
           Instrumentations MAY provide a way for users to filter chat messages.
