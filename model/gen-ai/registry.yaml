@@ -340,7 +340,7 @@ groups:
           `gen_ai.output.{type}.*` attributes.
       - id: gen_ai.system.instructions
         stability: development
-        type: string
+        type: string  # any
         brief: The system message or instructions provided to the GenAI model or agent.
         note: |
           The format of the instructions is defined in the [JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
@@ -350,7 +350,7 @@ groups:
 
           See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
           section for more details.
-        examples: ["You are a helpful assistant."]
+        examples: ['{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}']
       - id: gen_ai.system.instructions_ref
         stability: development
         type: string
@@ -379,11 +379,10 @@ groups:
 
           See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
           section for more details.
-        examples: [
-          '{"role": "user", "content": "Weather in Paris?"}',
-          '{"role": "assistant", "tool_calls":[{"id":"call_VSPygqKTWdrhaFErNvMV18Yl","function":{"name":"get_weather","arguments":{"location":"Paris"}},"type":"function"}]}',
-          '{"role": "tool", "content":"rainy, 57°F", "id":"call_VSPygqKTWdrhaFErNvMV18Yl"}'
-        ]
+        examples:
+          - '[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]},
+              {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]},
+              {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]'
       - id: gen_ai.input.messages_ref
         stability: development
         type: string
@@ -404,7 +403,8 @@ groups:
 
           See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
           section for more details.
-        examples: ['[{"index":0,"finish_reason":"stop","message":{"role": "assistant", "content": "The weather in Paris is rainy and overcast, with temperatures around 57°F"}}]']
+        examples:
+          - '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]'
       - id: gen_ai.output.messages_ref
         stability: development
         type: string

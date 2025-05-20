@@ -16,7 +16,6 @@ groups:
   - id: event.gen_ai.operation.start
     name: gen_ai.operation.start
     type: event
-    #severity: debug
     stability: development
     brief: >
       The chat history provided to the model or agent as an input excluding
@@ -27,20 +26,10 @@ groups:
       - ref: gen_ai.system.instructions_ref
       - ref: gen_ai.input.messages
       - ref: gen_ai.input.messages_ref
-      - ref: gen_ai.tool.definition
-
-  - id: event.gen_ai.response.chunk
-    name: gen_ai.response.chunk
-    type: event
-    # severity: debug
-    stability: development
-    brief: >
-      Verbatim streamign messages returned by the model or agent in response.
 
   - id: event.gen_ai.operation.end
     name: gen_ai.operation.end
     type: event
-    # severity: debug
     stability: development
     brief: >
       Messages returned by the model or agent in response.

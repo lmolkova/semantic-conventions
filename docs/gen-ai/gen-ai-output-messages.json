@@ -1,62 +1,100 @@
 {
     "$defs": {
-        "AssistantMessage": {
+        "FinishReason": {
+            "description": "Describes the reason for finishing the generation.",
+            "enum": [
+                "stop",
+                "length",
+                "content_filter",
+                "tool_call",
+                "error"
+            ],
+            "type": "string"
+        },
+        "OutputMessage": {
+            "additionalProperties": true,
+            "description": "Describes generated output.",
             "properties": {
                 "role": {
-                    "const": "assistant",
                     "type": "string"
                 },
-                "content": {
-                    "anyOf": [
-                        {},
-                        {
-                            "type": "null"
-                        }
-                    ]
-                },
-                "tool_calls": {
-                    "anyOf": [
-                        {
-                            "items": {
-                                "$ref": "#/$defs/ToolCall"
+                "parts": {
+                    "items": {
+                        "discriminator": {
+                            "mapping": {
+                                "text": "#/$defs/TextPart",
+                                "tool_call": "#/$defs/ToolCallPart",
+                                "tool_call_response": "#/$defs/ToolCallResponsePart"
                             },
-                            "type": "array"
+                            "propertyName": "type"
+                        },
+                        "oneOf": [
+                            {
+                                "$ref": "#/$defs/TextPart"
+                            },
+                            {
+                                "$ref": "#/$defs/ToolCallPart"
+                            },
+                            {
+                                "$ref": "#/$defs/ToolCallResponsePart"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "finish_reason": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FinishReason"
                         },
                         {
-                            "type": "null"
+                            "type": "string"
                         }
-                    ]
+                    ],
+                    "description": "Reason for finishing."
                 }
             },
             "required": [
                 "role",
-                "content",
-                "tool_calls"
+                "parts",
+                "finish_reason"
             ],
             "type": "object"
         },
-        "Choice": {
+        "TextPart": {
+            "additionalProperties": true,
+            "description": "Describes text content sent to or received from the model.",
             "properties": {
-                "index": {
-                    "type": "integer"
-                },
-                "finish_reason": {
+                "type": {
+                    "const": "text",
                     "type": "string"
                 },
-                "message": {
-                    "$ref": "#/$defs/AssistantMessage"
+                "content": {
+                    "description": "Text content provided to or received from the model.",
+                    "type": "string"
                 }
             },
             "required": [
-                "index",
-                "finish_reason",
-                "message"
+                "type",
+                "content"
             ],
             "type": "object"
         },
-        "FunctionCall": {
+        "ToolCallPart": {
+            "additionalProperties": true,
+            "description": "Describes a tool call requested by the model.",
             "properties": {
+                "type": {
+                    "const": "tool_call",
+                    "description": "Content type.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the tool call.",
+                    "type": "string"
+                },
                 "name": {
+                    "description": "Name of the tool.",
                     "type": "string"
                 },
                 "arguments": {
@@ -65,53 +103,52 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Arguments for the tool call."
                 }
             },
             "required": [
+                "type",
+                "id",
                 "name",
                 "arguments"
             ],
             "type": "object"
         },
-        "ToolCall": {
+        "ToolCallResponsePart": {
+            "additionalProperties": true,
+            "description": "Describes a result of tool call sent to the model.",
             "properties": {
-                "id": {
-                    "type": "string"
-                },
                 "type": {
-                    "const": "function",
+                    "const": "tool_call_response",
+                    "description": "Message type.",
                     "type": "string"
                 },
-                "function": {
+                "id": {
+                    "description": "Unique tool call identifier.",
+                    "type": "string"
+                },
+                "result": {
                     "anyOf": [
-                        {
-                            "$ref": "#/$defs/FunctionCall"
-                        },
+                        {},
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Result of the tool call."
                 }
             },
             "required": [
-                "id",
                 "type",
-                "function"
+                "id",
+                "result"
             ],
             "type": "object"
         }
     },
-    "properties": {
-        "choices": {
-            "items": {
-                "$ref": "#/$defs/Choice"
-            },
-            "type": "array"
-        }
+    "description": "Describes the output messages generated by the model.",
+    "items": {
+        "$ref": "#/$defs/OutputMessage"
     },
-    "required": [
-        "choices"
-    ],
-    "type": "object"
+    "type": "array"
 }

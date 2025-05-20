@@ -1,43 +1,76 @@
 {
     "$defs": {
-        "AssistantMessage": {
+        "ChatMessage": {
+            "additionalProperties": true,
             "properties": {
                 "role": {
-                    "const": "assistant",
                     "type": "string"
                 },
-                "content": {
-                    "anyOf": [
-                        {},
-                        {
-                            "type": "null"
-                        }
-                    ]
-                },
-                "tool_calls": {
-                    "anyOf": [
-                        {
-                            "items": {
-                                "$ref": "#/$defs/ToolCall"
+                "parts": {
+                    "items": {
+                        "discriminator": {
+                            "mapping": {
+                                "text": "#/$defs/TextPart",
+                                "tool_call": "#/$defs/ToolCallPart",
+                                "tool_call_response": "#/$defs/ToolCallResponsePart"
                             },
-                            "type": "array"
+                            "propertyName": "type"
                         },
-                        {
-                            "type": "null"
-                        }
-                    ]
+                        "oneOf": [
+                            {
+                                "$ref": "#/$defs/TextPart"
+                            },
+                            {
+                                "$ref": "#/$defs/ToolCallPart"
+                            },
+                            {
+                                "$ref": "#/$defs/ToolCallResponsePart"
+                            }
+                        ]
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "role",
-                "content",
-                "tool_calls"
+                "parts"
             ],
             "type": "object"
         },
-        "FunctionCall": {
+        "TextPart": {
+            "additionalProperties": true,
+            "description": "Describes text content sent to or received from the model.",
             "properties": {
+                "type": {
+                    "const": "text",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "Text content provided to or received from the model.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "type": "object"
+        },
+        "ToolCallPart": {
+            "additionalProperties": true,
+            "description": "Describes a tool call requested by the model.",
+            "properties": {
+                "type": {
+                    "const": "tool_call",
+                    "description": "Content type.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the tool call.",
+                    "type": "string"
+                },
                 "name": {
+                    "description": "Name of the tool.",
                     "type": "string"
                 },
                 "arguments": {
@@ -46,103 +79,52 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Arguments for the tool call."
                 }
             },
             "required": [
+                "type",
+                "id",
                 "name",
                 "arguments"
             ],
             "type": "object"
         },
-        "ToolCall": {
+        "ToolCallResponsePart": {
+            "additionalProperties": true,
+            "description": "Describes a result of tool call sent to the model.",
             "properties": {
-                "id": {
-                    "type": "string"
-                },
                 "type": {
-                    "const": "function",
+                    "const": "tool_call_response",
+                    "description": "Message type.",
                     "type": "string"
                 },
-                "function": {
+                "id": {
+                    "description": "Unique tool call identifier.",
+                    "type": "string"
+                },
+                "result": {
                     "anyOf": [
-                        {
-                            "$ref": "#/$defs/FunctionCall"
-                        },
+                        {},
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Result of the tool call."
                 }
             },
             "required": [
-                "id",
                 "type",
-                "function"
-            ],
-            "type": "object"
-        },
-        "ToolMessage": {
-            "properties": {
-                "role": {
-                    "const": "tool",
-                    "type": "string"
-                },
-                "content": {},
-                "id": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "role",
-                "content",
-                "id"
-            ],
-            "type": "object"
-        },
-        "UserMessage": {
-            "properties": {
-                "role": {
-                    "const": "user",
-                    "type": "string"
-                },
-                "content": {}
-            },
-            "required": [
-                "role",
-                "content"
+                "id",
+                "result"
             ],
             "type": "object"
         }
     },
-    "properties": {
-        "messages": {
-            "items": {
-                "discriminator": {
-                    "mapping": {
-                        "assistant": "#/$defs/AssistantMessage",
-                        "tool": "#/$defs/ToolMessage",
-                        "user": "#/$defs/UserMessage"
-                    },
-                    "propertyName": "role"
-                },
-                "oneOf": [
-                    {
-                        "$ref": "#/$defs/UserMessage"
-                    },
-                    {
-                        "$ref": "#/$defs/AssistantMessage"
-                    },
-                    {
-                        "$ref": "#/$defs/ToolMessage"
-                    }
-                ]
-            },
-            "type": "array"
-        }
+    "description": "Describes input messages sent to the model.",
+    "items": {
+        "$ref": "#/$defs/ChatMessage"
     },
-    "required": [
-        "messages"
-    ],
-    "type": "object"
+    "type": "array"
 }
