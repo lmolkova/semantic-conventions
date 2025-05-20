@@ -1,40 +1,23 @@
 groups:
-  - id: gen_ai.common.event.attributes
-    type: attribute_group
+  - id: event.gen_ai.completion.details
+    name: gen_ai.completion.details
+    type: event
     stability: development
     brief: >
-      Describes common Gen AI event attributes.
+      Describes the details of a GenAI completion request including chat history
+      and parameters.
+    note: >
+      This event is opt-in and should be used to store chat history and other completion
+      details independently from traces.
     attributes:
       - ref: gen_ai.system
       - ref: gen_ai.operation.name
       - ref: gen_ai.request.model
       - ref: gen_ai.conversation.id
-        requirement_level:
-          conditionally_required: when available
-
-
-  - id: event.gen_ai.operation.start
-    name: gen_ai.operation.start
-    type: event
-    stability: development
-    brief: >
-      The chat history provided to the model or agent as an input excluding
-      the system message/instructions.
-    extends: gen_ai.common.event.attributes
-    attributes:
       - ref: gen_ai.system.instructions
       - ref: gen_ai.system.instructions_ref
       - ref: gen_ai.input.messages
       - ref: gen_ai.input.messages_ref
-
-  - id: event.gen_ai.operation.end
-    name: gen_ai.operation.end
-    type: event
-    stability: development
-    brief: >
-      Messages returned by the model or agent in response.
-    extends: gen_ai.common.event.attributes
-    attributes:
       - ref: gen_ai.output.messages
       - ref: gen_ai.output.messages_ref
       - ref: gen_ai.output.type
@@ -43,3 +26,8 @@ groups:
       - ref: gen_ai.usage.output_tokens
       - ref: gen_ai.response.id
       - ref: error.type
+      - ref: error.message
+      - ref: server.address
+      - ref: server.port
+      # TODO: add other relevant attributes from inference span
+
