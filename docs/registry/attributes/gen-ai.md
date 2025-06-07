@@ -20,7 +20,7 @@ This document defines the attributes used to describe telemetry in the context o
 | <a id="gen-ai-conversation-id" href="#gen-ai-conversation-id">`gen_ai.conversation.id`</a> | string | The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation. | `conv_5j66UpCpwteGg4YSxUnt7lPY` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-data-source-id" href="#gen-ai-data-source-id">`gen_ai.data_source.id`</a> | string | The data source identifier. [1] | `H7STPQYOND` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-input-messages" href="#gen-ai-input-messages">`gen_ai.input.messages`</a> | string | The chat history provided to the model or agent as an input excluding the system message/instructions. [2] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="gen-ai-input-messages-ref" href="#gen-ai-input-messages-ref">`gen_ai.input.messages_ref`</a> | string | The link to the chat history recorded in a separate storage. [3] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-input-messages-ref" href="#gen-ai-input-messages-ref">`gen_ai.input.messages_ref`</a> | string | The link to the input messages recorded in a separate storage. [3] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-operation-name" href="#gen-ai-operation-name">`gen_ai.operation.name`</a> | string | The name of the operation being performed. [4] | `chat`; `generate_content`; `text_completion` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-output-messages" href="#gen-ai-output-messages">`gen_ai.output.messages`</a> | string | Messages returned by the model or agent. [5] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-output-messages-ref" href="#gen-ai-output-messages-ref">`gen_ai.output.messages_ref`</a> | string | The link to the model or agent output recorded in a separate storage. [6] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -52,12 +52,12 @@ This document defines the attributes used to describe telemetry in the context o
 
 **[1] `gen_ai.data_source.id`:** Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
 
-**[2] `gen_ai.input.messages`:** Messages MUST be provided in the order they were sent to the model or agent.
-Instrumentations MAY provide a way for users to filter chat messages.
+**[2] `gen_ai.input.messages`:** The system message/instructions are recorded separately in `gen_ai.system.instructions`.
 
-The system message/instructions are recorded separately in `gen_ai.system.instructions`.
-
-The format of the prompt is defined in the [JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
+Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
+Messages MUST be provided in the order they were sent to the model or agent.
+Instrumentations MAY provide a way for users to filter or truncate
+input messages.
 
 > [!Warning]
 > This attribute is likely to contain sensitive information.
@@ -65,11 +65,19 @@ The format of the prompt is defined in the [JSON schema](/docs/gen-ai/gen-ai-inp
 See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
 section for more details.
 
-**[3] `gen_ai.input.messages_ref`:** Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
+**[3] `gen_ai.input.messages_ref`:** This attribute records the reference to the content of
+`gen_ai.input.messages` attribute when the content is too large or
+contains sensitive information and should be stored separately from
+general telemetry data.
+
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage)
+section for more details.
 
 **[4] `gen_ai.operation.name`:** If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
 
-**[5] `gen_ai.output.messages`:** The format of the output messages is defined in the [JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+**[5] `gen_ai.output.messages`:** Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+Instrumentations MAY provide a way for users to filter or truncate
+output messages.
 
 > [!Warning]
 > This attribute is likely to contain sensitive information.
@@ -77,7 +85,13 @@ section for more details.
 See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
 section for more details.
 
-**[6] `gen_ai.output.messages_ref`:** Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
+**[6] `gen_ai.output.messages_ref`:** This attribute records the reference to the content of
+`gen_ai.output.messages` attribute when the content is too large or
+contains sensitive information and should be stored separately from
+general telemetry data.
+
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage)
+section for more details.
 
 **[7] `gen_ai.output.type`:** This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
 This attribute specifies the output modality and not the actual output format. For example, if an image is requested, the actual output could be a URL pointing to an image file.
@@ -97,7 +111,11 @@ attribute may help identify the actual system in use for `openai`.
 For custom model, a custom friendly name SHOULD be used.
 If none of these options apply, the `gen_ai.system` SHOULD be set to `_OTHER`.
 
-**[10] `gen_ai.system.instructions`:** The format of the instructions is defined in the [JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+**[10] `gen_ai.system.instructions`:** The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
+
+Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+Instrumentations MAY provide a way for users to filter or truncate
+system instructions.
 
 > [!Warning]
 > This attribute may contain sensitive information.
@@ -105,7 +123,8 @@ If none of these options apply, the `gen_ai.system` SHOULD be set to `_OTHER`.
 See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
 section for more details.
 
-**[11] `gen_ai.system.instructions_ref`:** Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
+**[11] `gen_ai.system.instructions_ref`:** This attribute records the reference to the content of `gen_ai.system.instructions` attribute when the content is too large or contains sensitive information and should be stored separately from general telemetry data.
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
 
 **[12] `gen_ai.tool.type`:** Extension: A tool executed on the agent-side to directly call external APIs, bridging the gap between the agent and real-world systems.
   Agent-side operations involve actions that are performed by the agent on the server or within the agent's controlled environment.

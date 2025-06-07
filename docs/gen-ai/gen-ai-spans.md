@@ -57,7 +57,7 @@ client or when the GenAI call happens over instrumented protocol such as HTTP.
 | [`gen_ai.request.model`](/docs/registry/attributes/gen-ai.md) | string | The name of the GenAI model a request is being made to. [7] | `gpt-4` | `Conditionally Required` If available. | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.request.seed`](/docs/registry/attributes/gen-ai.md) | int | Requests with same seed value more likely to return same result. | `100` | `Conditionally Required` if applicable and if the request includes a seed | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`server.port`](/docs/registry/attributes/server.md) | int | GenAI server port. [8] | `80`; `8080`; `443` | `Conditionally Required` If `server.address` is set. | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
-| [`gen_ai.input.messages_ref`](/docs/registry/attributes/gen-ai.md) | string | The link to the chat history recorded in a separate storage. [9] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | `Recommended` if applicable | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.input.messages_ref`](/docs/registry/attributes/gen-ai.md) | string | The link to the input messages recorded in a separate storage. [9] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | `Recommended` if applicable | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.output.messages_ref`](/docs/registry/attributes/gen-ai.md) | string | The link to the model or agent output recorded in a separate storage. [10] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | `Recommended` if applicable | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.request.frequency_penalty`](/docs/registry/attributes/gen-ai.md) | double | The frequency penalty setting for the GenAI request. | `0.1` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.request.max_tokens`](/docs/registry/attributes/gen-ai.md) | int | The maximum number of tokens the model generates for a request. | `100` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -69,12 +69,13 @@ client or when the GenAI call happens over instrumented protocol such as HTTP.
 | [`gen_ai.response.finish_reasons`](/docs/registry/attributes/gen-ai.md) | string[] | Array of reasons the model stopped generating tokens, corresponding to each generation received. | `["stop"]`; `["stop", "length"]` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.response.id`](/docs/registry/attributes/gen-ai.md) | string | The unique identifier for the completion. | `chatcmpl-123` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.response.model`](/docs/registry/attributes/gen-ai.md) | string | The name of the model that generated the response. [11] | `gpt-4-0613` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.system.instructions_ref`](/docs/registry/attributes/gen-ai.md) | string | The link to the system message or instructions recorded in a separate storage. [12] | `s3://acme.prod.support_bot.chats.2025/conv_1234/invocation_42.json` | `Recommended` if applicable | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.usage.input_tokens`](/docs/registry/attributes/gen-ai.md) | int | The number of tokens used in the GenAI input (prompt). | `100` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.usage.output_tokens`](/docs/registry/attributes/gen-ai.md) | int | The number of tokens used in the GenAI response (completion). | `180` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
-| [`server.address`](/docs/registry/attributes/server.md) | string | GenAI server address. [12] | `example.com`; `10.1.2.80`; `/tmp/my.sock` | `Recommended` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
-| [`gen_ai.input.messages`](/docs/registry/attributes/gen-ai.md) | string | The chat history provided to the model or agent as an input excluding the system message/instructions. [13] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
-| [`gen_ai.output.messages`](/docs/registry/attributes/gen-ai.md) | string | Messages returned by the model or agent. [14] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
-| [`gen_ai.system.instructions`](/docs/registry/attributes/gen-ai.md) | string | The system message or instructions provided to the GenAI model or agent. [15] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`server.address`](/docs/registry/attributes/server.md) | string | GenAI server address. [13] | `example.com`; `10.1.2.80`; `/tmp/my.sock` | `Recommended` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
+| [`gen_ai.input.messages`](/docs/registry/attributes/gen-ai.md) | string | The chat history provided to the model or agent as an input excluding the system message/instructions. [14] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.output.messages`](/docs/registry/attributes/gen-ai.md) | string | Messages returned by the model or agent. [15] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.system.instructions`](/docs/registry/attributes/gen-ai.md) | string | The system message or instructions provided to the GenAI model or agent. [16] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 **[1] `gen_ai.operation.name`:** If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
 
@@ -118,28 +119,35 @@ Additional output format details may be recorded in the future in the `gen_ai.ou
 
 **[8] `server.port`:** When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
 
-**[9] `gen_ai.input.messages_ref`:** Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
+**[9] `gen_ai.input.messages_ref`:** This attribute records the reference to the content of
+`gen_ai.input.messages` attribute when the content is too large or
+contains sensitive information and should be stored separately from
+general telemetry data.
 
-**[10] `gen_ai.output.messages_ref`:** Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage)
+section for more details.
+
+**[10] `gen_ai.output.messages_ref`:** This attribute records the reference to the content of
+`gen_ai.output.messages` attribute when the content is too large or
+contains sensitive information and should be stored separately from
+general telemetry data.
+
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage)
+section for more details.
 
 **[11] `gen_ai.response.model`:** If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
 
-**[12] `server.address`:** When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+**[12] `gen_ai.system.instructions_ref`:** This attribute records the reference to the content of `gen_ai.system.instructions` attribute when the content is too large or contains sensitive information and should be stored separately from general telemetry data.
+Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.md#uploading-content-to-external-storage) section for more details.
 
-**[13] `gen_ai.input.messages`:** Messages MUST be provided in the order they were sent to the model or agent.
-Instrumentations MAY provide a way for users to filter chat messages.
+**[13] `server.address`:** When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
 
-The system message/instructions are recorded separately in `gen_ai.system.instructions`.
+**[14] `gen_ai.input.messages`:** The system message/instructions are recorded separately in `gen_ai.system.instructions`.
 
-The format of the prompt is defined in the [JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
-
-> [!Warning]
-> This attribute is likely to contain sensitive information.
-
-See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
-section for more details.
-
-**[14] `gen_ai.output.messages`:** The format of the output messages is defined in the [JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
+Messages MUST be provided in the order they were sent to the model or agent.
+Instrumentations MAY provide a way for users to filter or truncate
+input messages.
 
 > [!Warning]
 > This attribute is likely to contain sensitive information.
@@ -147,7 +155,21 @@ section for more details.
 See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
 section for more details.
 
-**[15] `gen_ai.system.instructions`:** The format of the instructions is defined in the [JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+**[15] `gen_ai.output.messages`:** Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+Instrumentations MAY provide a way for users to filter or truncate
+output messages.
+
+> [!Warning]
+> This attribute is likely to contain sensitive information.
+
+See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+section for more details.
+
+**[16] `gen_ai.system.instructions`:** The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
+
+Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+Instrumentations MAY provide a way for users to filter or truncate
+system instructions.
 
 > [!Warning]
 > This attribute may contain sensitive information.
@@ -200,9 +222,9 @@ section for more details.
 | `az.ai.openai` | Azure OpenAI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `cohere` | Cohere | ![Development](https://img.shields.io/badge/-development-blue) |
 | `deepseek` | DeepSeek | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gemini` | Gemini [16] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gen_ai` | Any Google generative AI endpoint [17] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.vertex_ai` | Vertex AI [18] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gemini` | Gemini [17] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gen_ai` | Any Google generative AI endpoint [18] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.vertex_ai` | Vertex AI [19] | ![Development](https://img.shields.io/badge/-development-blue) |
 | `groq` | Groq | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.watsonx.ai` | IBM Watsonx AI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `mistral_ai` | Mistral AI | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -210,11 +232,11 @@ section for more details.
 | `perplexity` | Perplexity | ![Development](https://img.shields.io/badge/-development-blue) |
 | `xai` | xAI | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[16]:** This refers to the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[17]:** This refers to the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API. May use common attributes prefixed with 'gcp.gen_ai.'.
 
-**[17]:** May be used when specific backend is unknown. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[18]:** May be used when specific backend is unknown. May use common attributes prefixed with 'gcp.gen_ai.'.
 
-**[18]:** This refers to the 'aiplatform.googleapis.com' endpoint. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[19]:** This refers to the 'aiplatform.googleapis.com' endpoint. May use common attributes prefixed with 'gcp.gen_ai.'.
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
@@ -385,13 +407,13 @@ application needs and maturity:
 The content captured in `gen_ai.system.instructions`, `gen_ai.input.messages`,
 and `gen_ai.output.messages` attributes is likely to be large.
 
-It may contain media, and even in the text form, it may be longer than
-observability backend limits for telemetry envelopes or attribute values.
+It may contain media, and even in the text form, it may be lager than
+observability backends limits for telemetry envelopes or attribute values.
 
 The instructions, input and output messages attributes follow common structure
 defined in [instructions JSON schema](./gen-ai-system-instructions.json),
 [inputs JSON schema](./gen-ai-input-messages.json), and
-[outputs JSON schema](./gen-ai-output-messages.json) and are encoded as a JSON string.
+[outputs JSON schema](./gen-ai-output-messages.json).
 
 > [!NOTE]
 >
@@ -400,7 +422,8 @@ defined in [instructions JSON schema](./gen-ai-system-instructions.json),
 > for the details.
 
 Until structured attributes are supported on spans, the corresponding attribute
-value SHOULD be serialized to JSON string.
+value SHOULD be serialized to JSON string on spans (unless spans start supporting
+complex attributes) and in their structured form on events.
 
 Instrumentation MAY provide a configuration option allowing to truncate properties
 such as individual message contents, preserving JSON structure.
@@ -442,6 +465,6 @@ and export settings accordingly in the OpenTelemetry SDK pipeline.
 
 ### Streaming chunks
 
-TBD
+TODO
 
 [DocumentStatus]: https://opentelemetry.io/docs/specs/otel/document-status
