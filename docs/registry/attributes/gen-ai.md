@@ -55,8 +55,8 @@ This document defines the attributes used to describe telemetry in the context o
 **[2] `gen_ai.input.messages`:** The system message/instructions are recorded separately in `gen_ai.system.instructions`.
 
 Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
-When the attribute is recorded on events, it MUST be stored in structured
-form. When recorded on spans, it SHOULD be stored as a JSON string,
+When the attribute is recorded on events, it MUST be recorded in structured
+form. When recorded on spans, it SHOULD be recorded as a JSON string,
 unless a structured format is supported.
 
 Messages MUST be provided in the order they were sent to the model or agent.
@@ -80,8 +80,8 @@ section for more details.
 **[4] `gen_ai.operation.name`:** If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
 
 **[5] `gen_ai.output.messages`:** Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
-When the attribute is recorded on events, it MUST be stored in structured
-form. When recorded on spans, it SHOULD be stored as a JSON string,
+When the attribute is recorded on events, it MUST be recorded in structured
+form. When recorded on spans, it SHOULD be recorded as a JSON string,
 unless a structured format is supported.
 
 Instrumentations MAY provide a way for users to filter or truncate
@@ -122,8 +122,8 @@ If none of these options apply, the `gen_ai.system` SHOULD be set to `_OTHER`.
 **[10] `gen_ai.system.instructions`:** The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
 
 Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
-When the attribute is recorded on events, it MUST be stored in structured
-form. When recorded on spans, it SHOULD be stored as a JSON string,
+When the attribute is recorded on events, it MUST be recorded in structured
+form. When recorded on spans, it SHOULD be recorded as a JSON string,
 unless a structured format is supported.
 
 Instrumentations MAY provide a way for users to filter or truncate
