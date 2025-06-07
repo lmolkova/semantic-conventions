@@ -154,7 +154,6 @@ unless a structured format is supported.
 Instrumentations MAY provide a way for users to filter or truncate
 output messages.
 
-
 > [!Warning]
 > This attribute is likely to contain sensitive information.
 

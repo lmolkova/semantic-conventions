@@ -11,7 +11,11 @@ groups:
     name: gen_ai.system.message
     type: event
     stability: development
-    deprecated: "Deprecated in favor of `gen_ai.system.instructions` attribute."
+    deprecated:
+      reason: uncategorized
+      note: >
+        Chat history is reported on `gen_ai.system.instructions` attribute on
+        spans or `gen_ai.client.inference.operation.details` event.
     brief: >
       This event describes the system instructions passed to the GenAI model.
     extends: gen_ai.common.event.attributes
@@ -46,8 +50,8 @@ groups:
     deprecated:
       reason: uncategorized
       note: >
-        Chat history is reported on `gen_ai.input.messages` attribute on span or
-        `gen_ai.client.inference.operation.details` event.
+        Chat history is reported on `gen_ai.input.messages` attribute on spans
+        or `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.user.message
@@ -80,8 +84,8 @@ groups:
     deprecated:
       reason: uncategorized
       note: >
-        Chat history is reported on `gen_ai.input.messages` attribute on span or
-        `gen_ai.client.inference.operation.details` event.
+        Chat history is reported on `gen_ai.input.messages` attribute on spans
+        or `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.assistant.message
@@ -169,8 +173,8 @@ groups:
     deprecated:
       reason: uncategorized
       note: >
-        Chat history is reported on `gen_ai.input.messages` attribute on span or
-        `gen_ai.client.inference.operation.details` event.
+        Chat history is reported on `gen_ai.input.messages` attribute on spans
+        or `gen_ai.client.inference.operation.details` event.
     body:
       id: gen_ai.tool.message
       requirement_level: opt_in
@@ -209,8 +213,8 @@ groups:
     deprecated:
       reason: uncategorized
       note: >
-        Chat history is reported on `gen_ai.output.messages` attribute on span or
-        `gen_ai.client.inference.operation.details` event.
+        Chat history is reported on `gen_ai.output.messages` attribute on spans
+        or `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.choice
