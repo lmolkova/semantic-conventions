@@ -28,7 +28,7 @@
         },
         "message": {
             "$ref": "#/$defs/TextPart",
-            "description": "System instruction message."
+            "description": "System instructions."
         }
     },
     "required": [
