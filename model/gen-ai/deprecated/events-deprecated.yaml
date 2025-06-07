@@ -43,7 +43,11 @@ groups:
     stability: development
     brief: >
       This event describes the user message passed to the GenAI model.
-    deprecated: "Deprecated in favor of `gen_ai.input.messages` attribute."
+    deprecated:
+      reason: uncategorized
+      note: >
+        Chat history is reported on `gen_ai.input.messages` attribute on span or
+        `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.user.message
@@ -73,7 +77,11 @@ groups:
     stability: development
     brief: >
       This event describes the assistant message passed to GenAI system.
-    deprecated: "Deprecated in favor of `gen_ai.input.messages` attribute."
+    deprecated:
+      reason: uncategorized
+      note: >
+        Chat history is reported on `gen_ai.input.messages` attribute on span or
+        `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.assistant.message
@@ -158,7 +166,11 @@ groups:
     brief: >
       This event describes the response from a tool or function call passed to the GenAI model.
     extends: gen_ai.common.event.attributes
-    deprecated: "Deprecated in favor of `gen_ai.input.messages` attribute."
+    deprecated:
+      reason: uncategorized
+      note: >
+        Chat history is reported on `gen_ai.input.messages` attribute on span or
+        `gen_ai.client.inference.operation.details` event.
     body:
       id: gen_ai.tool.message
       requirement_level: opt_in
@@ -194,7 +206,11 @@ groups:
     stability: development
     brief: >
       This event describes the Gen AI response message.
-    deprecated: "Deprecated in favor of `gen_ai.output.messages` attribute."
+    deprecated:
+      reason: uncategorized
+      note: >
+        Chat history is reported on `gen_ai.output.messages` attribute on span or
+        `gen_ai.client.inference.operation.details` event.
     extends: gen_ai.common.event.attributes
     body:
       id: gen_ai.choice

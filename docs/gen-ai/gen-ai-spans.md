@@ -437,6 +437,7 @@ The hook SHOULD operate independently of the opt-in flags that control capturing
 
 If such a hook is supported and configured, instrumentations SHOULD invoke it regardless
 of the span sampling decision with:
+
 - the instructions, [inputs](./gen-ai-input-messages.json), and
   [outputs](./gen-ai-output-messages.json) object using formats defined in this convention
   and before they are serialized to JSON string;
