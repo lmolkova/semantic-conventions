@@ -26,7 +26,7 @@ The event name MUST be `gen_ai.client.inference.operation.details`.
 
 Describes the details of a GenAI completion request including chat history and parameters.
 
-This event is opt-in and should be used to store chat history and other completion details independently from traces.
+This event is opt-in and could be used to store input and output details independently from traces.
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
@@ -53,9 +53,9 @@ This event is opt-in and should be used to store chat history and other completi
 | [`gen_ai.usage.input_tokens`](/docs/registry/attributes/gen-ai.md) | int | The number of tokens used in the GenAI input (prompt). | `100` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`gen_ai.usage.output_tokens`](/docs/registry/attributes/gen-ai.md) | int | The number of tokens used in the GenAI response (completion). | `180` | `Recommended` | ![Development](https://img.shields.io/badge/-development-blue) |
 | [`server.address`](/docs/registry/attributes/server.md) | string | GenAI server address. [12] | `example.com`; `10.1.2.80`; `/tmp/my.sock` | `Recommended` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
-| [`gen_ai.input.messages`](/docs/registry/attributes/gen-ai.md) | string | The chat history provided to the model or agent as an input excluding the system message/instructions. [13] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
-| [`gen_ai.output.messages`](/docs/registry/attributes/gen-ai.md) | string | Messages returned by the model or agent. [14] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
-| [`gen_ai.system.instructions`](/docs/registry/attributes/gen-ai.md) | string | The system message or instructions provided to the GenAI model or agent. [15] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.input.messages`](/docs/registry/attributes/gen-ai.md) | any | The chat history provided to the model or agent as an input excluding the system message/instructions. [13] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.output.messages`](/docs/registry/attributes/gen-ai.md) | any | Messages returned by the model or agent. [14] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
+| [`gen_ai.system.instructions`](/docs/registry/attributes/gen-ai.md) | any | The system message or instructions provided to the GenAI model or agent. [15] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | `Opt-In` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 **[1] `gen_ai.operation.name`:** If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
 
@@ -112,7 +112,11 @@ Refer to the [Uploading content to external storage](/docs/gen-ai/gen-ai-spans.m
 
 **[13] `gen_ai.input.messages`:** The system message/instructions are recorded separately in `gen_ai.system.instructions`.
 
-Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
+Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Messages MUST be provided in the order they were sent to the model or agent.
 Instrumentations MAY provide a way for users to filter or truncate
 input messages.
@@ -124,8 +128,13 @@ See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-con
 section for more details.
 
 **[14] `gen_ai.output.messages`:** Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Instrumentations MAY provide a way for users to filter or truncate
 output messages.
+
 
 > [!Warning]
 > This attribute is likely to contain sensitive information.
@@ -135,7 +144,11 @@ section for more details.
 
 **[15] `gen_ai.system.instructions`:** The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
 
-Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Instrumentations MAY provide a way for users to filter or truncate
 system instructions.
 

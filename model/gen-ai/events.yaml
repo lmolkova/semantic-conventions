@@ -7,6 +7,6 @@ groups:
       Describes the details of a GenAI completion request including chat history
       and parameters.
     note: >
-      This event is opt-in and should be used to store chat history and other completion
-      details independently from traces.
+      This event is opt-in and could be used to store input and output details
+      independently from traces.
     extends: attributes.gen_ai.inference.client

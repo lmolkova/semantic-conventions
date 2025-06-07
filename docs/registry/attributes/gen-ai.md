@@ -19,10 +19,10 @@ This document defines the attributes used to describe telemetry in the context o
 | <a id="gen-ai-agent-name" href="#gen-ai-agent-name">`gen_ai.agent.name`</a> | string | Human-readable name of the GenAI agent provided by the application. | `Math Tutor`; `Fiction Writer` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-conversation-id" href="#gen-ai-conversation-id">`gen_ai.conversation.id`</a> | string | The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation. | `conv_5j66UpCpwteGg4YSxUnt7lPY` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-data-source-id" href="#gen-ai-data-source-id">`gen_ai.data_source.id`</a> | string | The data source identifier. [1] | `H7STPQYOND` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="gen-ai-input-messages" href="#gen-ai-input-messages">`gen_ai.input.messages`</a> | string | The chat history provided to the model or agent as an input excluding the system message/instructions. [2] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-input-messages" href="#gen-ai-input-messages">`gen_ai.input.messages`</a> | any | The chat history provided to the model or agent as an input excluding the system message/instructions. [2] | `[{"role": "user",      "parts": [{"type": "text", "content": "Weather in Paris?"}]}, {"role": "assistant", "parts": [{"type": "tool_call", "id": "call_VSPygqKTWdrhaFErNvMV18Yl", "name":"get_weather", "arguments":{"location":"Paris"}}]}, {"role": "tool",      "parts": [{"type": "tool_call_response", "id":" call_VSPygqKTWdrhaFErNvMV18Yl", "result":"rainy, 57°F"}]}]` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-input-messages-ref" href="#gen-ai-input-messages-ref">`gen_ai.input.messages_ref`</a> | string | The link to the input messages recorded in a separate storage. [3] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-operation-name" href="#gen-ai-operation-name">`gen_ai.operation.name`</a> | string | The name of the operation being performed. [4] | `chat`; `generate_content`; `text_completion` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="gen-ai-output-messages" href="#gen-ai-output-messages">`gen_ai.output.messages`</a> | string | Messages returned by the model or agent. [5] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-output-messages" href="#gen-ai-output-messages">`gen_ai.output.messages`</a> | any | Messages returned by the model or agent. [5] | `[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-output-messages-ref" href="#gen-ai-output-messages-ref">`gen_ai.output.messages_ref`</a> | string | The link to the model or agent output recorded in a separate storage. [6] | `s3://acme.prod.support_bot.chats.2025/conv_1234/run_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-output-type" href="#gen-ai-output-type">`gen_ai.output.type`</a> | string | Represents the content type requested by the client. [7] | `text`; `json`; `image` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-request-choice-count" href="#gen-ai-request-choice-count">`gen_ai.request.choice.count`</a> | int | The target number of candidate completions to return. | `3` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -40,7 +40,7 @@ This document defines the attributes used to describe telemetry in the context o
 | <a id="gen-ai-response-id" href="#gen-ai-response-id">`gen_ai.response.id`</a> | string | The unique identifier for the completion. | `chatcmpl-123` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-response-model" href="#gen-ai-response-model">`gen_ai.response.model`</a> | string | The name of the model that generated the response. | `gpt-4-0613` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-system" href="#gen-ai-system">`gen_ai.system`</a> | string | The Generative AI product as identified by the client or server instrumentation. [9] | `openai` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="gen-ai-system-instructions" href="#gen-ai-system-instructions">`gen_ai.system.instructions`</a> | string | The system message or instructions provided to the GenAI model or agent. [10] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-system-instructions" href="#gen-ai-system-instructions">`gen_ai.system.instructions`</a> | any | The system message or instructions provided to the GenAI model or agent. [10] | `{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-system-instructions-ref" href="#gen-ai-system-instructions-ref">`gen_ai.system.instructions_ref`</a> | string | The link to the system message or instructions recorded in a separate storage. [11] | `s3://acme.prod.support_bot.chats.2025/conv_1234/invocation_42.json` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-token-type" href="#gen-ai-token-type">`gen_ai.token.type`</a> | string | The type of token being counted. | `input`; `output` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-tool-call-id" href="#gen-ai-tool-call-id">`gen_ai.tool.call.id`</a> | string | The tool call identifier. | `call_mszuSIzqtI65i1wAUOE8w5H4` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -54,7 +54,11 @@ This document defines the attributes used to describe telemetry in the context o
 
 **[2] `gen_ai.input.messages`:** The system message/instructions are recorded separately in `gen_ai.system.instructions`.
 
-Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json)
+Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Messages MUST be provided in the order they were sent to the model or agent.
 Instrumentations MAY provide a way for users to filter or truncate
 input messages.
@@ -76,8 +80,13 @@ section for more details.
 **[4] `gen_ai.operation.name`:** If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
 
 **[5] `gen_ai.output.messages`:** Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Instrumentations MAY provide a way for users to filter or truncate
 output messages.
+
 
 > [!Warning]
 > This attribute is likely to contain sensitive information.
@@ -113,7 +122,11 @@ If none of these options apply, the `gen_ai.system` SHOULD be set to `_OTHER`.
 
 **[10] `gen_ai.system.instructions`:** The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
 
-Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json)
+Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+When the attribute is recorded on events, it MUST be stored in structured
+form. When recorded on spans, it SHOULD be stored as a JSON string,
+unless a structured format is supported.
+
 Instrumentations MAY provide a way for users to filter or truncate
 system instructions.
 
