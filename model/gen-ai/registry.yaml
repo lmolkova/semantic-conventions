@@ -341,14 +341,21 @@ groups:
       - id: gen_ai.system.instructions
         stability: development
         type: any
-        brief: The system message or instructions provided to the GenAI model or agent.
+        brief: The system message or instructions provided to the GenAI model or agent
+          separately from the chat history.
         note: |
-          The user prompt and chat history is recorded separately in `gen_ai.input.messages`.
+          This attribute SHOULD be used when the corresponding provider or API
+          allows to provide system instructions or messages separately from the
+          chat history.
 
-          Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
-          When the attribute is recorded on events, it MUST be recorded in structured
-          form. When recorded on spans, it SHOULD be recorded as a JSON string,
-          unless a structured format is supported.
+          Instructions that are part of the chat history SHOULD be recorded in
+          `gen_ai.input.messages` attribute instead.
+
+          The data format of this attribute is system-specific. Semantic conventions
+          for specific GenAI systems MAY define the format of this attribute.
+
+          When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Instrumentations MAY provide a way for users to filter or truncate
           system instructions.
@@ -358,7 +365,9 @@ groups:
 
           See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
           section for more details.
-        examples: ['{"role": "system", "message": {"type": "text", "content": "You are a helpful assistant"}}']
+        examples:
+          - "You are an Agent that greet users, always use greetings tool to respond"
+          - '["You are a language translator.", "Your mission is to translate text in English to French."]'
       - id: gen_ai.system.instructions_ref
         stability: development
         type: string
@@ -377,15 +386,12 @@ groups:
         stability: development
         type: any
         brief: >
-          The chat history provided to the model or agent as an input excluding
-          the system message/instructions.
+          The chat history provided to the model or agent as an input.
         note: |
-          The system message/instructions are recorded separately in `gen_ai.system.instructions`.
-
           Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
           When the attribute is recorded on events, it MUST be recorded in structured
-          form. When recorded on spans, it SHOULD be recorded as a JSON string,
-          unless a structured format is supported.
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Messages MUST be provided in the order they were sent to the model or agent.
           Instrumentations MAY provide a way for users to filter or truncate
@@ -420,8 +426,8 @@ groups:
         note: |
           Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
           When the attribute is recorded on events, it MUST be recorded in structured
-          form. When recorded on spans, it SHOULD be recorded as a JSON string,
-          unless a structured format is supported.
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Instrumentations MAY provide a way for users to filter or truncate
           output messages.
