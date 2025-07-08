@@ -402,9 +402,8 @@ and `gen_ai.output.messages` attributes is likely to be large.
 It may contain media, and even in the text form, it may be lager than
 observability backends limits for telemetry envelopes or attribute values.
 
-The instructions, input and output messages attributes follow common structure
-defined in [instructions JSON schema](./gen-ai-system-instructions.json),
-[inputs JSON schema](./gen-ai-input-messages.json), and
+The input and output messages attributes follow common structure
+defined in [inputs JSON schema](./gen-ai-input-messages.json) and
 [outputs JSON schema](./gen-ai-output-messages.json).
 
 > [!NOTE]
