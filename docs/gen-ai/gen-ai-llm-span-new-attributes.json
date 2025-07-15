@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://opentelemetry.io/schemas/gen-ai-llm-versioning-attributes.json",
+  "title": "GenAI LLM Versioning Attributes",
+  "description": "Schema for new versioning attributes in GenAI LLM spans",
+  "type": "object",
+  "properties": {
+    "gen_ai.model.version": {
+      "type": "string",
+      "description": "The version of the model being used",
+      "examples": [
+        "v1.0",
+        "2024-02-01", 
+        "gpt-4-0613",
+        "claude-3-opus-20240229",
+        "llama-2-70b-chat"
+      ],
+      "pattern": "^[\\w\\d\\-\\.]+$"
+    },
+    "gen_ai.system.prompt.version": {
+      "type": "string", 
+      "description": "The version of the system prompt template or configuration",
+      "examples": [
+        "v1.0",
+        "v2.1",
+        "2024-07-15",
+        "customer-service-v2",
+        "experiment-A",
+        "prod-2024-Q3"
+      ],
+      "pattern": "^[\\w\\d\\-\\.]+$"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "gen_ai.model.version": "gpt-4-0613",
+      "gen_ai.system.prompt.version": "v1.0"
+    },
+    {
+      "gen_ai.model.version": "claude-3-opus-20240229",
+      "gen_ai.system.prompt.version": "2024-07-15"
+    },
+    {
+      "gen_ai.model.version": "gpt-3.5-turbo-0125",
+      "gen_ai.system.prompt.version": "customer-support-v3.2"
+    },
+    {
+      "gen_ai.model.version": "2024-02-01",
+      "gen_ai.system.prompt.version": "experiment-B"
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://opentelemetry.io/schemas/gen-ai-execute-tool-span.json",
+    "title": "GenAI Execute Tool Span Schema",
+    "description": "Schema for GenAI agent execute tool span attributes",
+    "type": "object",
+    "required": [
+        "gen_ai.tool.type",
+        "gen_ai.tool.input.tool_call.name",
+        "gen_ai.tool.input.tool_call.arguments",
+        "gen_ai.tool.message.content",
+        "gen_ai.tool.message.content.type"
+    ],
+    "properties": {
+        "gen_ai.tool.version": {
+            "type": "string",
+            "description": "Tool schema or interface version",
+            "examples": ["v1.0", "1.0.0", "2.1.3"]
+        },
+        "gen_ai.role": {
+            "type": "string",
+            "description": "Typically 'tool' to denote the actor in the conversation",
+            "const": "tool"
+        },
+        "gen_ai.tool.type": {
+            "$ref": "#/$defs/ToolType"
+        },
+        "gen_ai.tool.input.tool_call.name": {
+            "type": "string",
+            "description": "Function/tool name being invoked",
+            "examples": ["get_weather", "search_files", "execute_query"]
+        },
+        "gen_ai.tool.input.tool_call.arguments": {
+            "$ref": "#/$defs/ToolArguments"
+        },
+        "gen_ai.tool.message.content": {
+            "description": "The tool's response/output",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "description": "Text, HTML, base64-encoded image, or stringified JSON/table/CSV"
+                },
+                {
+                    "type": "object",
+                    "description": "Structured JSON object"
+                },
+                {
+                    "type": "array",
+                    "description": "Array of objects for table data"
+                }
+            ]
+        },
+        "gen_ai.tool.message.content.type": {
+            "$ref": "#/$defs/ContentType"
+        }
+    },
+    "additionalProperties": true,
+    "$defs": {
+        "ToolType": {
+            "type": "string",
+            "description": "Type of tool invoked",
+            "enum": [
+                "function",
+                "search",
+                "api",
+                "file_lookup",
+                "code_execution",
+                "custom"
+            ]
+        },
+        "ContentType": {
+            "type": "string",
+            "description": "Content type of the tool's output",
+            "enum": [
+                "text",
+                "json",
+                "table",
+                "html",
+                "image",
+                "image_url",
+                "chart"
+            ]
+        },
+        "ToolArguments": {
+            "type": "object",
+            "description": "Input schema and runtime values used",
+            "required": ["parameters_schema", "runtime_arguments"],
+            "properties": {
+                "parameters_schema": {
+                    "type": "array",
+                    "description": "List of all expected parameters for the tool",
+                    "items": {
+                        "$ref": "#/$defs/ParameterSchema"
+                    }
+                },
+                "runtime_arguments": {
+                    "type": "object",
+                    "description": "Actual input values passed during tool execution",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "ParameterSchema": {
+            "type": "object",
+            "description": "Schema definition for a single parameter",
+            "required": ["name", "type"],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Parameter name"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Parameter data type",
+                    "enum": ["string", "number", "integer", "boolean", "object", "array"]
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Human-readable description of the parameter"
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "Whether this parameter is required",
+                    "default": false
+                },
+                "default": {
+                    "description": "Default value if parameter is not provided"
+                },
+                "enum": {
+                    "type": "array",
+                    "description": "List of allowed values for the parameter",
+                    "items": {}
+                },
+                "pattern": {
+                    "type": "string",
+                    "description": "Regular expression pattern for string validation"
+                },
+                "minimum": {
+                    "type": "number",
+                    "description": "Minimum value for numeric parameters"
+                },
+                "maximum": {
+                    "type": "number",
+                    "description": "Maximum value for numeric parameters"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "examples": [
+        {
+            "gen_ai.tool.version": "v1.0",
+            "gen_ai.role": "tool",
+            "gen_ai.tool.type": "function",
+            "gen_ai.tool.input.tool_call.name": "get_weather",
+            "gen_ai.tool.input.tool_call.arguments": {
+                "parameters_schema": [
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "description": "City name for weather lookup",
+                        "required": true
+                    }
+                ],
+                "runtime_arguments": {
+                    "location": "Bali"
+                }
+            },
+            "gen_ai.tool.message.content": "The weather in Bali is sunny and 25°C.",
+            "gen_ai.tool.message.content.type": "text"
+        },
+        {
+            "gen_ai.tool.version": "2.0.0",
+            "gen_ai.role": "tool",
+            "gen_ai.tool.type": "search",
+            "gen_ai.tool.input.tool_call.name": "search_files",
+            "gen_ai.tool.input.tool_call.arguments": {
+                "parameters_schema": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "description": "Search query",
+                        "required": true
+                    },
+                    {
+                        "name": "max_results",
+                        "type": "integer",
+                        "description": "Maximum number of results",
+                        "required": false,
+                        "default": 10,
+                        "minimum": 1,
+                        "maximum": 100
+                    }
+                ],
+                "runtime_arguments": {
+                    "query": "Space Needle",
+                    "max_results": 5
+                }
+            },
+            "gen_ai.tool.message.content": [
+                {
+                    "name": "Space_Needle_Document.pdf",
+                    "size": 1048576,
+                    "type": "pdf"
+                },
+                {
+                    "name": "Space_Needle_Image.jpg",
+                    "size": 204800,
+                    "type": "image"
+                }
+            ],
+            "gen_ai.tool.message.content.type": "table"
+        },
+        {
+            "gen_ai.tool.version": "1.5.0",
+            "gen_ai.role": "tool",
+            "gen_ai.tool.type": "api",
+            "gen_ai.tool.input.tool_call.name": "get_stock_price",
+            "gen_ai.tool.input.tool_call.arguments": {
+                "parameters_schema": [
+                    {
+                        "name": "symbol",
+                        "type": "string",
+                        "description": "Stock symbol",
+                        "required": true,
+                        "pattern": "^[A-Z]{1,5}$"
+                    }
+                ],
+                "runtime_arguments": {
+                    "symbol": "AAPL"
+                }
+            },
+            "gen_ai.tool.message.content": {
+                "symbol": "AAPL",
+                "price": 185.50,
+                "currency": "USD",
+                "timestamp": "2025-01-15T10:30:00Z"
+            },
+            "gen_ai.tool.message.content.type": "json"
+        }
+    ]
+}
