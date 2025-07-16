@@ -36,10 +36,14 @@ This document defines the attributes used to describe telemetry in the context o
 | <a id="gen-ai-response-id" href="#gen-ai-response-id">`gen_ai.response.id`</a> | string | The unique identifier for the completion. | `chatcmpl-123` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-response-model" href="#gen-ai-response-model">`gen_ai.response.model`</a> | string | The name of the model that generated the response. | `gpt-4-0613` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-token-type" href="#gen-ai-token-type">`gen_ai.token.type`</a> | string | The type of token being counted. | `input`; `output` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-tool-call-arguments" href="#gen-ai-tool-call-arguments">`gen_ai.tool.call.arguments`</a> | any | Parameters passed to the tool call. [6] | `{"location": "San Francisco?", "date": "2025-10-01"}` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-tool-call-id" href="#gen-ai-tool-call-id">`gen_ai.tool.call.id`</a> | string | The tool call identifier. | `call_mszuSIzqtI65i1wAUOE8w5H4` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-tool-call-result" href="#gen-ai-tool-call-result">`gen_ai.tool.call.result`</a> | any | The result returned by the tool call (if any and if execution was successful). [7] | `{"temperature_range": {"high": 75, "low": 60}, "conditions": "sunny"}` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-tool-definitions" href="#gen-ai-tool-definitions">`gen_ai.tool.definitions`</a> | any | The list of tool definitions available to the GenAI agent or model. [8] | `[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-tool-description" href="#gen-ai-tool-description">`gen_ai.tool.description`</a> | string | The tool description. | `Multiply two numbers` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-tool-name" href="#gen-ai-tool-name">`gen_ai.tool.name`</a> | string | Name of the tool utilized by the agent. | `Flights` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="gen-ai-tool-type" href="#gen-ai-tool-type">`gen_ai.tool.type`</a> | string | Type of the tool utilized by the agent [6] | `function`; `extension`; `datastore` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-tool-type" href="#gen-ai-tool-type">`gen_ai.tool.type`</a> | string | Type of the tool utilized by the agent [9] | `function`; `extension`; `datastore` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="gen-ai-tool-version" href="#gen-ai-tool-version">`gen_ai.tool.version`</a> | string | Version of the tool utilized by the agent. [10] | `0.1.2` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-usage-input-tokens" href="#gen-ai-usage-input-tokens">`gen_ai.usage.input_tokens`</a> | int | The number of tokens used in the GenAI input (prompt). | `100` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="gen-ai-usage-output-tokens" href="#gen-ai-usage-output-tokens">`gen_ai.usage.output_tokens`</a> | int | The number of tokens used in the GenAI response (completion). | `180` | ![Development](https://img.shields.io/badge/-development-blue) |
 
@@ -72,11 +76,27 @@ applicable `aws.bedrock.*` attributes and are not expected to include
 
 **[5] `gen_ai.request.encoding_formats`:** In some GenAI systems the encoding formats are called embedding types. Also, some GenAI systems only accept a single format per request.
 
-**[6] `gen_ai.tool.type`:** Extension: A tool executed on the agent-side to directly call external APIs, bridging the gap between the agent and real-world systems.
+**[6] `gen_ai.tool.call.arguments`:** TODO: we need to decide what to do with well-known function call params (eg. filesearch) - do we want to define a format and normalize across models/frameworks or leave them as is and record a complex object.
+> [!WARNING] > This attribute may contain sensitive information.
+It's expected to be an object - in case a serialized string is available to the instrumentation, the instrumentation SHOULD do the best effort to deserialize it to an object.
+
+**[7] `gen_ai.tool.call.result`:** TODO: we need to decide what to do with well-known function call results
+(eg. filesearch) - do we want to define a format and normalize across
+models/frameworks or leave it as is and record a complex object.
+
+> [!WARNING]
+> This attribute may contain sensitive information.
+
+**[8] `gen_ai.tool.definitions`:** The value of this attribute matches provider-specific tool definition format. It's expected to be an object - in case a serialized string is available to the instrumentation, the instrumentation SHOULD do the best effort to deserialize it to an object.
+Since this attribute could be large, it's NOT RECOMMENDED to populate it by default. Instrumentations MAY provide a way to enable populating this attribute.
+
+**[9] `gen_ai.tool.type`:** Extension: A tool executed on the agent-side to directly call external APIs, bridging the gap between the agent and real-world systems.
   Agent-side operations involve actions that are performed by the agent on the server or within the agent's controlled environment.
 Function: A tool executed on the client-side, where the agent generates parameters for a predefined function, and the client executes the logic.
   Client-side operations are actions taken on the user's end or within the client application.
 Datastore: A tool used by the agent to access and query structured or unstructured external data for retrieval-augmented tasks or knowledge updates.
+
+**[10] `gen_ai.tool.version`:** TODO: where are we going to get this from? None of the models have it
 
 ---
 
@@ -115,9 +135,9 @@ Datastore: A tool used by the agent to access and query structured or unstructur
 | `azure.ai.openai` | [Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/) | ![Development](https://img.shields.io/badge/-development-blue) |
 | `cohere` | [Cohere](https://cohere.com/) | ![Development](https://img.shields.io/badge/-development-blue) |
 | `deepseek` | [DeepSeek](https://www.deepseek.com/) | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gemini` | [Gemini](https://cloud.google.com/products/gemini) [7] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gen_ai` | Any Google generative AI endpoint [8] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.vertex_ai` | [Vertex AI](https://cloud.google.com/vertex-ai) [9] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gemini` | [Gemini](https://cloud.google.com/products/gemini) [11] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gen_ai` | Any Google generative AI endpoint [12] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.vertex_ai` | [Vertex AI](https://cloud.google.com/vertex-ai) [13] | ![Development](https://img.shields.io/badge/-development-blue) |
 | `groq` | [Groq](https://groq.com/) | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.watsonx.ai` | [IBM Watsonx AI](https://www.ibm.com/products/watsonx-ai) | ![Development](https://img.shields.io/badge/-development-blue) |
 | `mistral_ai` | [Mistral AI](https://mistral.ai/) | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -125,11 +145,11 @@ Datastore: A tool used by the agent to access and query structured or unstructur
 | `perplexity` | [Perplexity](https://www.perplexity.ai/) | ![Development](https://img.shields.io/badge/-development-blue) |
 | `x_ai` | [xAI](https://x.ai/) | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[7]:** Used when accessing the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API.
+**[11]:** Used when accessing the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API.
 
-**[8]:** May be used when specific backend is unknown.
+**[12]:** May be used when specific backend is unknown.
 
-**[9]:** Used when accessing the 'aiplatform.googleapis.com' endpoint.
+**[13]:** Used when accessing the 'aiplatform.googleapis.com' endpoint.
 
 ---
 
@@ -166,20 +186,20 @@ Describes deprecated `gen_ai` attributes.
 | `azure.ai.openai` | Azure OpenAI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `cohere` | Cohere | ![Development](https://img.shields.io/badge/-development-blue) |
 | `deepseek` | DeepSeek | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gemini` | Gemini [10] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.gen_ai` | Any Google generative AI endpoint [11] | ![Development](https://img.shields.io/badge/-development-blue) |
-| `gcp.vertex_ai` | Vertex AI [12] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gemini` | Gemini [14] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.gen_ai` | Any Google generative AI endpoint [15] | ![Development](https://img.shields.io/badge/-development-blue) |
+| `gcp.vertex_ai` | Vertex AI [16] | ![Development](https://img.shields.io/badge/-development-blue) |
 | `groq` | Groq | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.watsonx.ai` | IBM Watsonx AI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `mistral_ai` | Mistral AI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `openai` | OpenAI | ![Development](https://img.shields.io/badge/-development-blue) |
 | `perplexity` | Perplexity | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[10]:** This refers to the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[14]:** This refers to the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API. May use common attributes prefixed with 'gcp.gen_ai.'.
 
-**[11]:** May be used when specific backend is unknown. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[15]:** May be used when specific backend is unknown. May use common attributes prefixed with 'gcp.gen_ai.'.
 
-**[12]:** This refers to the 'aiplatform.googleapis.com' endpoint. May use common attributes prefixed with 'gcp.gen_ai.'.
+**[16]:** This refers to the 'aiplatform.googleapis.com' endpoint. May use common attributes prefixed with 'gcp.gen_ai.'.
 
 ## Deprecated OpenAI GenAI Attributes
 

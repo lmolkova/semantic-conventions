@@ -88,6 +88,9 @@ groups:
           Application developers that manage conversation history MAY add conversation id to GenAI and other
           spans or logs using custom span or log record processors or hooks provided by instrumentation
           libraries.
+      - ref: gen_ai.tool.definitions
+        requirement_level:
+          conditionally_required: opt_in
 
   - id: span.gen_ai.inference.client
     type: span
@@ -231,6 +234,9 @@ groups:
       - ref: gen_ai.agent.description
         requirement_level:
           conditionally_required: If provided by the application.
+      - ref: gen_ai.tool.definitions
+        requirement_level:
+          conditionally_required: opt_in
 
   - id: span.gen_ai.invoke_agent.client
     type: span
@@ -278,12 +284,23 @@ groups:
     attributes:
       - ref: gen_ai.tool.name
         requirement_level: recommended
-      - ref: gen_ai.tool.call.id
-        requirement_level:
-          recommended: if available
       - ref: gen_ai.tool.description
         requirement_level:
           recommended: if available
+
+      - ref: gen_ai.tool.version
+        requirement_level:
+          recommended: >
+            if available. TODO: is it ever available?
+
+      - ref: gen_ai.tool.call.id
+        requirement_level:
+          recommended: if available
+      - ref: gen_ai.tool.type
+      - ref: gen_ai.tool.call.arguments
+      - ref: gen_ai.tool.call.result
+        requirement_level:
+          conditionally_required: opt_in
       - ref: error.type
         requirement_level:
           conditionally_required: "if the operation ended in an error"
