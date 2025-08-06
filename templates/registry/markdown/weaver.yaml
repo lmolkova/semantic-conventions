@@ -1,12 +1,18 @@
 templates:
   - pattern: attributes_readme.md.j2
-    filter: '.groups | map(select(.type == "attribute_group")) | map(select(.id | startswith("registry"))) | group_by(.id | split(".") | .[1]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+    filter: semconv_grouped_attributes
     application_mode: single
     file_name: attributes/README.md
   - pattern: attribute_namespace.md.j2
-    filter: '.groups | map(select(.type == "attribute_group")) | map(select(.id | startswith("registry"))) | group_by(.id | split(".") | .[1]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+    filter: >
+      semconv_grouped_attributes
+        | map({
+            root_namespace: .root_namespace,
+            non_deprecated_attributes: (.attributes | map(select(has("deprecated") | not))),
+            deprecated_attributes: (.attributes | map(select(has("deprecated"))))
+          })
     application_mode: each
-    file_name: attributes/{{ ctx.id | lower | kebab_case }}.md
+    file_name: attributes/{{ ctx.root_namespace | kebab_case }}.md
   - pattern: registry_readme.md.j2
     filter: '.'
     application_mode: single
@@ -19,6 +25,59 @@ templates:
     filter: '.groups | map(select(.type == "entity")) | group_by(.name | split(".") | .[0]) | map({id: .[0].id | split(".") | .[1], groups: .})'
     application_mode: each
     file_name: 'entities/{{ ctx.id | kebab_case }}.md'
+text_maps:
+  display_name:
+    app: Application
+    aws: AWS
+    az: Azure
+    aspnetcore: ASP.NET Core
+    k8s: Kubernetes
+    cicd: CI/CD
+    cloudevents: CloudEvents
+    cloudfoundry: CloudFoundry
+    clr: CLR
+    cpu: CPU
+    cpython: CPython
+    csi: CSI
+    db: Database
+    dns: DNS
+    dotnet: .NET
+    dynamodb: DynamoDB
+    enduser: End User
+    ecs: ECS
+    eks: EKS
+    faas: Function as a Service
+    feature_flag: Feature Flag
+    gcp: GCP
+    gce: GCE (Google Compute Engine)
+    gen_ai: GenAI
+    graphql: GraphQL
+    http: HTTP
+    hw: Hardware
+    ios: iOS
+    jvm: Java Virtual Machine (JVM)
+    net: network
+    nodejs: Node.js
+    oci: Open Container Initiative (OCI)
+    openai: OpenAI
+    opentracing: OpenTracing
+    oracledb: OracleDB
+    os: OS
+    otel: OTel
+    rabbitmq: RabbitMQ
+    rocketmq: RocketMQ
+    rpc: Remote Procedure Call (RPC)
+    s3: S3
+    security_rule: Security Rule
+    signalr: SignalR
+    tls: TLS
+    url: URL
+    user_agent: User-agent
+    v8js: V8 JS
+    vcs: VCS
+    webengine: Web Engine
+    zos: z/OS
+# still needed for entities, TODO - remove
 acronyms:
   - AI
   - AWS

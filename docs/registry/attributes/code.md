@@ -8,8 +8,6 @@
 
 ## Code Attributes
 
-These attributes provide context about source code
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="code-column-number" href="#code-column-number">`code.column.number`</a> | int | The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity. | `16` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
@@ -35,8 +33,6 @@ Examples:
 * C function: `fopen`
 
 ## Deprecated Code Attributes
-
-These deprecated attributes provide context about source code
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

@@ -3,12 +3,10 @@
 
 # VCS
 
-- [VCS Repository Attributes](#vcs-repository-attributes)
-- [VCS Deprecated Attributes](#vcs-deprecated-attributes)
+- [VCS Attributes](#vcs-attributes)
+- [Deprecated VCS Attributes](#deprecated-vcs-attributes)
 
-## VCS Repository Attributes
-
-This group defines the attributes for [Version Control Systems (VCS)](https://wikipedia.org/wiki/Version_control).
+## VCS Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
@@ -143,9 +141,7 @@ the `.git` extension.
 | `ahead` | How many revisions the change is ahead of the target ref. | ![Development](https://img.shields.io/badge/-development-blue) |
 | `behind` | How many revisions the change is behind the target ref. | ![Development](https://img.shields.io/badge/-development-blue) |
 
-## VCS Deprecated Attributes
-
-"Describes deprecated vcs attributes."
+## Deprecated VCS Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

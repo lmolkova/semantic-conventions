@@ -8,8 +8,6 @@
 
 ## Android Attributes
 
-The Android platform on which the Android application is running.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="android-app-state" href="#android-app-state">`android.app.state`</a> | string | This attribute represents the state of the application. [1] | `created` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -28,8 +26,6 @@ The Android platform on which the Android application is running.
 | `foreground` | Any time after Activity.onResume() or, if the app has no Activity, Context.startService() has been called when the app was in either the created or background states. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 ## Deprecated Android Attributes
-
-This document defines attributes that represents an occurrence of a lifecycle transition on the Android platform.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

@@ -5,8 +5,6 @@
 
 ## DNS Attributes
 
-This document defines the shared attributes used to report a DNS query.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="dns-answers" href="#dns-answers">`dns.answers`</a> | string[] | The list of IPv4 or IPv6 addresses resolved during DNS lookup. | `["10.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]` | ![Development](https://img.shields.io/badge/-development-blue) |

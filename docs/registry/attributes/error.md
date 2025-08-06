@@ -5,8 +5,6 @@
 
 ## Error Attributes
 
-This document defines the shared attributes used to report an error.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="error-message" href="#error-message">`error.message`</a> | string | A message providing more detail about an error in human-readable form. [1] | `Unexpected input type: string`; `The user has exceeded their storage quota` | ![Development](https://img.shields.io/badge/-development-blue) |

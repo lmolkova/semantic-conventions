@@ -3,9 +3,7 @@
 
 # Event
 
-## Event Attributes
-
-Attributes for Events represented using Log Records.
+## Deprecated Event Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

@@ -8,8 +8,6 @@
 
 ## iOS Attributes
 
-This group describes iOS-specific attributes.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="ios-app-state" href="#ios-app-state">`ios.app.state`</a> | string | This attribute represents the state of the application. [1] | `active`; `inactive`; `background` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -29,8 +27,6 @@ This group describes iOS-specific attributes.
 | `terminate` | The app is about to terminate. Associated with UIKit notification `applicationWillTerminate`. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 ## Deprecated iOS Attributes
-
-The iOS platform on which the iOS application is running.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

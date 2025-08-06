@@ -8,8 +8,6 @@
 
 ## Exception Attributes
 
-This document defines the shared attributes used to report a single exception associated with a span or log.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="exception-message" href="#exception-message">`exception.message`</a> | string | The exception message. | `Division by zero`; `Can't convert 'int' object to str implicitly` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
@@ -17,8 +15,6 @@ This document defines the shared attributes used to report a single exception as
 | <a id="exception-type" href="#exception-type">`exception.type`</a> | string | The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it. | `java.net.ConnectException`; `OSError` | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
 
 ## Deprecated Exception Attributes
-
-Deprecated exception attributes.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

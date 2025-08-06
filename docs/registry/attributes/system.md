@@ -3,31 +3,24 @@
 
 # System
 
-- [General System Attributes](#general-system-attributes)
-- [Filesystem Attributes](#filesystem-attributes)
-- [System Memory Attributes](#system-memory-attributes)
-- [System Paging Attributes](#system-paging-attributes)
-- [System Process Attributes](#system-process-attributes)
+- [System Attributes](#system-attributes)
 - [Deprecated System Attributes](#deprecated-system-attributes)
 
-## General System Attributes
-
-Describes System attributes
+## System Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
+| <a id="system-cpu-logical-number" href="#system-cpu-logical-number">`system.cpu.logical_number`</a> | int | Deprecated, use `cpu.logical_number` instead. | `1` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="system-device" href="#system-device">`system.device`</a> | string | The device identifier | `(identifier)` | ![Development](https://img.shields.io/badge/-development-blue) |
-
-## Filesystem Attributes
-
-Describes Filesystem attributes
-
-| Attribute | Type | Description | Examples | Stability |
-|---|---|---|---|---|
 | <a id="system-filesystem-mode" href="#system-filesystem-mode">`system.filesystem.mode`</a> | string | The filesystem mode | `rw, ro` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="system-filesystem-mountpoint" href="#system-filesystem-mountpoint">`system.filesystem.mountpoint`</a> | string | The filesystem mount path | `/mnt/data` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="system-filesystem-state" href="#system-filesystem-state">`system.filesystem.state`</a> | string | The filesystem state | `used` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="system-filesystem-type" href="#system-filesystem-type">`system.filesystem.type`</a> | string | The filesystem type | `ext4` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="system-memory-state" href="#system-memory-state">`system.memory.state`</a> | string | The memory state | `free`; `cached` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="system-paging-direction" href="#system-paging-direction">`system.paging.direction`</a> | string | The paging access direction | `in` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="system-paging-state" href="#system-paging-state">`system.paging.state`</a> | string | The memory paging state | `free` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="system-paging-type" href="#system-paging-type">`system.paging.type`</a> | string | The memory paging type | `minor` | ![Development](https://img.shields.io/badge/-development-blue) |
+| <a id="system-process-status" href="#system-process-status">`system.process.status`</a> | string | The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES) | `running` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 ---
 
@@ -52,14 +45,6 @@ Describes Filesystem attributes
 | `ntfs` | ntfs | ![Development](https://img.shields.io/badge/-development-blue) |
 | `refs` | refs | ![Development](https://img.shields.io/badge/-development-blue) |
 
-## System Memory Attributes
-
-Describes System Memory attributes
-
-| Attribute | Type | Description | Examples | Stability |
-|---|---|---|---|---|
-| <a id="system-memory-state" href="#system-memory-state">`system.memory.state`</a> | string | The memory state | `free`; `cached` | ![Development](https://img.shields.io/badge/-development-blue) |
-
 ---
 
 `system.memory.state` has the following list of well-known values. If one of them applies, then the respective value MUST be used; otherwise, a custom value MAY be used.
@@ -70,16 +55,6 @@ Describes System Memory attributes
 | `cached` | cached | ![Development](https://img.shields.io/badge/-development-blue) |
 | `free` | free | ![Development](https://img.shields.io/badge/-development-blue) |
 | `used` | used | ![Development](https://img.shields.io/badge/-development-blue) |
-
-## System Paging Attributes
-
-Describes System Memory Paging attributes
-
-| Attribute | Type | Description | Examples | Stability |
-|---|---|---|---|---|
-| <a id="system-paging-direction" href="#system-paging-direction">`system.paging.direction`</a> | string | The paging access direction | `in` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="system-paging-state" href="#system-paging-state">`system.paging.state`</a> | string | The memory paging state | `free` | ![Development](https://img.shields.io/badge/-development-blue) |
-| <a id="system-paging-type" href="#system-paging-type">`system.paging.type`</a> | string | The memory paging type | `minor` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 ---
 
@@ -108,14 +83,6 @@ Describes System Memory Paging attributes
 | `major` | major | ![Development](https://img.shields.io/badge/-development-blue) |
 | `minor` | minor | ![Development](https://img.shields.io/badge/-development-blue) |
 
-## System Process Attributes
-
-Describes System Process attributes
-
-| Attribute | Type | Description | Examples | Stability |
-|---|---|---|---|---|
-| <a id="system-process-status" href="#system-process-status">`system.process.status`</a> | string | The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES) | `running` | ![Development](https://img.shields.io/badge/-development-blue) |
-
 ---
 
 `system.process.status` has the following list of well-known values. If one of them applies, then the respective value MUST be used; otherwise, a custom value MAY be used.
@@ -129,11 +96,8 @@ Describes System Process attributes
 
 ## Deprecated System Attributes
 
-Deprecated system attributes.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
-| <a id="system-cpu-logical-number" href="#system-cpu-logical-number">`system.cpu.logical_number`</a> | int | Deprecated, use `cpu.logical_number` instead. | `1` | ![Development](https://img.shields.io/badge/-development-blue) |
 | <a id="system-cpu-state" href="#system-cpu-state">`system.cpu.state`</a> | string | Deprecated, use `cpu.mode` instead. | `idle`; `interrupt` | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Replaced by `cpu.mode`. |
 | <a id="system-network-state" href="#system-network-state">`system.network.state`</a> | string | Deprecated, use `network.connection.state` instead. | `close_wait` | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Replaced by `network.connection.state`. |
 | <a id="system-processes-status" href="#system-processes-status">`system.processes.status`</a> | string | Deprecated, use `system.process.status` instead. | `running` | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Replaced by `system.process.status`. |

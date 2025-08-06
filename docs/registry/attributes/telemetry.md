@@ -5,8 +5,6 @@
 
 ## Telemetry Attributes
 
-This document defines attributes for telemetry SDK.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="telemetry-distro-name" href="#telemetry-distro-name">`telemetry.distro.name`</a> | string | The name of the auto instrumentation agent or distribution, if used. [1] | `parts-unlimited-java` | ![Development](https://img.shields.io/badge/-development-blue) |

@@ -5,8 +5,6 @@
 
 ## Cassandra Attributes
 
-This section defines attributes for Cassandra.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="cassandra-consistency-level" href="#cassandra-consistency-level">`cassandra.consistency.level`</a> | string | The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html). | `all`; `each_quorum`; `quorum` | ![Development](https://img.shields.io/badge/-development-blue) |

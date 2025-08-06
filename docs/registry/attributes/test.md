@@ -5,8 +5,6 @@
 
 ## Test Attributes
 
-This group describes attributes specific to [software tests](https://wikipedia.org/wiki/Software_testing).
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="test-case-name" href="#test-case-name">`test.case.name`</a> | string | The fully qualified human readable name of the [test case](https://wikipedia.org/wiki/Test_case). | `org.example.TestCase1.test1`; `example/tests/TestCase1.test1`; `ExampleTestCase1_test1` | ![Development](https://img.shields.io/badge/-development-blue) |

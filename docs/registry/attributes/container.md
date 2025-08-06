@@ -8,8 +8,6 @@
 
 ## Container Attributes
 
-A container instance.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="container-command" href="#container-command">`container.command`</a> | string | The command used to run the container (i.e. the command name). [1] | `otelcontribcol` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -41,8 +39,6 @@ The ID is assigned by the container runtime and can vary in different environmen
 **[6] `container.label.<key>`:** For example, a docker container label `app` with value `nginx` SHOULD be recorded as the `container.label.app` attribute with value `"nginx"`.
 
 ## Deprecated Container Attributes
-
-Describes deprecated container attributes.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

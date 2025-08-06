@@ -5,8 +5,6 @@
 
 ## GraphQL Attributes
 
-This document defines attributes for GraphQL.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="graphql-document" href="#graphql-document">`graphql.document`</a> | string | The GraphQL document being executed. [1] | `query findBookById { bookById(id: ?) { name } }` | ![Development](https://img.shields.io/badge/-development-blue) |

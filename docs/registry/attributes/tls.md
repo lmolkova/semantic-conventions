@@ -4,11 +4,9 @@
 # TLS
 
 - [TLS Attributes](#tls-attributes)
-- [TLS Deprecated Attributes](#tls-deprecated-attributes)
+- [Deprecated TLS Attributes](#deprecated-tls-attributes)
 
 ## TLS Attributes
-
-This document defines semantic convention attributes in the TLS namespace.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
@@ -52,9 +50,7 @@ This document defines semantic convention attributes in the TLS namespace.
 | `ssl` | ssl | ![Development](https://img.shields.io/badge/-development-blue) |
 | `tls` | tls | ![Development](https://img.shields.io/badge/-development-blue) |
 
-## TLS Deprecated Attributes
-
-Describes deprecated `tls` attributes.
+## Deprecated TLS Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

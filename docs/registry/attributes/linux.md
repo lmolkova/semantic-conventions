@@ -3,9 +3,7 @@
 
 # Linux
 
-## Linux Memory Attributes
-
-Describes Linux Memory attributes
+## Linux Attributes
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

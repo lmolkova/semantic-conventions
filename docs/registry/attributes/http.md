@@ -8,8 +8,6 @@
 
 ## HTTP Attributes
 
-This document defines semantic convention attributes in the HTTP namespace.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="http-connection-state" href="#http-connection-state">`http.connection.state`</a> | string | State of the HTTP connection in the HTTP connection pool. | `active`; `idle` | ![Development](https://img.shields.io/badge/-development-blue) |
@@ -105,8 +103,6 @@ SHOULD include the [application root](/docs/http/http-spans.md#http-server-defin
 | `TRACE` | TRACE method. | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
 
 ## Deprecated HTTP Attributes
-
-Describes deprecated HTTP attributes.
 
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|

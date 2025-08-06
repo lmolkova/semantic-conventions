@@ -3,6 +3,8 @@ groups:
     type: attribute_group
     display_name: Session Attributes
     brief: >
+      !!! TODO: this is useful, how can we keep it?
+
       Session is defined as the period of time encompassing all activities performed by the application and the actions
       executed by the end user.
 

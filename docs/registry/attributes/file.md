@@ -5,8 +5,6 @@
 
 ## File Attributes
 
-Describes file attributes.
-
 | Attribute | Type | Description | Examples | Stability |
 |---|---|---|---|---|
 | <a id="file-accessed" href="#file-accessed">`file.accessed`</a> | string | Time when the file was last accessed, in ISO 8601 format. [1] | `2021-01-01T12:00:00Z` | ![Development](https://img.shields.io/badge/-development-blue) |
