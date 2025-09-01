@@ -18,7 +18,9 @@
 
 {% macro find_lineage(attr_id, lineage) %}{% if attr_id in lineage %}{{lineage[attr_id].source_group}}{% endif %}{% endmacro %}
 
-{% macro name_with_link(attribute, attribute_registry_base_url, lineage_attributes) %}[`{{name(attribute)}}`]({{attribute_registry_base_url}}/{{ find_lineage(attribute.name, lineage_attributes) | split_id | list | reject("eq", "registry")| first | kebab_case }}.md){% endmacro %}
+{% macro find_file_name(lineage_str) %}{% set name_list = lineage_str | split_id | list | reject("eq", "registry")%}{% if name_list | first == "model"%}{{name_list[1]}}{%else%}{{name_list[0]}}{% endif %}{% endmacro %}
+
+{% macro name_with_link(attribute, attribute_registry_base_url, lineage_attributes) %}[`{{name(attribute)}}`]({{attribute_registry_base_url}}/{{ find_file_name(find_lineage(attribute.name, lineage_attributes)) | kebab_case }}.md){% endmacro %}
 
 {% macro display_name(group) %}
 {%- if 'display_name' in group %}{{ group.display_name }}

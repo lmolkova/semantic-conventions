@@ -1,7 +1,29 @@
-groups:
-  - id: metric.azure.cosmosdb.client.operation.request_charge
-    type: metric
-    metric_name: azure.cosmosdb.client.operation.request_charge
+version: "2"
+attribute_groups:
+  - id: attributes.azure.cosmosdb.minimal
+    attributes:
+      # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
+      # - ref: db.system.name
+      #   requirement_level:
+      #     conditionally_required: if available
+      - ref: db.operation.name
+        requirement_level: required
+      - ref: db.collection.name
+        brief: Cosmos DB container name.
+        requirement_level:
+          conditionally_required: If available.
+      - ref: db.namespace
+        requirement_level:
+          conditionally_required: If available.
+        note: ""  # overriding the base note
+      - ref: azure.cosmosdb.response.sub_status_code
+        requirement_level:
+          conditionally_required: when response was received and contained sub-code.
+      - ref: azure.cosmosdb.consistency.level
+        requirement_level:
+          conditionally_required: If available.
+metrics:
+  - name: azure.cosmosdb.client.operation.request_charge
     annotations:
       code_generation:
         metric_value_type: double
@@ -9,7 +31,10 @@ groups:
     instrument: histogram
     unit: "{request_unit}"
     stability: development
-    extends: attributes.azure.cosmosdb.minimal
+    include_groups:
+      - attributes.azure.cosmosdb.minimal
+      - attributes.db.client.response
+      - attributes.db.client.authority
     attributes:
       - ref: azure.cosmosdb.operation.contacted_regions
         requirement_level:
@@ -20,9 +45,7 @@ groups:
         note: >
           It is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization.
 
-  - id: metric.azure.cosmosdb.client.active_instance.count
-    type: metric
-    metric_name: azure.cosmosdb.client.active_instance.count
+  - name: azure.cosmosdb.client.active_instance.count
     annotations:
       code_generation:
         metric_value_type: int
@@ -30,14 +53,10 @@ groups:
     instrument: updowncounter
     unit: "{instance}"
     stability: development
-    attributes:
+    include_groups:
+      - attributes.db.client.authority
+    #attributes:
       # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
       # - ref: db.system.name
       #   requirement_level:
       #     conditionally_required: if available
-      - ref: server.address
-        brief: >
-          Name of the database host.
-      - ref: server.port
-        requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
