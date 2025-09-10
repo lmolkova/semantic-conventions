@@ -1,6 +1,7 @@
 version: "2"
 attribute_groups:
   - id: attributes.azure.cosmosdb.minimal
+    visibility: internal
     attributes:
       # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
       # - ref: db.system.name

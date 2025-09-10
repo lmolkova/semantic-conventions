@@ -1,6 +1,7 @@
 version: "2"
 attribute_groups:
   - id: trace.db.common.minimal
+    visibility: internal
     include_groups:
       - attributes.db.client.response
       - attributes.db.client.authority
@@ -21,6 +22,7 @@ attribute_groups:
         sampling_relevant: true
 
   - id: trace.db.client.common
+    visibility: internal
     include_groups:
       - attributes.db.client.common
     attributes:
@@ -54,6 +56,7 @@ attribute_groups:
 
   - id: trace.db.sql.full
     include_groups: [ trace.db.client.common ]
+    visibility: internal
     attributes:
       - ref: db.namespace
         brief: >

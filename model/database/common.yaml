@@ -1,6 +1,7 @@
 version: "2"
 attribute_groups:
   - id: attributes.db.client.response
+    visibility: internal
     attributes:
       - ref: db.response.status_code
         requirement_level:
@@ -19,6 +20,7 @@ attribute_groups:
           Instrumentations SHOULD document how `error.type` is populated.
 
   - id: attributes.db.client.authority
+    visibility: internal
     attributes:
       - ref: server.address
         brief: >
@@ -28,6 +30,7 @@ attribute_groups:
           conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
 
   - id: attributes.db.client.network
+    visibility: internal
     attributes:
       - ref: network.peer.address
         brief: Peer address of the database node where the operation was performed.
@@ -43,6 +46,7 @@ attribute_groups:
           recommended: If and only if `network.peer.address` is set.
 
   - id: attributes.db.client.query
+    visibility: internal
     attributes:
       - ref: db.query.text
       - ref: db.query.summary
@@ -50,6 +54,7 @@ attribute_groups:
           recommended: if available through instrumentation hooks or if the instrumentation supports generating a query summary.
 
   - id: attributes.db.client.common
+    visibility: internal
     include_groups:
       - attributes.db.client.query
       - attributes.db.client.response
