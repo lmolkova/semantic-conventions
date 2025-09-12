@@ -23,11 +23,10 @@ spans:
       **Span kind** MUST be `CLIENT`.
 
       **Span status:** refer to the [Span Status](/docs/http/http-spans.md#status) section.
-    include_groups:
-      - attributes.http.client.authority
-      - attributes.http.client.url
-      - attributes.http.common
     attributes:
+      - ref_group: attributes.http.client.authority
+      - ref_group: attributes.http.client.url
+      - ref_group: attributes.http.common
       - ref: http.request.method
         sampling_relevant: true
       - ref: http.request.method_original
@@ -83,11 +82,10 @@ spans:
 
       **Span status:** refer to the [Span Status](/docs/http/http-spans.md#status) section.
     stability: stable
-    include_groups:
-      - attributes.http.server.common
-      - attributes.http.server.authority
-      - attributes.http.common
     attributes:
+      - ref_group: attributes.http.server.common
+      - ref_group: attributes.http.server.authority
+      - ref_group: attributes.http.common
       - ref: http.request.method
         sampling_relevant: true
       - ref: http.request.method_original

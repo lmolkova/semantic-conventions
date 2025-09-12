@@ -30,13 +30,12 @@ spans:
       individual systems SHOULD specify which values of `db.response.status_code`
       classify as errors.
     kind: client
-    include_groups:
-      - attributes.db.client.query
-      - attributes.db.client.response
-      - attributes.db.client.authority
-      - attributes.db.client.operation
-      - attributes.db.client.network
     attributes:
+      - ref_group: attributes.db.client.query
+      - ref_group: attributes.db.client.response
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.operation
+      - ref_group: attributes.db.client.network
       - ref: db.system.name
         sampling_relevant: true
         # TODO: Not adding to the minimal because of https://github.com/open-telemetry/weaver/issues/479
@@ -78,9 +77,8 @@ spans:
       Spans representing calls to Microsoft SQL Server adhere to the general [Semantic Conventions for Database Client Spans](database-spans.md).
     note: |
       `db.system.name` MUST be set to `"microsoft.sql_server"` and SHOULD be provided **at span creation time**.
-    include_groups:
-      - span.db.sql.client
     attributes:
+      - ref_group: span.db.sql.client
       - ref: db.namespace
         sampling_relevant: true
         brief: >
@@ -120,9 +118,8 @@ spans:
       Spans representing calls to a PostgreSQL database adhere to the general [Semantic Conventions for Database Client Spans](database-spans.md).
     note: |
       `db.system.name` MUST be set to `"postgresql"` and SHOULD be provided **at span creation time**.
-    include_groups:
-      - span.db.sql.client
     attributes:
+      - ref_group: span.db.sql.client
       - ref: db.namespace
         sampling_relevant: true
         brief: >
@@ -163,9 +160,8 @@ spans:
       Spans representing calls to a MySQL Server adhere to the general [Semantic Conventions for Database Client Spans](database-spans.md).
     note: |
       `db.system.name` MUST be set to `"mysql"` and SHOULD be provided **at span creation time**.
-    include_groups:
-     - span.db.sql.client
     attributes:
+      - ref_group: span.db.sql.client
       - ref: db.namespace
         sampling_relevant: true
         brief: The database associated with the connection.
@@ -198,9 +194,8 @@ spans:
       Spans representing calls to MariaDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/README.md).
     note: >
       `db.system.name` MUST be set to `"mariadb"` and SHOULD be provided **at span creation time**.
-    include_groups:
-      - span.db.sql.client
     attributes:
+      - ref_group: span.db.sql.client
       - ref: db.namespace
         sampling_relevant: true
         brief: The database associated with the connection.
@@ -243,12 +238,11 @@ spans:
       `db.system.name` MUST be set to `"cassandra"` and SHOULD be provided **at span creation time**.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.query
-      - attributes.db.client.response
-      - attributes.db.client.authority
-      - attributes.db.client.operation
     attributes:
+      - ref_group: attributes.db.client.query
+      - ref_group: attributes.db.client.response
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.operation
       - ref: db.namespace
         brief: The keyspace associated with the session.
         examples: ["mykeyspace"]
@@ -315,10 +309,9 @@ spans:
       `db.system.name` MUST be set to `"hbase"` and SHOULD be provided **at span creation time**.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       - ref: db.namespace
         sampling_relevant: true
         brief: The HBase namespace.
@@ -370,10 +363,9 @@ spans:
       `db.system.name` MUST be set to `"couchdb"` and SHOULD be provided **at span creation time**.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
       # - ref: db.system.name
       #   sampling_relevant: true
@@ -422,10 +414,9 @@ spans:
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
       except that `db.namespace` SHOULD NOT be used in the span name since it is a numeric value that ends up
       looking confusing.
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       - ref: db.namespace
         sampling_relevant: true
         brief: >
@@ -510,10 +501,9 @@ spans:
       `db.system.name` MUST be set to `"mongodb"` and SHOULD be provided **at span creation time**.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       - ref: db.operation.name
         sampling_relevant: true
         brief: >
@@ -563,10 +553,9 @@ spans:
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
       with the endpoint identifier stored in `db.operation.name`, and the index stored in `db.collection.name`.
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       - ref: http.request.method
         sampling_relevant: true
         requirement_level: required
@@ -675,12 +664,11 @@ spans:
       Instrumentations applied to generic SQL drivers SHOULD adhere to SQL semantic conventions.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.query
-      - attributes.db.client.response
-      - attributes.db.client.operation
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.query
+      - ref_group: attributes.db.client.response
+      - ref_group: attributes.db.client.operation
       - ref: db.namespace
         sampling_relevant: false # TODO: is this necessary? all sql impls have namespace in sampling relevant attrs
       - ref: db.query.text
@@ -795,10 +783,9 @@ spans:
       `db.system.name` MUST be set to `"azure.cosmosdb"` and SHOULD be provided **at span creation time**.
 
       **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
-    include_groups:
-      - attributes.db.client.authority
-      - attributes.db.client.response
     attributes:
+      - ref_group: attributes.db.client.authority
+      - ref_group: attributes.db.client.response
       - ref: azure.client.id
       - ref: user_agent.original
         brief: 'Full user-agent string is generated by Cosmos DB SDK'
@@ -1015,9 +1002,8 @@ spans:
       Spans representing calls to a Oracle SQL Database adhere to the general [Semantic Conventions for Database Client Spans](database-spans.md).
     note: |
       `db.system.name` MUST be set to `"oracle.db"` and SHOULD be provided **at span creation time**.
-    include_groups:
-      - span.db.sql.client
     attributes:
+      - ref_group: span.db.sql.client
       - ref: db.namespace
         sampling_relevant: true
         brief: >

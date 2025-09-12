@@ -32,11 +32,10 @@ metrics:
     instrument: histogram
     unit: "{request_unit}"
     stability: development
-    include_groups:
-      - attributes.azure.cosmosdb.minimal
-      - attributes.db.client.response
-      - attributes.db.client.authority
     attributes:
+      - ref_group: attributes.azure.cosmosdb.minimal
+      - ref_group: attributes.db.client.response
+      - ref_group: attributes.db.client.authority
       - ref: azure.cosmosdb.operation.contacted_regions
         requirement_level:
           recommended: If available
@@ -54,9 +53,8 @@ metrics:
     instrument: updowncounter
     unit: "{instance}"
     stability: development
-    include_groups:
-      - attributes.db.client.authority
-    #attributes:
+    attributes:
+      - ref_group: attributes.db.client.authority
       # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
       # - ref: db.system.name
       #   requirement_level:
