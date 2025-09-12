@@ -49,26 +49,25 @@ attribute_groups:
     visibility: internal
     attributes:
       - ref: db.query.text
+        requirement_level:
+          recommended: >
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes
+            sensitive data, e.g. by redacting all literal values present in the query text.
+            See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+
+            Parameterized query text SHOULD be collected by default
+            (the query parameter values themselves are opt-in,
+            see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
+
       - ref: db.query.summary
         requirement_level:
           recommended: if available through instrumentation hooks or if the instrumentation supports generating a query summary.
 
-  - id: attributes.db.client.common
+  - id: attributes.db.client.operation
     visibility: internal
-    include_groups:
-      - attributes.db.client.query
-      - attributes.db.client.response
-      - attributes.db.client.authority
     attributes:
       - ref: db.operation.name
         requirement_level:
           conditionally_required: >
             If readily available and if there is a single operation name that describes the
             database call.
-      - ref: db.collection.name
-        requirement_level:
-          conditionally_required: >
-            If readily available and if a database call is performed on a single collection.
-      - ref: db.namespace
-        requirement_level:
-          conditionally_required: If available.

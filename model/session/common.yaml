@@ -1,6 +1,8 @@
-groups:
+version: "2"
+attribute_groups:
   - id: session-id
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: >
       Session is defined as the period of time encompassing all activities performed by the application and the actions
       executed by the end user.

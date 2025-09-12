@@ -19,24 +19,7 @@ attribute_groups:
           > **Warning**
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
-  - id: metric_attributes.http.server.common
-    visibility: internal
-    include_groups:
-    - metric_attributes.http.server.authority
-    - attributes.http.server.common
-    attributes:
-      - ref: user_agent.synthetic.type
-        requirement_level: opt_in
 
-  - id: metric_attributes.http.client.url.experimental
-    visibility: internal
-    include_groups: [ attributes.http.client.url ]
-    attributes:
-      - ref: url.template
-        requirement_level:
-          conditionally_required: If available.
-        note: >
-          The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
 metrics:
   - name: http.server.request.duration
     annotations:
@@ -46,7 +29,10 @@ metrics:
     instrument: histogram
     unit: "s"
     stability: stable
-    include_groups: [ metric_attributes.http.server.common ]
+    include_groups:
+      - metric_attributes.http.server.authority
+      - attributes.http.server.common
+      - attributes.http.common
 
   - name: http.server.active_requests
     annotations:
@@ -76,7 +62,10 @@ metrics:
       The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and
       is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length)
       header. For requests using transport encoding, this should be the compressed size.
-    include_groups: [ metric_attributes.http.server.common ]
+    include_groups:
+      - metric_attributes.http.server.authority
+      - attributes.http.server.common
+      - attributes.http.common
 
   - name: http.server.response.body.size
     annotations:
@@ -90,7 +79,10 @@ metrics:
       The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and
       is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length)
       header. For requests using transport encoding, this should be the compressed size.
-    include_groups: [ metric_attributes.http.server.common ]
+    include_groups:
+      - metric_attributes.http.server.authority
+      - attributes.http.server.common
+      - attributes.http.common
 
   - name: http.client.request.duration
     annotations:
@@ -118,9 +110,13 @@ metrics:
       is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length)
       header. For requests using transport encoding, this should be the compressed size.
     include_groups:
-      - metric_attributes.http.client.url.experimental
+      - attributes.http.client.url
       - attributes.http.client.authority
       - attributes.http.common
+    attributes:
+      - ref: url.template
+        requirement_level:
+          conditionally_required: If available.
 
   - name: http.client.response.body.size
     annotations:
@@ -135,9 +131,13 @@ metrics:
       is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length)
       header. For requests using transport encoding, this should be the compressed size.
     include_groups:
-      - metric_attributes.http.client.url.experimental
+      - attributes.http.client.url
       - attributes.http.client.authority
       - attributes.http.common
+    attributes:
+      - ref: url.template
+        requirement_level:
+          conditionally_required: If available.
 
   - name: http.client.open_connections
     annotations:
@@ -193,7 +193,10 @@ metrics:
     unit: "{request}"
     include_groups:
     - attributes.http.client.authority
-    - metric_attributes.http.client.url.experimental
+    - attributes.http.client.url
     attributes:
       - ref: http.request.method
         requirement_level: recommended
+      - ref: url.template
+        requirement_level:
+          conditionally_required: If available.

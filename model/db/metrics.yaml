@@ -10,7 +10,12 @@ metrics:
     instrument: histogram
     unit: "s"
     stability: stable
-    include_groups: [ attributes.db.client.common, attributes.db.client.network ]
+    include_groups:
+      - attributes.db.client.query
+      - attributes.db.client.response
+      - attributes.db.client.authority
+      - attributes.db.client.network
+      - attributes.db.client.operation
     attributes:
       - ref: db.system.name
         # TODO: Not adding to the minimal because of https://github.com/open-telemetry/weaver/issues/479
@@ -20,6 +25,13 @@ metrics:
           recommended: If operation applies to a specific stored procedure.
       - ref: db.query.text
         requirement_level: opt_in
+      - ref: db.namespace
+        requirement_level:
+          conditionally_required: If available.
+      - ref: db.collection.name
+        requirement_level:
+          conditionally_required: >
+            If readily available and if a database call is performed on a single collection.
 
   - name: db.client.connection.count
     annotations:
@@ -139,10 +151,22 @@ metrics:
     instrument: histogram
     unit: "{row}"
     stability: development
-    include_groups: [ attributes.db.client.common, attributes.db.client.network ]
+    include_groups:
+      - attributes.db.client.query
+      - attributes.db.client.response
+      - attributes.db.client.authority
+      - attributes.db.client.network
+      - attributes.db.client.operation
     attributes:
       - ref: db.system.name
         # TODO: Not adding to the minimal because of https://github.com/open-telemetry/weaver/issues/479
         requirement_level: required
       - ref: db.query.text
         requirement_level: opt_in
+      - ref: db.namespace
+        requirement_level:
+          conditionally_required: If available.
+      - ref: db.collection.name
+        requirement_level:
+          conditionally_required: >
+            If readily available and if a database call is performed on a single collection.

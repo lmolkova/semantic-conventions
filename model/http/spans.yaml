@@ -86,6 +86,7 @@ spans:
     include_groups:
       - attributes.http.server.common
       - attributes.http.server.authority
+      - attributes.http.common
     attributes:
       - ref: http.request.method
         sampling_relevant: true
