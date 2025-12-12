@@ -1,0 +1,4 @@
+name: open-telemetry
+description: This registry contains OpenTelemetry semantic conventions.
+semconv_version: 1.39.0
+schema_base_url: https://opentelemetry.io/schemas/

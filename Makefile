@@ -332,8 +332,10 @@ generate-schema-next:
 		--baseline-registry=https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v$(LATEST_RELEASED_SEMCONV_VERSION).zip[model] \
 		--diff-format yaml \
 		--diff-template /home/weaver/templates/schema-diff \
-		--output /home/weaver/target
+		--output /home/weaver/target \
+		--v2
 		# --param next_version=$(NEXT_SEMCONV_VERSION)
+		# --param current_version=$(LATEST_RELEASED_SEMCONV_VERSION)
 	$(TOOLS_DIR)/scripts/generate-schema-next.sh $(NEXT_SEMCONV_VERSION) $(LATEST_RELEASED_SEMCONV_VERSION) $(TOOLS_DIR)/bin/schema-diff.yaml
 
 .PHONY: areas-table-generation
@@ -349,6 +351,10 @@ SCHEMAS_PATH = $(PWD)/schemas
 generate-schema-v2-dev:
 	mkdir -p $(SCHEMAS_PATH)/next-version-dev
 
+    # prepare registry_manifest.yaml
+	cp $(PWD)/model/registry_manifest.yaml $(SCHEMAS_PATH)/next-version-dev/registry_manifest.yaml
+	$(SED) -i 's/semconv_version: unversioned/semconv_version: $(NEXT_SEMCONV_VERSION)/' $(SCHEMAS_PATH)/next-version-dev/registry_manifest.yaml
+
     # resolve
 	$(DOCKER_RUN) --rm \
 	$(DOCKER_USER_IS_HOST_USER_ARG) \
@@ -361,20 +367,11 @@ generate-schema-v2-dev:
 		--format yaml \
 		--output /home/weaver/target/next-version-dev/schema.yaml
 
-	$(DOCKER_RUN) --rm \
-	$(DOCKER_USER_IS_HOST_USER_ARG) \
-	--mount 'type=bind,source=$(PWD)/internal/tools/scripts,target=/home/weaver/templates,readonly' \
-	--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
-	--mount 'type=bind,source=$(SCHEMAS_PATH),target=/home/weaver/target' \
-	$(WEAVER_CONTAINER) registry diff \
-		--registry=/home/weaver/source \
-		--baseline-registry=https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v$(LATEST_RELEASED_SEMCONV_VERSION).zip[model] \
-		--diff-format yaml \
-		--diff-template /home/weaver/templates/schema-v2-diff \
-		--output /home/weaver/target \
-		--v2
+    # diff
+	$(MAKE) generate-schema-next
+	cp $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION} $(SCHEMAS_PATH)/next-version-dev/schema-diff.yaml
 
-	# TODO: these commands should not be necessary:
+    # TODO: this command should not be necessary
 	$(SED) -i 's/semconv_version: unversioned/semconv_version: $(NEXT_SEMCONV_VERSION)/' $(SCHEMAS_PATH)/next-version-dev/schema-diff.yaml
 
 	rm -rf $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION}-dev

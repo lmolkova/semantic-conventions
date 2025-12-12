@@ -1,13 +1,15 @@
 params:
   next_version: "next_version_placeholder" # https://github.com/open-telemetry/weaver/issues/775
+  current_version: "current_version_placeholder" #
 templates:
   - pattern: schema-diff.j2
     filter: >
       .
       | {
-          renames: .changes | with_entries(.value |= (map(select(.type == "renamed")) | sort_by(.old_name))),
+          attribute_renames: .registry.attribute_changes | map(select(.type == "renamed")) | sort_by(.old_name),
+          metric_renames: .registry.metric_changes | map(select(.type == "renamed")) | sort_by(.old_name),
           next_version: $next_version,
-          latest_released_version: .baseline.semconv_version,
+          latest_released_version: $current_version,
         }
     application_mode: single
 whitespace_control:

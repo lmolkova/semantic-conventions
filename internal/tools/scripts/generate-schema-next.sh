@@ -37,5 +37,6 @@ prev_header_lines=$(awk '/^versions:/{print NR; exit}' "$prev_version_schema_fil
 # TODO: remove it after the issue is fixed
 {
   sed "s/next_version_placeholder/$cur_version/g" "$diff_file"
+  sed "s/current_version_placeholder/$prev_version/g" "$diff_file"
   tail -n +"$((prev_header_lines + 1))" "$prev_version_schema_file"
 } > "$cur_version_schema_file"
