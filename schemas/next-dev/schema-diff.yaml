@@ -1,10 +1,140 @@
-baseline:
-  semconv_version: v1.38.0
-changes:
-  entities: []
-  events: []
-  metrics: []
-  registry_attributes: []
-  spans: []
-head:
-  semconv_version: next
+registry:
+  attribute_changes:
+  - new_name: rpc.response.metadata
+    note: Replaced by `rpc.response.metadata`.
+    old_name: rpc.connect_rpc.response.metadata
+    type: renamed
+  - name: jsonrpc.request.id
+    type: added
+  - new_name: jsonrpc.protocol.version
+    note: Replaced by `jsonrpc.protocol.version`.
+    old_name: rpc.jsonrpc.version
+    type: renamed
+  - name: rpc.system.name
+    type: added
+  - new_name: rpc.response.metadata
+    note: Replaced by `rpc.response.metadata`.
+    old_name: rpc.grpc.response.metadata
+    type: renamed
+  - new_name: rpc.system.name
+    note: Replaced by `rpc.system.name`.
+    old_name: rpc.system
+    type: renamed
+  - name: k8s.pod.ip
+    type: added
+  - new_name: rpc.request.metadata
+    note: Replaced by `rpc.request.metadata`.
+    old_name: rpc.grpc.request.metadata
+    type: renamed
+  - name: rpc.response.status_code
+    type: added
+  - new_name: rpc.request.metadata
+    note: Replaced by `rpc.request.metadata`.
+    old_name: rpc.connect_rpc.request.metadata
+    type: renamed
+  - name: rpc.grpc.status_code
+    note: Use string representation of the gRPC status code on the `rpc.response.status_code` attribute.
+    type: uncategorized
+  - name: rpc.jsonrpc.error_message
+    note: Use the span status description or `error.message` attribute on other signals.
+    type: uncategorized
+  - name: jsonrpc.protocol.version
+    type: added
+  - name: rpc.request.metadata
+    type: added
+  - name: system.memory.linux.slab.state
+    type: added
+  - new_name: system.memory.linux.slab.state
+    note: Replaced by `system.memory.linux.slab.state`.
+    old_name: linux.memory.slab.state
+    type: renamed
+  - new_name: jsonrpc.request.id
+    note: Replaced by `jsonrpc.request.id`.
+    old_name: rpc.jsonrpc.request_id
+    type: renamed
+  - name: otel.event.name
+    type: added
+  - name: rpc.jsonrpc.error_code
+    note: Use string representation of the error code on the `rpc.response.status_code` attribute.
+    type: uncategorized
+  - new_name: rpc.response.status_code
+    note: Replaced by `rpc.response.status_code`.
+    old_name: rpc.connect_rpc.error_code
+    type: renamed
+  - name: k8s.pod.hostname
+    type: added
+  - name: rpc.response.metadata
+    type: added
+  - name: k8s.pod.start_time
+    type: added
+  attribute_group_changes: []
+  entity_changes:
+  - name: service.namespace
+    type: added
+  - name: service.instance
+    type: added
+  event_changes: []
+  metric_changes:
+  - new_name: process.unix.file_descriptor.count
+    note: Replaced by `process.unix.file_descriptor.count`.
+    old_name: process.open_file_descriptor.count
+    type: renamed
+  - name: rpc.client.duration
+    note: Replaced by `rpc.client.call.duration` with unit `s`.
+    type: uncategorized
+  - name: rpc.server.duration
+    note: Replaced by `rpc.server.call.duration` with unit `s`.
+    type: uncategorized
+  - name: process.unix.file_descriptor.count
+    type: added
+  - name: system.memory.linux.available
+    type: added
+  - name: rpc.server.call.duration
+    type: added
+  - new_name: system.memory.linux.available
+    note: Replaced by `system.memory.linux.available`.
+    old_name: system.linux.memory.available
+    type: renamed
+  - name: system.memory.linux.slab.usage
+    type: added
+  - new_name: system.memory.linux.slab.usage
+    note: Replaced by `system.memory.linux.slab.usage`.
+    old_name: system.linux.memory.slab.usage
+    type: renamed
+  - name: process.windows.handle.count
+    type: added
+  - name: rpc.client.call.duration
+    type: added
+  span_changes:
+  - name: rpc.call.server
+    type: added
+  - name: rpc.call.client
+    type: added
+  - name: rpc.grpc.call.server
+    type: added
+  - name: rpc.jsonrpc.call.server
+    type: added
+  - name: rpc.connect_rpc.call.server
+    type: added
+  - name: rpc.grpc.call.client
+    type: added
+  - name: rpc.jsonrpc.call.client
+    type: added
+  - name: rpc.connect_rpc.call.client
+    type: added
+  - name: rpc.jsonrpc.client
+    type: removed
+  - name: rpc.grpc.server
+    type: removed
+  - name: rpc.jsonrpc.server
+    type: removed
+  - name: rpc.client
+    type: removed
+  - name: rpc.grpc.client
+    type: removed
+  - name: rpc.connect_rpc.server
+    type: removed
+  - name: rpc.connect_rpc.client
+    type: removed
+  - name: rpc.server
+    type: removed
