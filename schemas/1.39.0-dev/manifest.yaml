@@ -2,6 +2,7 @@ file_format: 2.0.0
 name: open-telemetry
 description: This registry contains OpenTelemetry semantic conventions.
 version: 1.39.0
+# publish as gh release offset for now https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v1.38.0.tar.gz
 artifact_url: https://opentelemetry.io/schemas/1.39.0/schema.tar.gz
 semconv_version: 1.39.0 # to make weaver happy
 schema_base_url: https://opentelemetry.io/schemas/1.39.0/ # to make weaver happy

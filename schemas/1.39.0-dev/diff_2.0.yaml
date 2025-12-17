@@ -1,34 +1,8 @@
-
-
+# publish weaver diff (pretty much)
 file_format: 1.1.0
 schema_url: https://opentelemetry.io/schemas/1.39.0
 versions:
   1.39.0:
-    all:
-      changes:
-        - rename_attributes:
-            attribute_map:
-              linux.memory.slab.state: system.memory.linux.slab.state
-              rpc.connect_rpc.error_code: rpc.response.status_code
-              rpc.connect_rpc.request.metadata: rpc.request.metadata
-              rpc.connect_rpc.response.metadata: rpc.response.metadata
-              rpc.grpc.request.metadata: rpc.request.metadata
-              rpc.grpc.response.metadata: rpc.response.metadata
-              rpc.jsonrpc.request_id: jsonrpc.request.id
-              rpc.jsonrpc.version: jsonrpc.protocol.version
-              rpc.system: rpc.system.name
-    metrics:
-      changes:
-        - rename_metrics:
-            process.open_file_descriptor.count: process.unix.file_descriptor.count
-            system.linux.memory.available: system.memory.linux.available
-            system.linux.memory.slab.usage: system.memory.linux.slab.usage
-
-
-file_format: 1.1.0
-schema_url: https://opentelemetry.io/schemas/next_version_placeholder
-versions:
-  next_version_placeholder:
     all:
       changes:
         - rename_attributes:

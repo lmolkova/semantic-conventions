@@ -349,11 +349,10 @@ areas-table-check:
 SCHEMAS_PATH = $(PWD)/schemas
 .PHONY: generate-schema-v2-dev
 generate-schema-v2-dev:
-	mkdir -p $(SCHEMAS_PATH)/next-version-dev
+	mkdir -p "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev"; \
+	cp $(PWD)/model/registry_manifest.yaml "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml";
 
-    # prepare registry_manifest.yaml
-	cp $(PWD)/model/registry_manifest.yaml $(SCHEMAS_PATH)/next-version-dev/registry_manifest.yaml
-	$(SED) -i 's/semconv_version: unversioned/semconv_version: $(NEXT_SEMCONV_VERSION)/' $(SCHEMAS_PATH)/next-version-dev/registry_manifest.yaml
+	$(SED) -i 's/next_version_placeholder/$(NEXT_SEMCONV_VERSION)/' "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml"
 
     # resolve
 	$(DOCKER_RUN) --rm \
@@ -365,14 +364,12 @@ generate-schema-v2-dev:
 		--registry=/home/weaver/source \
 		--v2 \
 		--format yaml \
-		--output /home/weaver/target/next-version-dev/schema.yaml
+		--output /home/weaver/target/$(NEXT_SEMCONV_VERSION)-dev/schema.yaml
 
     # diff
 	$(MAKE) generate-schema-next
-	cp $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION} $(SCHEMAS_PATH)/next-version-dev/schema-diff.yaml
+	mv $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION} $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/diff.yaml
 
-    # TODO: this command should not be necessary
-	$(SED) -i 's/semconv_version: unversioned/semconv_version: $(NEXT_SEMCONV_VERSION)/' $(SCHEMAS_PATH)/next-version-dev/schema-diff.yaml
-
-	rm -rf $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION}-dev
-	mv $(SCHEMAS_PATH)/next-version-dev $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION}-dev
+    # manifest and archive
+	cp "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml" $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)
+	tar -czf $(SCHEMAS_PATH)/schema-$(NEXT_SEMCONV_VERSION)-dev.tar.gz $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev
