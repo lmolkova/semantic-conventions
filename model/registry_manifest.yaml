@@ -1,7 +1,0 @@
-file_format: 2.0.0
-name: open-telemetry
-description: This registry contains OpenTelemetry semantic conventions.
-version: next_version_placeholder
-artifact_url: https://opentelemetry.io/schemas/next_version_placeholder/schema.tar.gz
-semconv_version: next_version_placeholder # to make weaver happy
-schema_base_url: https://opentelemetry.io/schemas/next_version_placeholder/ # to make weaver happy

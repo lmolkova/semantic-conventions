@@ -338,6 +338,26 @@ generate-schema-next:
 		# --param current_version=$(LATEST_RELEASED_SEMCONV_VERSION)
 	$(TOOLS_DIR)/scripts/generate-schema-next.sh $(NEXT_SEMCONV_VERSION) $(LATEST_RELEASED_SEMCONV_VERSION) $(TOOLS_DIR)/bin/schema-diff.yaml
 
+.PHONY: generate-diff-v2
+generate-diff-v2:
+	mkdir -p $(TOOLS_DIR)/bin
+	$(DOCKER_RUN) --rm \
+	$(DOCKER_USER_IS_HOST_USER_ARG) \
+	--env USER=weaver \
+	--env HOME=/home/weaver \
+	-v $(shell mktemp -d):/home/weaver/.weaver \
+	--mount 'type=bind,source=$(PWD)/internal/tools/scripts,target=/home/weaver/templates,readonly' \
+	--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
+	--mount 'type=bind,source=$(TOOLS_DIR)/bin,target=/home/weaver/target' \
+	$(WEAVER_CONTAINER) registry diff \
+		--registry=/home/weaver/source \
+		--baseline-registry=https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v$(LATEST_RELEASED_SEMCONV_VERSION).zip[model] \
+		--diff-format yaml \
+		--output /home/weaver/target \
+		--v2
+		# --param next_version=$(NEXT_SEMCONV_VERSION)
+		# --param current_version=$(LATEST_RELEASED_SEMCONV_VERSION)
+
 .PHONY: areas-table-generation
 areas-table-generation:
 	docker run --rm -v ${PWD}:/repo -w /repo python:3-alpine python internal/tools/scripts/update-areas-table.py --install;
@@ -347,12 +367,16 @@ areas-table-check:
 	docker run --rm -v ${PWD}:/repo -w /repo python:3-alpine python internal/tools/scripts/update-areas-table.py --install --check;
 
 SCHEMAS_PATH = $(PWD)/schemas
+VNEXT_DEV_SCHEMA_DIR = "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev"
 .PHONY: generate-schema-v2-dev
 generate-schema-v2-dev:
-	mkdir -p "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev"; \
-	cp $(PWD)/model/registry_manifest.yaml "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml";
-
-	$(SED) -i 's/next_version_placeholder/$(NEXT_SEMCONV_VERSION)/' "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml"
+	mkdir -p "$(VNEXT_DEV_SCHEMA_DIR)"
+	@echo "file_format: 2.0.0" > $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
+	@echo "name: open-telemetry" >> $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
+	@echo "description: This registry contains OpenTelemetry semantic conventions." >> $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
+	@echo "stability: development" >> $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
+	@echo "version: $(NEXT_SEMCONV_VERSION)" >> $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
+	@echo "artifact_url: https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/schema-v$(NEXT_SEMCONV_VERSION)-dev.tar.gz" >> $(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml
 
     # resolve
 	$(DOCKER_RUN) --rm \
@@ -367,9 +391,38 @@ generate-schema-v2-dev:
 		--output /home/weaver/target/$(NEXT_SEMCONV_VERSION)-dev/schema.yaml
 
     # diff
-	$(MAKE) generate-schema-next
-	mv $(SCHEMAS_PATH)/${NEXT_SEMCONV_VERSION} $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/diff.yaml
+	$(MAKE) generate-diff-v2
+	mv $(TOOLS_DIR)/bin/diff.yaml $(VNEXT_DEV_SCHEMA_DIR)/diff.yaml
 
     # manifest and archive
-	cp "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev/manifest.yaml" $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)
-	tar -czf $(SCHEMAS_PATH)/schema-$(NEXT_SEMCONV_VERSION)-dev.tar.gz $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev
+	cp "$(VNEXT_DEV_SCHEMA_DIR)/manifest.yaml" $(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)-dev
+	tar -czf $(SCHEMAS_PATH)/schema-v$(NEXT_SEMCONV_VERSION)-dev.tar.gz $(VNEXT_DEV_SCHEMA_DIR)
+
+
+VNEXT_STABLE_SCHEMA_DIR = "$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION)"
+.PHONY: generate-schema-v2-stable
+generate-schema-v2-stable:
+	mkdir -p "$(VNEXT_STABLE_SCHEMA_DIR)"
+	@echo "file_format: 2.0.0" > $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+	@echo "name: open-telemetry" >> $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+	@echo "description: This registry contains OpenTelemetry semantic conventions." >> $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+	@echo "stability: stable" >> $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+	@echo "version: $(NEXT_SEMCONV_VERSION)" >> $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+	@echo "artifact_url: https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/schema-v$(NEXT_SEMCONV_VERSION).tar.gz" >> $(VNEXT_STABLE_SCHEMA_DIR)/manifest.yaml
+
+    # resolve - todo - filter
+	$(DOCKER_RUN) --rm \
+	$(DOCKER_USER_IS_HOST_USER_ARG) \
+	--mount 'type=bind,source=$(PWD)/internal/tools/scripts,target=/home/weaver/templates,readonly' \
+	--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
+	--mount 'type=bind,source=$(SCHEMAS_PATH)/$(NEXT_SEMCONV_VERSION),target=/home/weaver/target' \
+	$(WEAVER_CONTAINER) registry generate \
+		--registry=/home/weaver/source \
+		--v2 \
+		--templates=/home/weaver/templates \
+		--config=/home/weaver/templates/registry/stable-only-weaver.yaml \
+		. \
+		/home/weaver/target
+
+	# manifest and archive
+	tar -czf $(SCHEMAS_PATH)/schema-v$(NEXT_SEMCONV_VERSION).tar.gz $(VNEXT_STABLE_SCHEMA_DIR)

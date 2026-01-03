@@ -3,7 +3,7 @@
     "yaml.schemas": {
         "https://raw.githubusercontent.com/open-telemetry/weaver/v0.20.0/schemas/semconv.schema.json": [
             "model/**/*.yaml",
-            "!model/registry_manifest.yaml"
+            "!model/manifest.yaml"
         ],
         "./sigs-schema.json": [
             "sigs.yaml"
