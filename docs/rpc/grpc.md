@@ -92,7 +92,7 @@ depending on the scheme used. Or, they MAY use gRPC client APIs that
 provide this information.
 
 If the instrumentation cannot determine a server domain name or another
-suitable low-cardinality identifier for a group of service instances
+suitable low-cardinality identifier for a group of server instances
 from the target string, it SHOULD set `server.address` to the entire
 target string and SHOULD NOT set `server.port`.
 
@@ -112,10 +112,10 @@ Examples:
   - `server.address`: `"/run/containerd/containerd.sock"`
   - `server.port`: not set
 - Given the target string `zk://zookeeper:2181/my-server`, expected attributes:
-  - `server.address`: "zk://zookeeper:2181/my-server"
+  - `server.address`: `"zk://zookeeper:2181/my-server"`
   - `server.port`: not set
 - Given the target string `ipv4:198.51.100.123:50051,198.51.100.124:50051`, expected attributes:
-  - `server.address`: "ipv4:198.51.100.123:50051,198.51.100.124:50051"
+  - `server.address`: `"ipv4:198.51.100.123:50051,198.51.100.124:50051"`
   - `server.port`: not set
 
 **[4] `error.type`:** If the RPC fails with an error before status code is returned,

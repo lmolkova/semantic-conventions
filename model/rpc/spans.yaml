@@ -202,7 +202,7 @@ groups:
           provide this information.
 
           If the instrumentation cannot determine a server domain name or another
-          suitable low-cardinality identifier for a group of service instances
+          suitable low-cardinality identifier for a group of server instances
           from the target string, it SHOULD set `server.address` to the entire
           target string and SHOULD NOT set `server.port`.
 
