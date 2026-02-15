@@ -222,10 +222,10 @@ groups:
             - `server.address`: `"/run/containerd/containerd.sock"`
             - `server.port`: not set
           - Given the target string `zk://zookeeper:2181/my-server`, expected attributes:
-            - `server.address`: "zk://zookeeper:2181/my-server"
+            - `server.address`: `"zk://zookeeper:2181/my-server"`
             - `server.port`: not set
           - Given the target string `ipv4:198.51.100.123:50051,198.51.100.124:50051`, expected attributes:
-            - `server.address`: "ipv4:198.51.100.123:50051,198.51.100.124:50051"
+            - `server.address`: `"ipv4:198.51.100.123:50051,198.51.100.124:50051"`
             - `server.port`: not set
         requirement_level: required
       - ref: server.port
