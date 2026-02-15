@@ -15,9 +15,7 @@ linkTitle: JSON-RPC
 
 <!-- tocstop -->
 
-The Semantic Conventions for [JSON-RPC](https://www.jsonrpc.org/) extend and override the [RPC spans](rpc-spans.md) and [RPC metrics](rpc-metrics.md) Semantic Conventions
-that describe common RPC operations attributes in addition to the Semantic Conventions
-described on this page.
+The Semantic Conventions for [JSON-RPC](https://www.jsonrpc.org/) extend and override the [RPC Semantic Conventions](README.md).
 
 ## Spans
 
@@ -34,7 +32,7 @@ This span represents an outgoing Remote Procedure Call (RPC).
 
 `rpc.system.name` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
 
-**Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
+**Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#name) section.
 
 **Span kind** MUST be `CLIENT`.
 
@@ -53,10 +51,10 @@ are considered errors.
 | [`rpc.response.status_code`](/docs/registry/attributes/rpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Conditionally Required` when available | string | The [`error.code`](https://www.jsonrpc.org/specification#error_object) property of response if it is an error response recorded as a string. [2] | `OK`; `DEADLINE_EXCEEDED`; `-32602` |
 | [`server.port`](/docs/registry/attributes/server.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Conditionally Required` if applicable and if `server.address` is set. | int | Server port number. [3] | `80`; `8080`; `443` |
 | [`jsonrpc.request.id`](/docs/registry/attributes/jsonrpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Recommended` | string | A string representation of the `id` property of the request and its corresponding response. [4] | `10`; `request-7` |
-| [`network.peer.address`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | string | Peer address of the network connection - IP address or Unix domain socket name. | `10.1.2.80`; `/tmp/my.sock` |
+| [`network.peer.address`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | string | Peer address of the network connection - IP address or Unix domain socket name. [5] | `10.1.2.80`; `/tmp/my.sock` |
 | [`network.peer.port`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` If `network.peer.address` is set. | int | Peer port number of the network connection. | `65123` |
-| [`server.address`](/docs/registry/attributes/server.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` [5] | string | A string identifying a group of RPC server instances request is sent to. | `example.com`; `10.1.2.80`; `/tmp/my.sock` |
-| [`rpc.method`](/docs/registry/attributes/rpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Opt-In` | string | JSON-RPC method name provided in the request. [6] | `com.example.ExampleService/exampleMethod`; `EchoService/Echo`; `_OTHER` |
+| [`server.address`](/docs/registry/attributes/server.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` [6] | string | A string identifying a group of RPC server instances request is sent to. | `example.com`; `10.1.2.80`; `/tmp/my.sock` |
+| [`rpc.method`](/docs/registry/attributes/rpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Opt-In` | string | JSON-RPC method name provided in the request. [7] | `com.example.ExampleService/exampleMethod`; `EchoService/Echo`; `_OTHER` |
 
 **[1] `error.type`:** If the RPC fails with an error before status code is returned,
 `error.type` SHOULD be set to the exception type (its fully-qualified class name, if applicable)
@@ -79,9 +77,11 @@ If the request has completed successfully, instrumentations SHOULD NOT set
 **[4] `jsonrpc.request.id`:** Under the [JSON-RPC specification](https://www.jsonrpc.org/specification), the `id` property may be a string, number, null, or omitted entirely. When omitted, the request is treated as a notification. Using `null` is not equivalent to omitting the `id`, but it is discouraged.
 Instrumentations SHOULD NOT capture this attribute when the `id` is `null` or omitted.
 
-**[5] `server.address`:** Instrumentations that have access to the transport-level information and can reliably extract domain name or another low-cardinality server address from it SHOULD set this attribute.
+**[5] `network.peer.address`:** If a RPC involved multiple network calls (for example retries), the last contacted address SHOULD be used.
 
-**[6] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
+**[6] `server.address`:** Instrumentations that have access to the transport-level information and can reliably extract domain name or another low-cardinality server address from it SHOULD set this attribute.
+
+**[7] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
 General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
 
 The following attributes can be important for making sampling decisions
@@ -116,7 +116,7 @@ This span represents an incoming Remote Procedure Call (RPC).
 
 `rpc.system.name` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
 
-**Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
+**Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#name) section.
 
 **Span kind** MUST be `SERVER`.
 
@@ -138,9 +138,9 @@ are considered errors.
 | [`client.address`](/docs/registry/attributes/client.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | string | Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name. [5] | `client.example.com`; `10.1.2.80`; `/tmp/my.sock` |
 | [`client.port`](/docs/registry/attributes/client.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | int | Client port number. [6] | `65123` |
 | [`jsonrpc.request.id`](/docs/registry/attributes/jsonrpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Recommended` | string | A string representation of the `id` property of the request and its corresponding response. [7] | `10`; `request-7` |
-| [`network.peer.address`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | string | Peer address of the network connection - IP address or Unix domain socket name. | `10.1.2.80`; `/tmp/my.sock` |
+| [`network.peer.address`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` | string | Peer address of the network connection - IP address or Unix domain socket name. [8] | `10.1.2.80`; `/tmp/my.sock` |
 | [`network.peer.port`](/docs/registry/attributes/network.md) | ![Stable](https://img.shields.io/badge/-stable-lightgreen) | `Recommended` If `network.peer.address` is set. | int | Peer port number of the network connection. | `65123` |
-| [`rpc.method`](/docs/registry/attributes/rpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Opt-In` | string | JSON-RPC method name provided in the request. [8] | `com.example.ExampleService/exampleMethod`; `EchoService/Echo`; `_OTHER` |
+| [`rpc.method`](/docs/registry/attributes/rpc.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Opt-In` | string | JSON-RPC method name provided in the request. [9] | `com.example.ExampleService/exampleMethod`; `EchoService/Echo`; `_OTHER` |
 
 **[1] `error.type`:** If the RPC fails with an error before status code is returned,
 `error.type` SHOULD be set to the exception type (its fully-qualified class name, if applicable)
@@ -171,7 +171,9 @@ When address is an IP address, instrumentations SHOULD NOT do a reverse DNS look
 **[7] `jsonrpc.request.id`:** Under the [JSON-RPC specification](https://www.jsonrpc.org/specification), the `id` property may be a string, number, null, or omitted entirely. When omitted, the request is treated as a notification. Using `null` is not equivalent to omitting the `id`, but it is discouraged.
 Instrumentations SHOULD NOT capture this attribute when the `id` is `null` or omitted.
 
-**[8] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
+**[8] `network.peer.address`:** If a RPC involved multiple network calls (for example retries), the last contacted address SHOULD be used.
+
+**[9] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
 General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
 
 The following attributes can be important for making sampling decisions
