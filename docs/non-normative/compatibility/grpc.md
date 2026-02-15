@@ -46,12 +46,12 @@ Attribute mapping:
 
 | gRPC attribute     | OpenTelemetry attribute(s)         | Conversion comments  |
 | :----------------- | :--------------------------------- | :------------------- |
-| `grpc.method`      | `rpc.method`                       | gRPC -> OTel: when the value is `other`, replace it with `_OTHER`<br>OTel -> gRPC: when the value is `_OTHER`, replace it with `other` |
+| `grpc.method`      | `rpc.method`                       | gRPC -> OTel: When the value is `other`, replace it with `_OTHER`<br>OTel -> gRPC: When the value is `_OTHER`, replace it with `other` |
 | `grpc.status`      | `rpc.response.status_code`         | |
-| `grpc.target`      | `grpc.target`                      | gRPC -> OTel: preserve `grpc.target` if it contains information that's not captured in `server.address` and `server.port`<br>OTel -> gRPC: preserve `grpc.target` if present; otherwise, set `grpc.target` to `{server.address}:{server.port}` |
-|                    | `server.address` and `server.port` | gRPC -> OTel: parse the address and port from `grpc.target` (when applicable)<br>OTel -> gRPC: drop |
-|                    | `rpc.system.name`                  | gRPC -> OTel: set to `grpc`<br>OTel -> gRPC: drop |
-|                    | `error.type`                       | gRPC -> OTel: set to `rpc.response.status_code` when it indicates an error (see [gRPC OpenTelemetry conventions](/docs/rpc/grpc.md))<br>OTel -> gRPC: drop |
+| `grpc.target`      | `grpc.target`                      | gRPC -> OTel: Drop<br>OTel -> gRPC: Set `grpc.target` to `{server.address}[:{server.port}]` |
+|                    | `server.address` and `server.port` | gRPC -> OTel: Parse the address and port from `grpc.target`<br>OTel -> gRPC: Drop |
+|                    | `rpc.system.name`                  | gRPC -> OTel: Set to `grpc`<br>OTel -> gRPC: Drop |
+|                    | `error.type`                       | gRPC -> OTel: Set to `rpc.response.status_code` when it indicates an error (see [gRPC OpenTelemetry conventions](/docs/rpc/grpc.md))<br>OTel -> gRPC: Drop |
 
 ## Spans
 
@@ -69,14 +69,15 @@ Mapping:
 
 | Property                | gRPC                                                             | OpenTelemetry                                                                | Conversion comments                                      |
 | :---------------------- | :--------------------------------------------------------------- | :--------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| Span name               | `Sent.{method name}` (client)<br>`Recv.{method name}` (server)<br>Note: The gRPC span name *may be* of high cardinality in edge cases.  | `{rpc.method}`                                                               | gRPC -> OTel: remove the `Sent.` or `Recv.` prefix<br>OTel -> gRPC: add the prefix based on the span kind |
-| Span status code        | `ERROR` when the response status code is not `OK`                | `ERROR` for specific error status codes(see the [gRPC OpenTelemetry conventions](/docs/rpc/grpc.md)) | gRPC -> OTel: parse `rpc.response.status_code` from the status description and set the span status code accordingly<br>OTel -> gRPC: set based on `rpc.response.status_code`<br> |
+| Span name               | `Sent.{method name}` (client)<br>`Recv.{method name}` (server)<br>Note: The gRPC span name *may be* of high cardinality in edge cases.  | `{rpc.method}`                                                               | gRPC -> OTel: Remove the `Sent.` or `Recv.` prefix<br>OTel -> gRPC: Add the prefix based on the span kind |
+| Span status code        | `ERROR` when the response status code is not `OK`                | `ERROR` for specific error status codes (see the [gRPC OpenTelemetry conventions](/docs/rpc/grpc.md)) | gRPC -> OTel: Parse `rpc.response.status_code` from the status description and set the span status code accordingly<br>OTel -> gRPC: Set based on `rpc.response.status_code`<br> |
 | Span status description | Code and description (e.g., `UNAVAILABLE, unable to resolve host`)| Description only (the error code is recorded separately)                    | |
 | Attributes              |                                                                  | `rpc.system.name`                                                            | gRPC -> OTel: set to `grpc`<br>OTel -> gRPC: drop |
 |                         |                                                                  | `rpc.method`                                                                 | gRPC -> OTel: parse from the span name<br>OTel -> gRPC: drop |
 |                         |                                                                  | `rpc.response.status_code`                                                   | gRPC -> OTel: parse from the status description<br>OTel -> gRPC: drop |
 
-OpenTelemetry defines a few other (non-required) gRPC span attributes listed below. When converting from gRPC spans to OpenTelemetry spans or vice versa, these attributes should not be set:
+OpenTelemetry defines a few other (non-required) gRPC span attributes listed below. When converting from gRPC spans to OpenTelemetry spans, these attributes should not be set. When converting from
+OpenTelemetry to gRPC, they should be preserved.
 
 - `network.peer.address`
 - `network.peer.port`
