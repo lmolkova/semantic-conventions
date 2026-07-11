@@ -8,8 +8,6 @@
 
 ## iOS Attributes
 
-This group describes iOS-specific attributes.
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |
@@ -31,8 +29,6 @@ This group describes iOS-specific attributes.
 | `terminate` | The app is about to terminate. Associated with UIKit notification `applicationWillTerminate`. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 ## Deprecated iOS Attributes
-
-The iOS platform on which the iOS application is running.
 
 **Attributes:**
 

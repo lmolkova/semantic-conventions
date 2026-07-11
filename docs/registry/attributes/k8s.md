@@ -3,12 +3,10 @@
 
 # K8s
 
-- [Kubernetes Attributes](#kubernetes-attributes)
-- [Deprecated Kubernetes Attributes](#deprecated-kubernetes-attributes)
+- [K8s Attributes](#k8s-attributes)
+- [Deprecated K8s Attributes](#deprecated-k8s-attributes)
 
-## Kubernetes Attributes
-
-Kubernetes resource attributes.
+## K8s Attributes
 
 **Attributes:**
 
@@ -564,9 +562,7 @@ When not set, Kubernetes distributes traffic evenly across all endpoints cluster
 | `persistentVolumeClaim` | A [persistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim) volume | ![Development](https://img.shields.io/badge/-development-blue) |
 | `secret` | A [secret](https://kubernetes.io/docs/concepts/storage/volumes/#secret) volume | ![Development](https://img.shields.io/badge/-development-blue) |
 
-## Deprecated Kubernetes Attributes
-
-Describes deprecated k8s attributes.
+## Deprecated K8s Attributes
 
 **Attributes:**
 

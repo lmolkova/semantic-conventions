@@ -1,11 +1,10 @@
-groups:
-  # ENCLOSURE METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.enclosure
-    type: attribute_group
-    brief: >
-      Common attributes for enclosure metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.bios_version
         requirement_level: recommended
       - ref: hw.model
@@ -16,3 +15,10 @@ groups:
         requirement_level: recommended
       - ref: hw.vendor
         requirement_level: recommended
+
+# ENCLOSURE METRICS
+metric_refinements:
+  - id: hw.status.enclosure
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.enclosure

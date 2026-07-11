@@ -1,0 +1,82 @@
+file_format: definition/2
+
+# Google Cloud Pub/Sub spans, one per operation type. Each extends the base
+# messaging attributes (`messaging.attributes`) with Pub/Sub-specific attributes.
+attribute_groups:
+  # Producer-side Pub/Sub attributes (set at publish time) that are not present
+  # in `messaging.attributes`. Applied to `create` and `send` spans.
+  - id: messaging.gcp_pubsub.producer.attributes
+    visibility: internal
+    attributes:
+      - ref: messaging.gcp_pubsub.message.ordering_key
+        requirement_level:
+          conditionally_required: If the message type has an ordering key set.
+
+  # Consumer-side Pub/Sub attributes that are not present in
+  # `messaging.attributes` and carry no sampling relevance. Applied to `receive`
+  # and `settle` spans. `messaging.destination.subscription.name` is applied
+  # directly on each consumer span because it is sampling relevant.
+  - id: messaging.gcp_pubsub.consumer.attributes
+    visibility: internal
+    attributes:
+      - ref: messaging.gcp_pubsub.message.delivery_attempt
+      - ref: messaging.gcp_pubsub.message.ack_deadline
+      - ref: messaging.gcp_pubsub.message.ack_id
+
+spans:
+  # Producer spans do not carry consumer-side attributes.
+  - type: messaging.gcp_pubsub.create.producer
+    kind: producer
+    stability: development
+    brief: Describes a Google Cloud Pub/Sub `create` operation.
+    name:
+      note: &gcp-span-name >
+        Pub/Sub span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes: &gcp-producer-attributes
+      - ref_group: messaging.attributes
+      - &gcp-operation-name
+        ref: messaging.operation.name
+        note: |
+          The `messaging.operation.name` has the following list of well-known values in the context of Google Pub/Sub.
+          If one of them applies, then the respective value MUST be used; otherwise, a custom value MAY be used.
+
+          - `ack` and `nack` for settlement operations
+          - `send` for publishing operations
+          - `modack` for extending the lease for a single message or batch of messages
+          - `subscribe` for operations that represent the time from after the message was received to when the message is acknowledged, negatively acknowledged, or expired.
+          - `create` and `receive` for [common messaging operations](/docs/messaging/messaging-spans.md#operation-types)
+      - ref_group: messaging.gcp_pubsub.producer.attributes
+
+  - type: messaging.gcp_pubsub.send.producer
+    kind: producer
+    stability: development
+    brief: Describes a Google Cloud Pub/Sub `send` operation.
+    name:
+      note: *gcp-span-name
+    attributes: *gcp-producer-attributes
+
+  # Consumer spans add consumer-side attributes.
+  - type: messaging.gcp_pubsub.receive.client
+    kind: client
+    stability: development
+    brief: Describes a Google Cloud Pub/Sub `receive` operation.
+    name:
+      note: *gcp-span-name
+    attributes: &gcp-consumer-attributes
+      - ref_group: messaging.attributes
+      - *gcp-operation-name
+      - ref: messaging.destination.subscription.name
+        brief: "Google Pub/Sub [subscription name](https://cloud.google.com/pubsub/docs/subscription-overview)."
+        note: ""
+        sampling_relevant: true
+      - ref_group: messaging.gcp_pubsub.consumer.attributes
+
+  - type: messaging.gcp_pubsub.settle.client
+    kind: client
+    stability: development
+    brief: Describes a Google Cloud Pub/Sub `settle` operation.
+    name:
+      note: *gcp-span-name
+    attributes: *gcp-consumer-attributes

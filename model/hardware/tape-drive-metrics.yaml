@@ -1,11 +1,10 @@
-groups:
-  # TAPE DRIVE METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.tape_drive
-    type: attribute_group
-    brief: >
-      Common attributes for tape drive metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.model
         requirement_level: recommended
       - ref: hw.serial_number
@@ -13,18 +12,29 @@ groups:
       - ref: hw.vendor
         requirement_level: recommended
 
-  - id: metric.hw.tape_drive.operations
-    type: metric
-    metric_name: hw.tape_drive.operations
-    annotations:
-      code_generation:
-        metric_value_type: int
+# TAPE DRIVE METRICS
+metrics:
+  - name: hw.tape_drive.operations
     stability: development
     brief: "Operations performed by the tape drive."
     instrument: counter
     unit: "{operation}"
-    extends: metric_attributes.hw.tape_drive
+    annotations:
+      code_generation:
+        metric_value_type: int
     attributes:
+      - ref_group: metric_attributes.hw.tape_drive
       - ref: hw.tape_drive.operation_type
         examples: ["mount", "unmount", "clean"]
         requirement_level: recommended
+
+metric_refinements:
+  - id: hw.errors.tape_drive
+    ref: hw.errors
+    attributes:
+      - ref_group: metric_attributes.hw.tape_drive
+
+  - id: hw.status.tape_drive
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.tape_drive

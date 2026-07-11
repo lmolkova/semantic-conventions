@@ -8,8 +8,6 @@
 
 ## Code Attributes
 
-These attributes provide context about source code
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |
@@ -37,8 +35,6 @@ Examples:
 * C function: `fopen`
 
 ## Deprecated Code Attributes
-
-These deprecated attributes provide context about source code
 
 **Attributes:**
 

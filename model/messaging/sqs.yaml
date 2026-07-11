@@ -1,0 +1,34 @@
+file_format: definition/2
+
+# AWS SQS spans, one per operation type. Each extends the common messaging
+# attributes (`messaging.attributes`) with SQS-specific attributes.
+attribute_groups:
+  - id: messaging.aws.sqs.attributes
+    visibility: internal
+    attributes:
+      - ref: aws.sqs.queue.url
+        requirement_level: recommended
+      - ref: aws.request_id
+        requirement_level: recommended
+
+spans:
+  - type: messaging.aws.sqs.send.producer
+    kind: producer
+    stability: development
+    brief: Describes an AWS SQS `send` operation.
+    name:
+      note: &span-name >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes: &sqs-attributes
+      - ref_group: messaging.attributes
+      - ref_group: messaging.aws.sqs.attributes
+
+  - type: messaging.aws.sqs.receive.client
+    kind: client
+    stability: development
+    brief: Describes an AWS SQS `receive` operation.
+    name:
+      note: *span-name
+    attributes: *sqs-attributes

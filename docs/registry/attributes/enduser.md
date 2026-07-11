@@ -3,12 +3,10 @@
 
 # Enduser
 
-- [End User Attributes](#end-user-attributes)
-- [Deprecated End User Attributes](#deprecated-end-user-attributes)
+- [Enduser Attributes](#enduser-attributes)
+- [Deprecated Enduser Attributes](#deprecated-enduser-attributes)
 
-## End User Attributes
-
-Describes the end user.
+## Enduser Attributes
 
 **Attributes:**
 
@@ -27,9 +25,7 @@ Describes the end user.
 > [!Warning]
 > This field contains sensitive (linkable PII) information.
 
-## Deprecated End User Attributes
-
-Describes deprecated enduser attributes.
+## Deprecated Enduser Attributes
 
 **Attributes:**
 

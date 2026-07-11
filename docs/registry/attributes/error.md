@@ -8,8 +8,6 @@
 
 ## Error Attributes
 
-This document defines the shared attributes used to report an error.
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |
@@ -51,8 +49,6 @@ it's RECOMMENDED to:
 | `_OTHER` | A fallback error value to be used when the instrumentation doesn't define a custom value. | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
 
 ## Deprecated Error Attributes
-
-This document defines deprecated attributes used to report an error.
 
 **Attributes:**
 

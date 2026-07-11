@@ -1,0 +1,20 @@
+file_format: definition/2
+
+# AWS SNS is a publish/fan-out system, so it defines only a producer `send`
+# (publish) span, extending the common messaging attributes.
+spans:
+  - type: messaging.aws.sns.send.producer
+    kind: producer
+    stability: development
+    brief: Describes an AWS SNS `send` (publish) operation.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref: aws.sns.topic.arn
+        requirement_level: recommended
+      - ref: aws.request_id
+        requirement_level: recommended

@@ -1,11 +1,10 @@
-groups:
-  # DISK CONTROLLER METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.disk_controller
-    type: attribute_group
-    brief: >
-      Common attributes for disk controller metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.bios_version
         requirement_level: recommended
       - ref: hw.driver_version
@@ -18,3 +17,10 @@ groups:
         requirement_level: recommended
       - ref: hw.vendor
         requirement_level: recommended
+
+# DISK CONTROLLER METRICS
+metric_refinements:
+  - id: hw.status.disk_controller
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.disk_controller

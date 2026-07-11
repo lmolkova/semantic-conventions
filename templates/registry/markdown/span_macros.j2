@@ -1,4 +1,4 @@
-{#- Macros for simplifying creating "Span" documentation. -#}
+{#- Macros for simplifying creating "Span" documentation (v2: `kind`, inline attributes). -#}
 {% import 'stability.j2' as stability %}
 {% macro header(span) -%}
 **Status:** {{ stability.badge(span.stability, span.deprecated) }}
@@ -7,10 +7,10 @@
 {%- if span.note %}
 
 {{ span.note | trim }}{% endif %}
-{%- if "**Span kind" not in span.note %}
+{%- if "**Span kind" not in (span.note or "") %}
 
-**Span kind** SHOULD be `{{ span.span_kind | upper }}`.{% endif %}
-{%- if "**Span status" not in span.note %}
+**Span kind** SHOULD be `{{ span.kind | upper }}`.{% endif %}
+{%- if "**Span status" not in (span.note or "") %}
 
 **Span status** SHOULD follow the [Recording Errors](/docs/general/recording-errors.md) document.{% endif %}
 

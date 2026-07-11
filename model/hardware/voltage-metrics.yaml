@@ -1,50 +1,53 @@
-groups:
-  # VOLTAGE METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.voltage.common
-    type: attribute_group
-    brief: >
-      Common attributes for voltage metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.sensor_location
         requirement_level: recommended
 
-  - id: metric.hw.voltage
-    type: metric
-    metric_name: hw.voltage
-    annotations:
-      code_generation:
-        metric_value_type: double
+# VOLTAGE METRICS
+metrics:
+  - name: hw.voltage
     stability: development
     brief: "Voltage measured by the sensor."
     instrument: gauge
     unit: "V"
-    extends: metric_attributes.hw.voltage.common
-
-  - id: metric.hw.voltage.limit
-    type: metric
-    metric_name: hw.voltage.limit
     annotations:
       code_generation:
         metric_value_type: double
+    attributes:
+      - ref_group: metric_attributes.hw.voltage.common
+
+  - name: hw.voltage.limit
     stability: development
     brief: "Voltage limit in Volts."
     instrument: gauge
     unit: "V"
-    extends: metric_attributes.hw.voltage.common
+    annotations:
+      code_generation:
+        metric_value_type: double
     attributes:
+      - ref_group: metric_attributes.hw.voltage.common
       - ref: hw.limit_type
         examples: ["low.critical", "low.degraded", "high.degraded", "high.critical"]
         requirement_level: recommended
 
-  - id: metric.hw.voltage.nominal
-    type: metric
-    metric_name: hw.voltage.nominal
-    annotations:
-      code_generation:
-        metric_value_type: double
+  - name: hw.voltage.nominal
     stability: development
     brief: "Nominal (expected) voltage."
     instrument: gauge
     unit: "V"
-    extends: metric_attributes.hw.voltage.common
+    annotations:
+      code_generation:
+        metric_value_type: double
+    attributes:
+      - ref_group: metric_attributes.hw.voltage.common
+
+metric_refinements:
+  - id: hw.status.voltage
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.voltage.common

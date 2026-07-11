@@ -1,54 +1,61 @@
-groups:
-  # LOGICAL DISK METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.logical_disk
-    type: attribute_group
-    brief: >
-      Common attributes for logical disk metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.logical_disk.raid_level
         requirement_level: recommended
 
-  - id: metric.hw.logical_disk.limit
-    type: metric
-    metric_name: hw.logical_disk.limit
-    annotations:
-      code_generation:
-        metric_value_type: int
+# LOGICAL DISK METRICS
+metrics:
+  - name: hw.logical_disk.limit
     stability: development
     brief: "Size of the logical disk."
     instrument: updowncounter
     unit: "By"
-    extends: metric_attributes.hw.logical_disk
-
-  - id: metric.hw.logical_disk.usage
-    type: metric
-    metric_name: hw.logical_disk.usage
     annotations:
       code_generation:
         metric_value_type: int
+    attributes:
+      - ref_group: metric_attributes.hw.logical_disk
+
+  - name: hw.logical_disk.usage
     stability: development
     brief: "Logical disk space usage."
     instrument: updowncounter
     unit: "By"
-    extends: metric_attributes.hw.logical_disk
+    annotations:
+      code_generation:
+        metric_value_type: int
     attributes:
+      - ref_group: metric_attributes.hw.logical_disk
       - ref: hw.logical_disk.state
         examples: ["used", "free"]
         requirement_level: required
 
-  - id: metric.hw.logical_disk.utilization
-    type: metric
-    metric_name: hw.logical_disk.utilization
-    annotations:
-      code_generation:
-        metric_value_type: double
+  - name: hw.logical_disk.utilization
     stability: development
     brief: "Logical disk space utilization as a fraction."
     instrument: gauge
     unit: "1"
-    extends: metric_attributes.hw.logical_disk
+    annotations:
+      code_generation:
+        metric_value_type: double
     attributes:
+      - ref_group: metric_attributes.hw.logical_disk
       - ref: hw.logical_disk.state
         examples: ["used", "free"]
         requirement_level: required
+
+metric_refinements:
+  - id: hw.errors.logical_disk
+    ref: hw.errors
+    attributes:
+      - ref_group: metric_attributes.hw.logical_disk
+
+  - id: hw.status.logical_disk
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.logical_disk

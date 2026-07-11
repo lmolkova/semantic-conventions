@@ -5,8 +5,6 @@
 
 ## Deprecated Linux Attributes
 
-Deprecated Linux attributes.
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |

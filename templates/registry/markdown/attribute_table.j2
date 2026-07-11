@@ -5,11 +5,17 @@
 {% import 'enum_macros.j2' as enums %}
 {% import 'sampling_macros.j2' as sampling %}
 {% import 'examples_macros.j2' as examples %}
-{#- Macro for creating attribute table -#}
-{% macro generate(attributes, tag_filter, attribute_registry_base_url, lineage_attributes, title) %}{% if (tag_filter | length == 0) %}{% set filtered_attributes = attributes %}{% else %}{% set filtered_attributes = attributes | selectattr("tag", "in", tag_filter) %}{% endif %}{% if (filtered_attributes is defined) and (filtered_attributes | length > 0) %}{% if title and title != "Other" and title != "" %}**{{title}}:**{% elif title is undefined or title != "Other" %}**Attributes:**{%endif%}
+{% import 'links.j2' as links %}
+{#- v2 attribute table: input is a list of attribute objects keyed by `key`, with
+    `requirement_level`, `note`, etc. inlined. -#}
+{#- `show_level`: render the Requirement Level column only when the attributes
+    carry a requirement level. Signal usages (spans/metrics/events) always do;
+    bare catalog attributes (from `registry.attributes`) never do, so the column
+    is dropped automatically for definition-only tables. -#}
+{% macro generate(attributes, attribute_registry_base_url, title) %}{% if (attributes is defined) and (attributes | length > 0) %}{% set show_level = (attributes | selectattr("requirement_level", "defined") | list | length) > 0 %}{% if title and title != "Other" and title != "" %}**{{title}}:**{% elif title is undefined or title != "Other" %}**Attributes:**{%endif%}
 
-| Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
-| --- | --- | --- | --- | --- | --- |
-{% for attribute in filtered_attributes | attribute_sort %}| {{ attrs.name_with_link(attribute, attribute_registry_base_url, lineage_attributes) }} | {{ stability.badge(attribute.stability, attribute.deprecated, attribute.brief) | trim }} | {{ requirement.render({"level": attribute.requirement_level, "name": attrs.name(attribute)}, notes) | trim }} | {{ attrs.type(attribute) }} | {{ attribute.brief | trim }}{{ notes.add({"note": attribute.note, "name": attrs.name(attribute)}) }} | {{ examples.format(attribute) }}|
-{% endfor %}{{ notes.render() }}{{ sampling.snippet(filtered_attributes, attribute_registry_base_url, lineage_attributes) }}{{ enums.tables(filtered_attributes | selectattr("type", "mapping"), notes) }}
+| Key | Stability |{% if show_level %} [Requirement Level]({{ links.requirement_level_url() }}) |{% endif %} Value Type | Description | Example Values |
+| --- | --- |{% if show_level %} --- |{% endif %} --- | --- | --- |
+{% for attribute in attributes | attribute_sort %}| {{ attrs.name_with_link(attribute, attribute_registry_base_url) }} | {{ stability.badge(attribute.stability, attribute.deprecated, attribute.brief) | trim }} |{% if show_level %} {{ requirement.render({"level": attribute.requirement_level, "name": attrs.name(attribute) | trim}, notes) | trim }} |{% endif %} {{ attrs.type(attribute) }} | {{ attribute.brief | trim }}{{ notes.add({"note": attribute.note, "name": attrs.name(attribute) | trim}) }} | {{ examples.format(attribute) }}|
+{% endfor %}{{ notes.render() }}{{ sampling.snippet(attributes, attribute_registry_base_url) }}{{ enums.tables(attributes | selectattr("type", "mapping"), notes) }}
 {% endif %}{% endmacro %}

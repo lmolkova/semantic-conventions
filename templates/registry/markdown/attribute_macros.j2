@@ -1,4 +1,13 @@
 {% import 'examples_macros.j2' as examples %}
+{% import 'links.j2' as links %}
+
+{# v2 attribute objects are keyed by `key`. Template-typed attributes render
+   their key with a `.<key>` suffix, matching the pre-v2 output. #}
+{% macro name(attribute) -%}
+{%- if attribute.type is string and attribute.type is startingwith("template[") %}{{ attribute.key }}.<key>
+{%- else %}{{ attribute.key }}{%- endif %}
+{%- endmacro %}
+
 {% macro type(attribute) %}{%- if attribute.type is mapping %}
 {%- if attribute.type.members[0].value is string %}string{%- endif %}
 {%- if attribute.type.members[0].value is int %}int{%- endif %}
@@ -13,17 +22,9 @@
 {%- elif attribute.type == "template[string[]]" %}string[]
 {%- else %}{{ attribute.type | trim }}{%- endif %}{% endmacro %}
 
-{% macro name(attribute) %}{%- if attribute.type is startingwith("template[") %}{{ attribute.name }}.<key>
-{%- else %}{{ attribute.name }}{%- endif %}{% endmacro %}
-
-{% macro find_lineage(attr_id, lineage) %}{% if attr_id in lineage %}{{lineage[attr_id].source_group}}{% endif %}{% endmacro %}
-
-{% macro name_with_link(attribute, attribute_registry_base_url, lineage_attributes) %}[`{{name(attribute)}}`]({{attribute_registry_base_url}}/{{ find_lineage(attribute.name, lineage_attributes) | split_id | list | reject("eq", "registry")| first | kebab_case }}.md){% endmacro %}
-
-{% macro display_name(group) %}
-{%- if 'display_name' in group %}{{ group.display_name }}
-{%- else %}{{ group.id | split_id | list | reject("eq", "registry") | join(" ") | title_case | acronym }} Attributes
-{%- endif %}{% endmacro %}
+{% macro name_with_link(attribute, attribute_registry_base_url) -%}
+[`{{ name(attribute) | trim }}`]({{ links.attribute_doc_url(attribute, attribute_registry_base_url) | trim }})
+{%- endmacro %}
 
 {% macro heading_link_fragments(title) %}{{ title | trim | lower | replace(" ", "-") | replace("(", "") | replace(")", "") | replace("/", "") | replace("\\", "") | replace(".", "") | replace("!", "") | replace("?", "") | replace("~", "") | replace("#", "")}}{% endmacro %}
 
@@ -34,3 +35,13 @@
 {% macro sentence_case(text) %}
   {{- text[:1].upper() + text[1:].lower() -}}
 {% endmacro %}
+
+{#- Map a raw namespace/entity-type key to a curated display title. If the key is
+    present in the `namespace_mapping` text map, the mapped value is used verbatim;
+    otherwise the normalized `fallback` (humanized/title-cased) form is used. This
+    lets text-map keys be the raw namespaces (e.g. `zos`, `webengine`,
+    `cicd.pipeline`) rather than their post-processed forms. -#}
+{%- macro map_or(raw, fallback) -%}
+{%- set mapped = raw | map_text("namespace_mapping") -%}
+{{- mapped if mapped != raw else fallback -}}
+{%- endmacro -%}

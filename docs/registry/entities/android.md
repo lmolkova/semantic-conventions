@@ -12,11 +12,11 @@
 **Description:** The Android platform on which the Android application is running.
 
 > [!warning]
-> This entity definition contains attributes without a role.
-> Stable Entities MUST NOT have attributes without a defined role.
+> This entity definition has no identity attributes.
+> Stable Entities MUST have at least one identity attribute.
 
 **Attributes:**
 
 | Role | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
 | --- | --- | --- | --- | --- | --- | --- |
-| Other | [`android.os.api_level`](/docs/registry/attributes/android.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Recommended` | string | Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels). | `33`; `32` |
+| Description | [`android.os.api_level`](/docs/registry/attributes/android.md) | ![Development](https://img.shields.io/badge/-development-blue) | `Recommended` | string | Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels). | `33`; `32` |

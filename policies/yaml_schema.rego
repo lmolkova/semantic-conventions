@@ -45,6 +45,14 @@ deny contains yaml_schema_violation(description, group.id, name) if {
     expected_id := sprintf("metric.%s", [name])
     expected_id != group.id
 
+    # TODO(v2-migration): v2 `metric_refinements` translate to v1 metric groups that
+    # inherit `metric_name` via `extends` but keep a refinement id of the form
+    # `{metric_name}.{context}` (e.g. `hw.errors.network`). The resolved v1 group has
+    # no marker distinguishing a refinement from a mis-named metric, so we exclude
+    # refinement-shaped ids here for now. Revisit once policies run against the v2
+    # schema (refinements) directly instead of the v1-translated groups.
+    not startswith(group.id, sprintf("%s.", [name]))
+
     description := sprintf("Metric id '%s' is invalid. Metric id must follow 'metric.{metric_name}' pattern and match '%s'", [group.id, expected_id])
 }
 

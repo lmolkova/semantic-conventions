@@ -174,7 +174,7 @@ table-generation:
 		--param registry_base_url=/docs/registry/ \
 		--templates=/home/weaver/templates \
 		--target=markdown \
-		--future \
+		--v2 \
 		/home/weaver/target
 
 # DEPRECATED: Generate attribute registry markdown.
@@ -193,6 +193,7 @@ registry-generation:
 		$(WEAVER_CONTAINER) registry generate \
 		  --registry=/home/weaver/source \
 		  --templates=/home/weaver/templates \
+		  --v2 \
 		  markdown \
 		  /home/weaver/target/registry/
 
@@ -210,7 +211,7 @@ table-check:
 		--templates=/home/weaver/templates \
 		--target=markdown \
 		--dry-run \
-		--future \
+		--v2 \
 		/home/weaver/target
 
 .PHONY: schema-check

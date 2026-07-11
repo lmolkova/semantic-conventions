@@ -1,11 +1,10 @@
-groups:
-  # MEMORY METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.memory
-    type: attribute_group
-    brief: >
-      Common attributes for memory module metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.model
         requirement_level: recommended
       - ref: hw.serial_number
@@ -15,14 +14,26 @@ groups:
       - ref: hw.vendor
         requirement_level: recommended
 
-  - id: metric.hw.memory.size
-    type: metric
-    metric_name: hw.memory.size
-    annotations:
-      code_generation:
-        metric_value_type: int
+# MEMORY METRICS
+metrics:
+  - name: hw.memory.size
     stability: development
     brief: "Size of the memory module."
     instrument: updowncounter
     unit: "By"
-    extends: metric_attributes.hw.memory
+    annotations:
+      code_generation:
+        metric_value_type: int
+    attributes:
+      - ref_group: metric_attributes.hw.memory
+
+metric_refinements:
+  - id: hw.errors.memory
+    ref: hw.errors
+    attributes:
+      - ref_group: metric_attributes.hw.memory
+
+  - id: hw.status.memory
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.memory

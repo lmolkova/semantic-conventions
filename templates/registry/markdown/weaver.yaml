@@ -1,24 +1,50 @@
+params:
+  # Base URL of this registry's generated attribute/entity pages. Used to build
+  # links to attribute documentation. Overridable via `--param`.
+  registry_base_url: /docs/registry/
+  # Documentation links (kept identical to the pre-v2 templates so generated
+  # markdown does not change).
+  otel_requirement_level_url: https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/
+  naming_recommendations_url: ../../general/naming.md#recommendations-for-application-developers
+  recording_errors_url: /docs/general/recording-errors.md
+
 templates:
-  - pattern: attributes_readme.md.j2
-    filter: '.groups | map(select(.type == "attribute_group")) | map(select(.id | startswith("registry"))) | group_by(.id | split(".") | .[1]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+  # Attribute registry: one index page plus one page per root namespace.
+  - template: attributes_readme.md.j2
+    filter: &attributes_filter >-
+      semconv_grouped_attributes({
+        "v2": true,
+        "exclude_deprecated": false,
+        "ignore_code_generation_annotations": true
+      })
     application_mode: single
     file_name: attributes/README.md
-  - pattern: attribute_namespace.md.j2
-    filter: '.groups | map(select(.type == "attribute_group")) | map(select(.id | startswith("registry"))) | group_by(.id | split(".") | .[1]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+  - template: attribute_namespace.md.j2
+    filter: *attributes_filter
     application_mode: each
-    file_name: attributes/{{ ctx.id | lower | kebab_case }}.md
-  - pattern: registry_readme.md.j2
+    file_name: "attributes/{{ ctx.root_namespace | lower | kebab_case }}.md"
+
+  - template: registry_readme.md.j2
     filter: "."
     application_mode: single
     file_name: README.md
-  - pattern: entity_readme.md.j2
-    filter: '.groups | map(select(.type == "entity")) | group_by(.name | split(".") | .[0]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+
+  # Entity registry: one index page plus one page per root namespace.
+  - template: entity_readme.md.j2
+    filter: &entities_filter >-
+      semconv_signal("entity"; {
+        "v2": true,
+        "exclude_deprecated": false
+      })
+      | group_by(.root_namespace)
+      | map({ root_namespace: .[0].root_namespace, entities: . | sort_by(.type) })
     application_mode: single
     file_name: "entities/README.md"
-  - pattern: entity_namespace.md.j2
-    filter: '.groups | map(select(.type == "entity")) | group_by(.name | split(".") | .[0]) | map({id: .[0].id | split(".") | .[1], groups: .})'
+  - template: entity_namespace.md.j2
+    filter: *entities_filter
     application_mode: each
-    file_name: "entities/{{ ctx.id | kebab_case }}.md"
+    file_name: "entities/{{ ctx.root_namespace | kebab_case }}.md"
+
 acronyms:
   - AI
   - AWS
@@ -50,6 +76,7 @@ acronyms:
   - OS
   - OTel
   - ONC
+  - pprof
   - RabbitMQ
   - RocketMQ
   - RPC
@@ -61,8 +88,17 @@ acronyms:
   - zOS
   - JSONRPC
 text_maps:
+  # Curated display titles for registry pages, keyed by the raw attribute
+  # namespace or entity type. Used by the `map_or` macro (see attribute_macros.j2)
+  # to override the default humanized/title-cased heading.
   namespace_mapping:
-    CICD: CI/CD
-    CICD Pipeline: CI/CD Pipeline
-    CICD Pipeline Run: CI/CD Pipeline Run
-    CICD Worker: CI/CD Worker
+    aspnetcore: ASP.NET Core
+    cicd: CI/CD
+    cicd.pipeline: CI/CD Pipeline
+    cicd.pipeline.run: CI/CD Pipeline Run
+    cicd.worker: CI/CD Worker
+    webengine: Web Engine
+    zos: z/OS
+    zos.software: z/OS Software
+    jsonrpc: JSON-RPC
+    dotnet: .NET

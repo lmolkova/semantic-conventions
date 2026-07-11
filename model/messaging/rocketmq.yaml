@@ -1,0 +1,78 @@
+file_format: definition/2
+
+# Apache RocketMQ spans, one per operation type. Each extends the base
+# messaging attributes (`messaging.attributes`) with RocketMQ-specific
+# attributes.
+attribute_groups:
+  # RocketMQ-specific attributes that apply to both producer and consumer spans
+  # (message properties are set by the producer and read by the consumer) and
+  # are not present in `messaging.attributes` (a group cannot re-declare a base
+  # attribute). Consumer-only RocketMQ attributes
+  # (`messaging.consumer.group.name`, `messaging.rocketmq.consumption_model`)
+  # are applied directly on each consumer span.
+  - id: messaging.rocketmq.attributes
+    visibility: internal
+    attributes:
+      - ref: messaging.rocketmq.namespace
+        requirement_level: required
+      - ref: messaging.rocketmq.message.delivery_timestamp
+        requirement_level:
+          conditionally_required: If the message type is delay and delay time level is not specified.
+      - ref: messaging.rocketmq.message.delay_time_level
+        requirement_level:
+          conditionally_required: If the message type is delay and delivery timestamp is not specified.
+      - ref: messaging.rocketmq.message.group
+        requirement_level:
+          conditionally_required: If the message type is FIFO.
+      - ref: messaging.rocketmq.message.type
+      - ref: messaging.rocketmq.message.tag
+      - ref: messaging.rocketmq.message.keys
+
+spans:
+  # Producer spans do not carry consumer-side attributes
+  # (`messaging.consumer.group.name`, `messaging.rocketmq.consumption_model`).
+  - type: messaging.rocketmq.send.producer
+    kind: producer
+    stability: development
+    brief: Describes an Apache RocketMQ `send` operation.
+    name:
+      note: &rocketmq-span-name >
+        RocketMQ span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref_group: messaging.rocketmq.attributes
+
+  # Consumer spans add consumer-side attributes on top of the producer set.
+  - type: messaging.rocketmq.receive.client
+    kind: client
+    stability: development
+    brief: Describes an Apache RocketMQ `receive` operation.
+    name:
+      note: *rocketmq-span-name
+    attributes: &rocketmq-consumer-attributes
+      - ref_group: messaging.attributes
+      - ref_group: messaging.rocketmq.attributes
+      - ref: messaging.consumer.group.name
+        brief: "RocketMQ [consumer group name](https://rocketmq.apache.org/docs/domainModel/08consumergroup/)."
+        note: ""
+        sampling_relevant: true
+        requirement_level: required
+      - ref: messaging.rocketmq.consumption_model
+
+  - type: messaging.rocketmq.process.consumer
+    kind: consumer
+    stability: development
+    brief: Describes an Apache RocketMQ `process` operation.
+    name:
+      note: *rocketmq-span-name
+    attributes: *rocketmq-consumer-attributes
+
+  - type: messaging.rocketmq.settle.client
+    kind: client
+    stability: development
+    brief: Describes an Apache RocketMQ `settle` operation.
+    name:
+      note: *rocketmq-span-name
+    attributes: *rocketmq-consumer-attributes

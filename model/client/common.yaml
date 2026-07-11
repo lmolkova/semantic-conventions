@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: client
-    type: attribute_group
+    visibility: public
+    stability: stable
     brief: >
       General client attributes.
     attributes:

@@ -1,0 +1,18 @@
+{# All documentation/reference URLs used by the markdown templates.
+   Values come from `params` (see weaver.yaml) so they stay in one place and can
+   be overridden per invocation. This repository is a single registry with no
+   dependencies, so every attribute links to this registry's own pages. #}
+
+{# Namespace of an attribute (v2 uses `key`). #}
+{%- macro _attr_namespace(attribute) -%}
+{{ attribute.key | trim | split_id | first | kebab_case }}
+{%- endmacro -%}
+
+{% macro requirement_level_url() -%}{{ params.otel_requirement_level_url }}{%- endmacro %}
+{% macro naming_recommendations_url() -%}{{ params.naming_recommendations_url }}{%- endmacro %}
+{% macro recording_errors_url() -%}{{ params.recording_errors_url }}{%- endmacro %}
+
+{# Attribute documentation URL: this registry's generated per-namespace page. #}
+{% macro attribute_doc_url(attribute, registry_base_url) -%}
+{{ registry_base_url }}/{{ _attr_namespace(attribute) }}.md
+{%- endmacro %}

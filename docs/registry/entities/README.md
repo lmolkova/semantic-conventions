@@ -103,7 +103,7 @@ Currently, the following namespaces exist:
 | VCS | | |
 | | [vcs.ref](vcs.md#vcs-ref) | ![Development](https://img.shields.io/badge/-development-blue) |
 | | [vcs.repository](vcs.md#vcs-repository) | ![Release Candidate](https://img.shields.io/badge/-rc-mediumorchid) |
-| Webengine | | |
+| Web Engine | | |
 | | [webengine](webengine.md#webengine) | ![Development](https://img.shields.io/badge/-development-blue) |
-| zOS | | |
+| z/OS | | |
 | | [zos.software](zos.md#zos-software) | ![Development](https://img.shields.io/badge/-development-blue) |

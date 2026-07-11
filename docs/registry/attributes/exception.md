@@ -8,8 +8,6 @@
 
 ## Exception Attributes
 
-This document defines the shared attributes used to report a single exception associated with a span or log.
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |
@@ -31,8 +29,6 @@ using `%w` MAY be unwrapped when the wrapper type does not help
 classify the failure.
 
 ## Deprecated Exception Attributes
-
-Deprecated exception attributes.
 
 **Attributes:**
 

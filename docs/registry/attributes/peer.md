@@ -3,9 +3,7 @@
 
 # Peer
 
-## Peer Attributes
-
-These attribute may be used for any operation that accesses some remote service.
+## Deprecated Peer Attributes
 
 **Attributes:**
 

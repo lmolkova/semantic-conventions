@@ -1,0 +1,92 @@
+file_format: definition/2
+
+# Base messaging spans, one per operation type (see
+# /docs/messaging/messaging-spans.md#operation-types). Individual messaging
+# systems define their own spans that reference `messaging.attributes` (and,
+# when needed, system-specific attributes) instead of extending these.
+spans:
+  - type: messaging.create.producer
+    kind: producer
+    stability: development
+    brief: >
+      Describes a messaging operation of type `create`: a message is created or
+      passed to a client library for sending. "Create" spans always refer to a
+      single message.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref: messaging.operation.type
+        note: For `create` spans, `messaging.operation.type` SHOULD be `create`.
+
+  - type: messaging.send.producer
+    kind: producer
+    stability: development
+    brief: >
+      Describes a messaging operation of type `send`: one or more messages are
+      provided for sending to an intermediary. The span kind is `PRODUCER` when
+      the context of the "Send" span is used as the creation context, otherwise
+      `CLIENT`.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref: messaging.operation.type
+        note: For `send` spans, `messaging.operation.type` SHOULD be `send`.
+
+  - type: messaging.receive.client
+    kind: client
+    stability: development
+    brief: >
+      Describes a messaging operation of type `receive`: one or more messages
+      are requested by a consumer. This operation refers to pull-based scenarios.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref_group: messaging.consumer.attributes
+      - ref: messaging.operation.type
+        note: For `receive` spans, `messaging.operation.type` SHOULD be `receive`.
+
+  - type: messaging.process.consumer
+    kind: consumer
+    stability: development
+    brief: >
+      Describes a messaging operation of type `process`: one or more messages
+      are processed by a consumer.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref_group: messaging.consumer.attributes
+      - ref: messaging.operation.type
+        note: For `process` spans, `messaging.operation.type` SHOULD be `process`.
+
+  - type: messaging.settle.client
+    kind: client
+    stability: development
+    brief: >
+      Describes a messaging operation of type `settle`: one or more messages are
+      settled.
+    name:
+      note: >
+        Messaging span names SHOULD follow the general
+        [span naming guidance](/docs/messaging/messaging-spans.md#span-name):
+        `{messaging.operation.name} {destination}`.
+    attributes:
+      - ref_group: messaging.attributes
+      - ref_group: messaging.consumer.attributes
+      - ref: messaging.operation.type
+        note: For `settle` spans, `messaging.operation.type` SHOULD be `settle`.

@@ -1,7 +1,8 @@
-groups:
-
+file_format: definition/2
+attribute_groups:
   - id: pprof
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: >
       Attributes specific to pprof that help convert from pprof to Profiling signal.
     attributes:

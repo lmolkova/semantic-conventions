@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: opentracing
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: 'This document defines semantic conventions for the OpenTracing Shim'
     note: >
         These conventions are used by the OpenTracing Shim layer.

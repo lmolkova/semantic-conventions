@@ -8,8 +8,6 @@
 
 ## HTTP Attributes
 
-This document defines semantic convention attributes in the HTTP namespace.
-
 **Attributes:**
 
 | Key | Stability | Value Type | Description | Example Values |
@@ -124,8 +122,6 @@ support custom route formatting. Instrumentations SHOULD document the format and
 | `TRACE` | TRACE method. | ![Stable](https://img.shields.io/badge/-stable-lightgreen) |
 
 ## Deprecated HTTP Attributes
-
-Describes deprecated HTTP attributes.
 
 **Attributes:**
 

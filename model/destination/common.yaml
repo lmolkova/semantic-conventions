@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: destination
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: >
       General destination attributes.
     attributes:

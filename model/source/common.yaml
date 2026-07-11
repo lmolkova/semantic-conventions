@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: source
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: >
       General source attributes.
     attributes:

@@ -1,3 +1,4 @@
+{%- import 'attribute_macros.j2' as attrs -%}
 <!--- Hugo front matter used to generate the website version of this page:
 linkTitle: Attributes
 --->
@@ -31,9 +32,9 @@ All registered attributes are listed by namespace in this registry.
 
 Currently, the following namespaces exist:
 
-{% for bundle in ctx %}
-{%- set my_file_name = bundle.id | kebab_case ~ ".md" -%}
-- [{{ bundle.id | title_case | acronym | map_text("namespace_mapping") }}]({{ my_file_name }})
+{% for bundle in ctx | sort(attribute="root_namespace") %}
+{%- set my_file_name = bundle.root_namespace | kebab_case ~ ".md" -%}
+- [{{ attrs.map_or(bundle.root_namespace, bundle.root_namespace | title_case | acronym) }}]({{ my_file_name }})
 {% endfor %}
 [developers recommendations]: ../../general/naming.md#recommendations-for-application-developers
 

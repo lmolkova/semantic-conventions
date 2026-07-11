@@ -1,50 +1,53 @@
-groups:
-  # FAN METRICS
+file_format: definition/2
+
+attribute_groups:
   - id: metric_attributes.hw.fan
-    type: attribute_group
-    brief: >
-      Common attributes for fan metrics
-    extends: hardware.attributes.common
+    visibility: internal
     attributes:
+      - ref_group: hardware.attributes.common
       - ref: hw.sensor_location
         requirement_level: recommended
 
-  - id: metric.hw.fan.speed
-    type: metric
-    metric_name: hw.fan.speed
-    annotations:
-      code_generation:
-        metric_value_type: int
+# FAN METRICS
+metrics:
+  - name: hw.fan.speed
     stability: development
     brief: "Fan speed in revolutions per minute."
     instrument: gauge
     unit: "rpm"
-    extends: metric_attributes.hw.fan
-
-  - id: metric.hw.fan.speed.limit
-    type: metric
-    metric_name: hw.fan.speed.limit
     annotations:
       code_generation:
         metric_value_type: int
+    attributes:
+      - ref_group: metric_attributes.hw.fan
+
+  - name: hw.fan.speed.limit
     stability: development
     brief: "Speed limit in rpm."
     instrument: gauge
     unit: "rpm"
-    extends: metric_attributes.hw.fan
+    annotations:
+      code_generation:
+        metric_value_type: int
     attributes:
+      - ref_group: metric_attributes.hw.fan
       - ref: hw.limit_type
         examples: ["low.critical", "low.degraded", "max"]
         requirement_level: recommended
 
-  - id: metric.hw.fan.speed_ratio
-    type: metric
-    metric_name: hw.fan.speed_ratio
-    annotations:
-      code_generation:
-        metric_value_type: double
+  - name: hw.fan.speed_ratio
     stability: development
     brief: "Fan speed expressed as a fraction of its maximum speed."
     instrument: gauge
     unit: "1"
-    extends: metric_attributes.hw.fan
+    annotations:
+      code_generation:
+        metric_value_type: double
+    attributes:
+      - ref_group: metric_attributes.hw.fan
+
+metric_refinements:
+  - id: hw.status.fan
+    ref: hw.status
+    attributes:
+      - ref_group: metric_attributes.hw.fan

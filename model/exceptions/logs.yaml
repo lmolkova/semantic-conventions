@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: log-exception
-    type: attribute_group
+    visibility: public
+    stability: stable
     brief: >
       This document defines attributes for exceptions represented using Log
       Records.

@@ -1,4 +1,5 @@
 {%- import 'stability.j2' as stability -%}
+{%- import 'attribute_macros.j2' as attrs -%}
 <!--- Hugo front matter used to generate the website version of this page:
 linkTitle: Entities
 --->
@@ -20,11 +21,11 @@ Currently, the following namespaces exist:
 
 | Namespace | Entity | Stability |
 | --------- | ------ | --------- |
-{%- for bundle in ctx %}
-| {{ bundle.id | title_case | acronym | map_text("namespace_mapping") }} | | |
-{%- for group in bundle.groups | sort(attribute='name') -%}
-    {%- set my_file_name = bundle.id | kebab_case ~ ".md#" ~ (group.name | kebab_case) %}
-| | [{{ group.name }}]({{my_file_name}}) | {{ stability.badge(group.stability, group.deprecated) | trim }} |
+{%- for bundle in ctx | sort(attribute="root_namespace") %}
+| {{ attrs.map_or(bundle.root_namespace, bundle.root_namespace | title_case | acronym) }} | | |
+{%- for entity in bundle.entities | sort(attribute='type') -%}
+    {%- set my_file_name = bundle.root_namespace | kebab_case ~ ".md#" ~ (entity.type | kebab_case) %}
+| | [{{ entity.type }}]({{my_file_name}}) | {{ stability.badge(entity.stability, entity.deprecated) | trim }} |
 {%- endfor %}
 {%- endfor %}
 

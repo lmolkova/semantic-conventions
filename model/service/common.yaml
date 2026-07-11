@@ -1,6 +1,8 @@
-groups:
+file_format: definition/2
+attribute_groups:
   - id: service.peer
-    type: attribute_group
+    visibility: public
+    stability: development
     brief: "Operations that access some remote service MAY fill out these attributes to describe that remote service."
     attributes:
       - ref: service.peer.name
