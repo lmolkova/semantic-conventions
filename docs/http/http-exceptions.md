@@ -33,6 +33,12 @@ Instrumentations SHOULD set the severity to WARN (severity number 13) when recor
 Some HTTP client frameworks generate artificial exceptions for non-successful HTTP status codes (e.g., 404 Not Found). When possible, instrumentations SHOULD NOT record these artificial exceptions, or SHOULD set the severity to DEBUG (severity number 5).
 Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding HTTP client span.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -77,6 +83,12 @@ This event represents an exception that occurred during HTTP server request proc
 This event SHOULD be recorded when an exception occurs during HTTP server request processing.
 Instrumentations SHOULD set the severity to ERROR (severity number 17) when recording this event.
 Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding HTTP server span.
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 

@@ -1,0 +1,189 @@
+{%- macro java_type(attr) -%}
+{%- if attr.members | length > 0 -%}String
+{%- elif attr.type == "string" -%}String
+{%- elif attr.type == "string[]" -%}List<String>
+{%- elif attr.type == "int" -%}Long
+{%- elif attr.type == "double" -%}Double
+{%- elif attr.type == "boolean" -%}Boolean
+{%- else -%}String
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro key_factory(attr) -%}
+{%- if attr.type == "string[]" -%}stringArrayKey
+{%- elif attr.type == "int" -%}longKey
+{%- elif attr.type == "double" -%}doubleKey
+{%- elif attr.type == "boolean" -%}booleanKey
+{%- else -%}stringKey
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro template_type(attr) -%}
+{%- if attr.type == "template[string[]]" -%}List<String>
+{%- elif attr.type == "template[string]" -%}String
+{%- elif attr.type == "template[int]" -%}Long
+{%- elif attr.type == "template[boolean]" -%}Boolean
+{%- else -%}String
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro template_factory(attr) -%}
+{%- if attr.type == "template[string[]]" -%}stringArrayKeyTemplate
+{%- elif attr.type == "template[int]" -%}longKeyTemplate
+{%- elif attr.type == "template[boolean]" -%}booleanKeyTemplate
+{%- else -%}stringKeyTemplate
+{%- endif -%}
+{%- endmacro -%}
+
+{#- A toggle is off by default only for what is opt-in. -#}
+{%- macro toggle_default(requirement_level) -%}
+{{ "false" if requirement_level == "opt_in" else "true" }}
+{%- endmacro -%}
+
+{%- macro const(name) -%}{{ name | screaming_snake_case }}{%- endmacro -%}
+
+{%- macro attributes_class(domain) -%}{{ domain | pascal_case }}Attributes{%- endmacro -%}
+
+{#- An attribute's config block may declare its own, wider scope. The signal's scope wins when it
+    carries the property, so a shared property can still be overridden for one signal. -#}
+{%- macro config_at(attr) -%}
+{%- if attr.config_scope -%}
+Config.resolve(config, "{{ attr.config.name }}", SCOPE, "general.{{ attr.config_scope }}")
+{%- else -%}
+Config.at(config, SCOPE)
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro default_list(attr) -%}
+{%- for m in attr.members if m != attr.config.prop.fallback_value -%}
+"{{ m }}"{% if not loop.last %}, {% endif %}
+{%- endfor -%}
+{%- endmacro -%}
+
+{% macro key_declaration(attr) %}
+  private static final AttributeKey<{{ java_type(attr) }}> {{ const(attr.name) }} =
+      AttributeKey.{{ key_factory(attr) }}("{{ attr.name }}");
+{%- endmacro %}
+
+{% macro value_filter_method(attr) %}
+  public static String filter{{ attr.name | pascal_case }}(
+      DeclarativeConfigProperties config, String value) {
+    List<String> allowed =
+        {{ config_at(attr) }}
+            .getScalarList("{{ attr.config.name }}", String.class, {{ const(attr.name) }}_DEFAULT);
+    return allowed.contains(value) ? value : "{{ attr.config.prop.fallback_value }}";
+  }
+{%- endmacro %}
+
+{%- macro lookup_type(attr) -%}Function<String, {{ template_type(attr) }}>{%- endmacro -%}
+
+{%- macro normalized_key(attr) -%}
+{%- if attr.config.prop.key_normalization == "lowercase" -%}key.toLowerCase(Locale.ROOT)
+{%- else -%}key
+{%- endif -%}
+{%- endmacro -%}
+
+{% macro key_filter_method(attr, domain) %}
+  public static void populate{{ attr.config.name | pascal_case }}(
+      AttributesBuilder attributes,
+      {{ lookup_type(attr) }} lookup,
+      DeclarativeConfigProperties config) {
+{%- if attr.config_experimental %}
+    if (!Config.experimental(config, "{{ domain }}")) {
+      return;
+    }
+{%- endif %}
+    List<String> keys =
+        {{ config_at(attr) }}.getScalarList("{{ attr.config.name }}", String.class, List.of());
+    for (String key : keys) {
+      {{ template_type(attr) }} value = lookup.apply(key);
+{%- if attr.type is endingwith("[]]") %}
+      if (value != null && !value.isEmpty()) {
+{%- else %}
+      if (value != null) {
+{%- endif %}
+        attributes.put(
+            {{ attributes_class(domain) }}.{{ const(attr.name) }}.getAttributeKey({{ normalized_key(attr) }}),
+            value);
+      }
+    }
+  }
+{%- endmacro %}
+
+{% macro toggle_method(attr, domain) %}
+  public static void set{{ attr.name | pascal_case }}(
+      Span span, Supplier<{{ java_type(attr) }}> value, DeclarativeConfigProperties config) {
+{%- if attr.config_experimental %}
+    if (!Config.experimental(config, "{{ domain }}")) {
+      return;
+    }
+{%- endif %}
+    if (!{{ config_at(attr) }}.getBoolean("{{ attr.config.name }}", {{ toggle_default(attr.requirement_level) }})) {
+      return;
+    }
+    {{ java_type(attr) }} resolved = value.get();
+    if (resolved != null) {
+{%- set limit = attr.configs | selectattr("prop.type", "equalto", "value_limit") | first %}
+{%- if limit %}
+      resolved = truncate{{ attr.name | pascal_case }}(config, resolved);
+{%- endif %}
+      span.setAttribute({{ attributes_class(domain) }}.{{ const(attr.name) }}, resolved);
+    }
+  }
+{%- endmacro %}
+
+{#- A development attribute with no configuration of its own still needs the experimental gate. -#}
+{% macro experimental_setter(attr, domain) %}
+  public static void set{{ attr.name | pascal_case }}(
+      Span span, {{ java_type(attr) }} value, DeclarativeConfigProperties config) {
+    if (!Config.experimental(config, "{{ domain }}")) {
+      return;
+    }
+    if (value != null) {
+      span.setAttribute({{ attributes_class(domain) }}.{{ const(attr.name) }}, value);
+    }
+  }
+{%- endmacro %}
+
+{#- Config supplies a maximum size, and a longer value is truncated. -#}
+{% macro value_limit_method(attr) %}
+  public static String truncate{{ attr.name | pascal_case }}(
+      DeclarativeConfigProperties config, String value) {
+    int limit = {{ config_at(attr) }}.getInt("{{ attr.config.name }}", -1);
+    if (limit < 0 || value == null || value.length() <= limit) {
+      return value;
+    }
+    return value.substring(0, limit);
+  }
+{%- endmacro %}
+
+{#- Config supplies the keys whose values are redacted inside the attribute value. -#}
+{% macro key_redaction_method(attr) %}
+  public static String redact{{ attr.name | pascal_case }}(
+      DeclarativeConfigProperties config, String value) {
+    List<String> sensitive =
+        {{ config_at(attr) }}
+            .getScalarList("{{ attr.config.name }}", String.class, {{ const(attr.name) }}_SENSITIVE_DEFAULT);
+    return Redaction.redactQueryParameters(value, sensitive, "{{ attr.config.prop.fallback_value }}");
+  }
+{%- endmacro %}
+
+{#- Config supplies the values of one attribute to match and the attribute to record on a match. -#}
+{% macro attribute_mapping_method(p, domain) %}
+  public static void populate{{ p.name | pascal_case }}(
+      AttributesBuilder attributes,
+      DeclarativeConfigProperties config,
+      String {{ p.prop.match_attribute | camel_case }}) {
+    if ({{ p.prop.match_attribute | camel_case }} == null) {
+      return;
+    }
+    for (DeclarativeConfigProperties entry :
+        Config.at(config, SCOPE).getStructuredList("{{ p.name }}", List.of())) {
+      if ({{ p.prop.match_attribute | camel_case }}.equals(entry.getString("match"))) {
+        attributes.put(
+            {{ attributes_class(domain) }}.{{ const(p.prop.target_attribute) }}, entry.getString("value"));
+        return;
+      }
+    }
+  }
+{%- endmacro %}

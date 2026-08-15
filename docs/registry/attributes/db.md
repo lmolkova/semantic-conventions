@@ -90,6 +90,13 @@ MAY be recorded as the `db.operation.parameter.max_rows` attribute.
 `db.query.text` parameters SHOULD be captured using `db.query.parameter.<key>`
 instead of `db.operation.parameter.<key>`.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.operation_parameters` | none | Set to the list of operation parameter names to record, each as `db.operation.parameter.<key>`. Parameter values may contain sensitive information. |
+
 **[6] `db.query.parameter.<key>`:** If a query parameter has no name and instead is referenced only by index,
 then `<key>` SHOULD be the 0-based index.
 
@@ -114,6 +121,13 @@ Examples:
 - For a query `"SELECT * FROM users WHERE username = %(userName)s;` with parameter
   `userName = "jdoe"`, the attribute `db.query.parameter.userName` SHOULD be set to `"jdoe"`.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.query_parameters` | none | Set to the list of query parameter names to record, each as `db.query.parameter.<key>`. Use the parameter position (0-based) as the key for positional parameters. Parameter values may contain sensitive information. |
+
 **[7] `db.query.summary`:** The query summary describes a class of database queries and is useful
 as a grouping key, especially when analyzing telemetry for database
 calls involving complex queries.
@@ -133,6 +147,14 @@ system specific term if more applicable.
 **[8] `db.query.text`:** For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
 For batch operations, if the individual operations would all have the same `db.query.text` when executed as non-batch operations, then that query text SHOULD be used. Otherwise, all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
 Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.<scope>.sanitize_query_text` | `true` | Set to `false` to record the query text as the application provided it, instead of replacing embedded literals with placeholders. |
 
 **[9] `db.response.status_code`:** The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
 Semantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system.

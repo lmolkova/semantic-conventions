@@ -1,0 +1,68 @@
+{%- import "macros.j2" as m -%}
+{%- set enabled = ctx.group_properties | selectattr("prop.type", "equalto", "toggle") | first -%}
+package {{ params.package_root }}.{{ ctx.domain }};
+
+import io.opentelemetry.api.common.Attributes;
+{% if ctx.is_exception %}import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder;
+{% endif %}import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.semconv.prototype.config.Config;
+
+public final class {{ ctx.class_name | pascal_case }}Event {
+
+  private static final String SCOPE = "general.{{ ctx.scope }}";
+  private static final String NAME = "{{ ctx.event_name }}";
+
+  private {{ ctx.class_name | pascal_case }}Event() {}
+
+  public static boolean isEnabled(DeclarativeConfigProperties config) {
+{%- if enabled and ctx.experimental %}
+    return Config.experimental(config, "{{ ctx.domain }}")
+        && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif enabled %}
+    return Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif ctx.experimental %}
+    return Config.experimental(config, "{{ ctx.domain }}");
+{%- else %}
+    return true;
+{%- endif %}
+  }
+{% if ctx.is_exception %}
+  public static void emit(
+      Logger logger, DeclarativeConfigProperties config, Severity severity, Throwable throwable) {
+    emit(logger, config, severity, throwable, Attributes.empty());
+  }
+
+  public static void emit(
+      Logger logger,
+      DeclarativeConfigProperties config,
+      Severity severity,
+      Throwable throwable,
+      Attributes attributes) {
+    if (!isEnabled(config)) {
+      return;
+    }
+    ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();
+    builder
+        .setEventName(NAME)
+        .setSeverity(severity)
+        .setException(throwable)
+        .setAllAttributes(attributes)
+        .emit();
+  }
+{%- else %}
+  public static void emit(
+      Logger logger, DeclarativeConfigProperties config, Severity severity, Attributes attributes) {
+    if (!isEnabled(config)) {
+      return;
+    }
+    logger
+        .logRecordBuilder()
+        .setEventName(NAME)
+        .setSeverity(severity)
+        .setAllAttributes(attributes)
+        .emit();
+  }
+{%- endif %}
+}

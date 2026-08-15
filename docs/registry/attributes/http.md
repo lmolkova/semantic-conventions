@@ -52,6 +52,14 @@ When body is recorded, the instrumentation SHOULD record part of the body that w
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.request_capture_body_content` | `false` | Set to `true` to record the content of the HTTP request body. The request body may contain sensitive information. |
+| `.instrumentation/development.general.<scope>.request_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP request body to record. Longer content is truncated. |
+
 **[2] `http.request.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all request headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -68,6 +76,13 @@ Examples:
   attribute with value `["application/json"]`.
 - A header `X-Forwarded-For: 1.2.3.4, 1.2.3.5` SHOULD be recorded as the `http.request.header.x-forwarded-for`
   attribute with value `["1.2.3.4", "1.2.3.5"]` or `["1.2.3.4, 1.2.3.5"]` depending on the HTTP library.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.request_captured_headers` | none | Set to the list of `request` header names to record, each as `http.request.header.<key>`. |
 
 **[3] `http.request.method`:** HTTP request method value SHOULD be "known" to the instrumentation.
 By default, this convention defines "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods),
@@ -91,6 +106,13 @@ it is not a list of known methods in addition to the defaults.
 HTTP method names are case-sensitive and `http.request.method` attribute value MUST match a known HTTP method name exactly.
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
 
 **[4] `http.request.resend_count`:** The resend count SHOULD be updated each time an HTTP request gets resent by the client, regardless of what was the cause of the resending (e.g. redirection, authorization failure, 503 Server Unavailable, network issues, or any other).
 
@@ -120,6 +142,14 @@ which may or may not include reading the response body, so on client spans this 
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.response_capture_body_content` | `false` | Set to `true` to record the content of the HTTP response body. The response body may contain sensitive information. |
+| `.instrumentation/development.general.<scope>.response_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP response body to record. Longer content is truncated. |
+
 **[6] `http.response.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all response headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -135,6 +165,13 @@ Examples:
   attribute with value `["application/json"]`.
 - A header `My-custom-header: abc, def` header SHOULD be recorded as the `http.response.header.my-custom-header`
   attribute with value `["abc", "def"]` or `["abc, def"]` depending on the HTTP library.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.response_captured_headers` | none | Set to the list of `response` header names to record, each as `http.response.header.<key>`. |
 
 **[7] `http.route`:** MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
 SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.

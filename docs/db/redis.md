@@ -95,6 +95,13 @@ as a batch operation, and `db.operation.batch.size` SHOULD be set to `0`.
 See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
 The value provided for `db.query.text` SHOULD correspond to the syntax of the Redis CLI. If, for example, the [`HMSET` command](https://redis.io/docs/latest/commands/hmset) is invoked, `"HMSET myhash field1 ? field2 ?"` would be a suitable value for `db.query.text`.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.sanitize_query_text` | `true` | Set to `false` to record the query text as the application provided it, instead of replacing embedded literals with placeholders. |
+
 **[10] `db.stored_procedure.name`:** See [FCALL](https://redis.io/docs/latest/commands/fcall/) and [EVALSHA](https://redis.io/docs/latest/commands/evalsha/).
 
 **[11] `network.peer.address`:** If a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.

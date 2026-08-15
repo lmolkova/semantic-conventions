@@ -112,6 +112,13 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
+
 **[2] `url.scheme`:** The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.
 
 **[3] `error.type`:** If the request fails with an error before response status code was sent or received,
@@ -214,6 +221,12 @@ This metric is [opt-in][MetricOptIn].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `http.server.active_requests` | UpDownCounter | `{request}` | Number of active HTTP server requests. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -295,6 +308,12 @@ This metric is [opt-in][MetricOptIn].
 
 **[1]:** The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -332,6 +351,13 @@ it is not a list of known methods in addition to the defaults.
 HTTP method names are case-sensitive and `http.request.method` attribute value MUST match a known HTTP method name exactly.
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
 
 **[2] `url.scheme`:** The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.
 
@@ -437,6 +463,12 @@ This metric is [opt-in][MetricOptIn].
 
 **[1]:** The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -474,6 +506,13 @@ it is not a list of known methods in addition to the defaults.
 HTTP method names are case-sensitive and `http.request.method` attribute value MUST match a known HTTP method name exactly.
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
 
 **[2] `url.scheme`:** The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.
 
@@ -620,6 +659,13 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
+
 **[2] `server.address`:** In HTTP/1.1, when the [request target](https://www.rfc-editor.org/rfc/rfc9112.html#name-request-target)
 is passed in its [absolute-form](https://www.rfc-editor.org/rfc/rfc9112.html#section-3.2.2),
 the `server.address` SHOULD match the host component of the request target.
@@ -658,6 +704,13 @@ If the request has completed successfully, instrumentations SHOULD NOT set `erro
 **[7] `network.protocol.version`:** If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
 
 **[8] `url.template`:** The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 ---
 
@@ -704,6 +757,12 @@ This metric is [opt-in][MetricOptIn].
 
 **[1]:** The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -741,6 +800,13 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
+
 **[2] `server.address`:** In HTTP/1.1, when the [request target](https://www.rfc-editor.org/rfc/rfc9112.html#name-request-target)
 is passed in its [absolute-form](https://www.rfc-editor.org/rfc/rfc9112.html#section-3.2.2),
 the `server.address` SHOULD match the host component of the request target.
@@ -777,6 +843,13 @@ If the request has completed successfully, instrumentations SHOULD NOT set `erro
 **[6] `network.protocol.name`:** The value SHOULD be normalized to lowercase.
 
 **[7] `url.template`:** The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **[8] `network.protocol.version`:** If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
 
@@ -825,6 +898,12 @@ This metric is [opt-in][MetricOptIn].
 
 **[1]:** The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -862,6 +941,13 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
+
 **[2] `server.address`:** In HTTP/1.1, when the [request target](https://www.rfc-editor.org/rfc/rfc9112.html#name-request-target)
 is passed in its [absolute-form](https://www.rfc-editor.org/rfc/rfc9112.html#section-3.2.2),
 the `server.address` SHOULD match the host component of the request target.
@@ -898,6 +984,13 @@ If the request has completed successfully, instrumentations SHOULD NOT set `erro
 **[6] `network.protocol.name`:** The value SHOULD be normalized to lowercase.
 
 **[7] `url.template`:** The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **[8] `network.protocol.version`:** If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
 
@@ -944,6 +1037,12 @@ This metric is [opt-in][MetricOptIn].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `http.client.open_connections` | UpDownCounter | `{connection}` | Number of outbound HTTP connections that are currently active or idle on the client. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -989,6 +1088,12 @@ This metric is [opt-in][MetricOptIn].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `http.client.connection.duration` | Histogram | `s` | The duration of the successfully established outbound HTTP connections. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -1024,6 +1129,12 @@ This metric is [opt-in][MetricOptIn].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `http.client.active_requests` | UpDownCounter | `{request}` | Number of active HTTP requests. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -1049,6 +1160,13 @@ In all other cases, `server.port` SHOULD match the port component of the
 `Host` header in HTTP/1.1 or the `:authority` pseudo-header in HTTP/2 and HTTP/3.
 
 **[3] `url.template`:** The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **[4] `http.request.method`:** HTTP request method value SHOULD be "known" to the instrumentation.
 By default, this convention defines "known" methods as the ones listed in [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-methods),

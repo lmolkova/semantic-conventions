@@ -34,6 +34,8 @@ groups:
     type: metric
     metric_name: rpc.server.call.duration
     annotations:
+      config:
+        scope: rpc.server
       code_generation:
         metric_value_type: double
     stability: release_candidate
@@ -51,6 +53,8 @@ groups:
     type: metric
     metric_name: rpc.client.call.duration
     annotations:
+      config:
+        scope: rpc.client
       code_generation:
         metric_value_type: double
     stability: release_candidate

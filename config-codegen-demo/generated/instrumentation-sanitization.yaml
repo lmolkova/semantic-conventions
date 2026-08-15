@@ -1,0 +1,23 @@
+$defs:
+  ExperimentalSanitizationInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      url:
+        $ref: "#/$defs/ExperimentalSanitizationUrlInstrumentation"
+        description: Configure instrumentations following the sanitization url semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalSanitizationUrlInstrumentation are used"
+
+  ExperimentalSanitizationUrlInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      sensitive_query_parameters:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of query parameter names whose values are replaced with `REDACTED`.
+          This is a full override of the default list, not an addition to it.
+          Set to an empty list to disable redaction.
+        defaultBehavior: "the values of X-Amz-Signature, X-Amz-Credential, X-Amz-Security-Token, AWSAccessKeyId, Signature, sig, X-Goog-Signature are replaced with `REDACTED`"

@@ -3,6 +3,8 @@ groups:
     type: metric
     metric_name: db.client.operation.duration
     annotations:
+      config:
+        scope: db.client
       code_generation:
         metric_value_type: double
     brief: "Duration of database client operations."
@@ -36,11 +38,26 @@ groups:
           conditionally_required: If available.
       - ref: db.query.text
         requirement_level: opt_in
+        annotations:
+          config:
+            scope: db.client.metric
+            properties:
+              query_text:
+                type: toggle
+                description: |
+                  Set to `true` to record `db.query.text` as a metric attribute.
+                  Query text may have high cardinality and may contain sensitive information.
 
   - id: metric.db.client.connection.count
     type: metric
     metric_name: db.client.connection.count
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -57,6 +74,12 @@ groups:
     type: metric
     metric_name: db.client.connection.idle.max
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -71,6 +94,12 @@ groups:
     type: metric
     metric_name: db.client.connection.idle.min
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -85,6 +114,12 @@ groups:
     type: metric
     metric_name: db.client.connection.max
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -99,6 +134,12 @@ groups:
     type: metric
     metric_name: db.client.connection.pending_requests
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -113,6 +154,12 @@ groups:
     type: metric
     metric_name: db.client.connection.timeouts
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     stability: development
@@ -127,6 +174,12 @@ groups:
     type: metric
     metric_name: db.client.connection.create_time
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: double
     stability: development
@@ -141,6 +194,12 @@ groups:
     type: metric
     metric_name: db.client.connection.wait_time
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: double
     stability: development
@@ -155,6 +214,12 @@ groups:
     type: metric
     metric_name: db.client.connection.use_time
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: double
     stability: development
@@ -169,6 +234,12 @@ groups:
     type: metric
     metric_name: db.client.response.returned_rows
     annotations:
+      config:
+        scope: db.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
       code_generation:
         metric_value_type: int
     brief: "The actual number of records returned by the database operation."
@@ -197,3 +268,12 @@ groups:
           conditionally_required: If available.
       - ref: db.query.text
         requirement_level: opt_in
+        annotations:
+          config:
+            scope: db.client.metric
+            properties:
+              query_text:
+                type: toggle
+                description: |
+                  Set to `true` to record `db.query.text` as a metric attribute.
+                  Query text may have high cardinality and may contain sensitive information.

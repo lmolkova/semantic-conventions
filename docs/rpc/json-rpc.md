@@ -84,6 +84,13 @@ Instrumentations SHOULD NOT capture this attribute when the `id` is `null` or om
 **[7] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
 General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.client.known_methods` | none | Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`. Method names are case-sensitive. `rpc.method` is not recorded when this list is empty. |
+
 The following attributes can be important for making sampling decisions
 and SHOULD be provided **at span creation time** (if provided at all):
 
@@ -167,6 +174,13 @@ Instrumentations SHOULD NOT capture this attribute when the `id` is `null` or om
 
 **[7] `rpc.method`:** JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
 General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.server.known_methods` | none | Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`. Method names are case-sensitive. `rpc.method` is not recorded when this list is empty. |
 
 The following attributes can be important for making sampling decisions
 and SHOULD be provided **at span creation time** (if provided at all):

@@ -43,17 +43,38 @@ The `code.function.name` attribute may be used to record the fully-qualified
 method actually executing the call on the server side, or the
 RPC client stub method on the client side.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.known_methods` | none | Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`. Method names are case-sensitive. `rpc.method` is not recorded when this list is empty. |
+
 **[2] `rpc.request.metadata.<key>`:** Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
 Including all request metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
 For example, a property `my-custom-key` with value `["1.2.3.4", "1.2.3.5"]` SHOULD be recorded as
 `rpc.request.metadata.my-custom-key` attribute with value `["1.2.3.4", "1.2.3.5"]`
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.request_captured_metadata` | none | Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`. |
+
 **[3] `rpc.response.metadata.<key>`:** Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
 Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
 For example, a property `my-custom-key` with value `["attribute_value"]` SHOULD be recorded as
 the `rpc.response.metadata.my-custom-key` attribute with value `["attribute_value"]`
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.response_captured_metadata` | none | Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`. |
 
 **[4] `rpc.status_code`:** Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
 Semantic conventions for individual RPC frameworks SHOULD document what `rpc.status_code` means in the context of that system and which values are considered to represent errors.

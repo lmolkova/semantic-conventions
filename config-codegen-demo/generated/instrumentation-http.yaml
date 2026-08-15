@@ -1,0 +1,149 @@
+$defs:
+  ExperimentalHttpInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      client:
+        $ref: "#/$defs/ExperimentalHttpClientInstrumentation"
+        description: Configure instrumentations following the http client semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalHttpClientInstrumentation are used"
+      server:
+        $ref: "#/$defs/ExperimentalHttpServerInstrumentation"
+        description: Configure instrumentations following the http server semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalHttpServerInstrumentation are used"
+
+  ExperimentalHttpClientInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      known_methods:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of known HTTP methods; any other value is recorded as `_OTHER`.
+          Known methods are case-sensitive.
+          This is a full override of the default known methods, not a list of known methods in addition to the defaults.
+          Equivalent to the OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS environment variable.
+        defaultBehavior: "CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE are known"
+      request_capture_body_content:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record the content of the HTTP request body.
+          The request body may contain sensitive information.
+        defaultBehavior: "`false` is used"
+      request_capture_body_content_max_size:
+        type: [integer, "null"]
+        minimum: 0
+        description: |
+          Set to the maximum number of characters of the HTTP request body to record.
+          Longer content is truncated.
+        defaultBehavior: "the value is recorded in full"
+      request_captured_headers:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of `request` header names to record, each as `http.request.header.<key>`.
+        defaultBehavior: "no keys are captured"
+      response_capture_body_content:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record the content of the HTTP response body.
+          The response body may contain sensitive information.
+        defaultBehavior: "`false` is used"
+      response_capture_body_content_max_size:
+        type: [integer, "null"]
+        minimum: 0
+        description: |
+          Set to the maximum number of characters of the HTTP response body to record.
+          Longer content is truncated.
+        defaultBehavior: "the value is recorded in full"
+      response_captured_headers:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of `response` header names to record, each as `http.response.header.<key>`.
+        defaultBehavior: "no keys are captured"
+      service_peer_name_mapping:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [match, value]
+          properties:
+            match:
+              type: string
+              description: A `server.address` value to match.
+            value:
+              type: string
+              description: The `service.peer.name` to record on a match.
+        description: |
+          Set to the list of `server.address` values and the `service.peer.name` to record for each.
+          Requests to any other address record no `service.peer.name`.
+        defaultBehavior: "no `service.peer.name` is recorded"
+
+  ExperimentalHttpServerInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      known_methods:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of known HTTP methods; any other value is recorded as `_OTHER`.
+          Known methods are case-sensitive.
+          This is a full override of the default known methods, not a list of known methods in addition to the defaults.
+          Equivalent to the OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS environment variable.
+        defaultBehavior: "CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE are known"
+      request_capture_body_content:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record the content of the HTTP request body.
+          The request body may contain sensitive information.
+        defaultBehavior: "`false` is used"
+      request_capture_body_content_max_size:
+        type: [integer, "null"]
+        minimum: 0
+        description: |
+          Set to the maximum number of characters of the HTTP request body to record.
+          Longer content is truncated.
+        defaultBehavior: "the value is recorded in full"
+      request_captured_headers:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of `request` header names to record, each as `http.request.header.<key>`.
+        defaultBehavior: "no keys are captured"
+      response_capture_body_content:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record the content of the HTTP response body.
+          The response body may contain sensitive information.
+        defaultBehavior: "`false` is used"
+      response_capture_body_content_max_size:
+        type: [integer, "null"]
+        minimum: 0
+        description: |
+          Set to the maximum number of characters of the HTTP response body to record.
+          Longer content is truncated.
+        defaultBehavior: "the value is recorded in full"
+      response_captured_headers:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of `response` header names to record, each as `http.response.header.<key>`.
+        defaultBehavior: "no keys are captured"
+      sensitive_query_parameters:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of query parameter names whose values are replaced with `REDACTED`.
+          This is a full override of the default list, not an addition to it.
+          Set to an empty list to disable redaction.
+        defaultBehavior: "the values of X-Amz-Signature, X-Amz-Credential, X-Amz-Security-Token, AWSAccessKeyId, Signature, sig, X-Goog-Signature are replaced with `REDACTED`"

@@ -1,0 +1,72 @@
+{%- import "macros.j2" as m -%}
+{%- set enabled = ctx.group_properties | selectattr("prop.type", "equalto", "toggle") | first -%}
+{%- set value_type = "double" if ctx.value_type == "double" else "long" -%}
+{%- set boxed = "Double" if ctx.value_type == "double" else "Long" -%}
+package {{ params.package_root }}.{{ ctx.domain }};
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.api.metrics.{{ "DoubleHistogram" if ctx.instrument == "histogram" else "LongUpDownCounter" }};
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.semconv.prototype.config.Config;
+
+public final class {{ ctx.class_name | pascal_case }}Metric {
+
+  private static final String SCOPE = "general.{{ ctx.scope }}";
+  private static final String NAME = "{{ ctx.metric_name }}";
+
+  private {{ ctx.class_name | pascal_case }}Metric() {}
+
+  public static boolean isEnabled(DeclarativeConfigProperties config) {
+{%- if enabled and ctx.experimental %}
+    return Config.experimental(config, "{{ ctx.domain }}")
+        && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif enabled %}
+    return Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif ctx.experimental %}
+    return Config.experimental(config, "{{ ctx.domain }}");
+{%- else %}
+    return true;
+{%- endif %}
+  }
+
+{% if ctx.instrument == "histogram" %}
+  public static DoubleHistogram create(Meter meter) {
+    return meter
+        .histogramBuilder(NAME)
+        .setUnit("{{ ctx.unit }}")
+        .setDescription("{{ ctx.brief | trim | replace("\"", "'") | replace("\n", " ") }}")
+        .build();
+  }
+
+  public static void record(
+      DoubleHistogram instrument,
+      DeclarativeConfigProperties config,
+      double value,
+      Attributes attributes) {
+    if (!isEnabled(config)) {
+      return;
+    }
+    instrument.record(value, attributes);
+  }
+{% else %}
+  public static LongUpDownCounter create(Meter meter) {
+    return meter
+        .upDownCounterBuilder(NAME)
+        .setUnit("{{ ctx.unit }}")
+        .setDescription("{{ ctx.brief | trim | replace("\"", "'") | replace("\n", " ") }}")
+        .build();
+  }
+
+  public static void add(
+      LongUpDownCounter instrument,
+      DeclarativeConfigProperties config,
+      long value,
+      Attributes attributes) {
+    if (!isEnabled(config)) {
+      return;
+    }
+    instrument.add(value, attributes);
+  }
+{% endif %}
+}

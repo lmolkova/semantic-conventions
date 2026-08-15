@@ -62,6 +62,17 @@ groups:
       - id: db.query.text
         type: string
         stability: stable
+        annotations:
+          config:
+            properties:
+              # No semantic type fits - this changes the value, not whether it is recorded, so it
+              # reaches the schema and the docs but generates no code.
+              sanitize_query_text:
+                type: boolean
+                default: true
+                description: |
+                  Set to `false` to record the query text as the application provided it, instead of
+                  replacing embedded literals with placeholders.
         brief: >
           The database query being executed.
         note: >
@@ -85,6 +96,15 @@ groups:
       - id: db.query.parameter
         type: template[string]
         stability: development
+        annotations:
+          config:
+            properties:
+              query_parameters:
+                type: key_filter
+                description: |
+                  Set to the list of query parameter names to record, each as `db.query.parameter.<key>`.
+                  Use the parameter position (0-based) as the key for positional parameters.
+                  Parameter values may contain sensitive information.
         brief: >
           A database query parameter, with `<key>` being the parameter name,
           and the attribute value being a string representation of the parameter value.
@@ -156,6 +176,14 @@ groups:
       - id: db.operation.parameter
         type: template[string]
         stability: development
+        annotations:
+          config:
+            properties:
+              operation_parameters:
+                type: key_filter
+                description: |
+                  Set to the list of operation parameter names to record, each as `db.operation.parameter.<key>`.
+                  Parameter values may contain sensitive information.
         brief: >
           A database operation parameter, with `<key>` being the parameter name,
           and the attribute value being a string representation of the parameter value.

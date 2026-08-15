@@ -147,6 +147,12 @@ There are two ways HTTP client spans can be implemented in an instrumentation:
 
 **Span status:** refer to the [Span Status](/docs/http/http-spans.md#status) section.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.service_peer_name_mapping` | none | Set to the list of `server.address` values and the `service.peer.name` to record for each. Requests to any other address record no `service.peer.name`. |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -199,6 +205,13 @@ it is not a list of known methods in addition to the defaults.
 HTTP method names are case-sensitive and `http.request.method` attribute value MUST match a known HTTP method name exactly.
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
 
 **[2] `server.address`:** In HTTP/1.1, when the [request target](https://www.rfc-editor.org/rfc/rfc9112.html#name-request-target)
 is passed in its [absolute-form](https://www.rfc-editor.org/rfc/rfc9112.html#section-3.2.2),
@@ -305,6 +318,14 @@ When body is recorded, the instrumentation SHOULD record part of the body that w
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.request_capture_body_content` | `false` | Set to `true` to record the content of the HTTP request body. The request body may contain sensitive information. |
+| `.instrumentation/development.general.http.client.request_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP request body to record. Longer content is truncated. |
+
 **[12] `http.request.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all request headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -321,6 +342,13 @@ Examples:
   attribute with value `["application/json"]`.
 - A header `X-Forwarded-For: 1.2.3.4, 1.2.3.5` SHOULD be recorded as the `http.request.header.x-forwarded-for`
   attribute with value `["1.2.3.4", "1.2.3.5"]` or `["1.2.3.4, 1.2.3.5"]` depending on the HTTP library.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.request_captured_headers` | none | Set to the list of `request` header names to record, each as `http.request.header.<key>`. |
 
 **[13] `http.response.body.content`:** Captured value MAY be limited in size and thus value is expected to be truncated in many cases.
 When an instrumentation applies a byte-based limit while capturing the body as a string, it SHOULD truncate on a character
@@ -348,6 +376,14 @@ which may or may not include reading the response body, so on client spans this 
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.response_capture_body_content` | `false` | Set to `true` to record the content of the HTTP response body. The response body may contain sensitive information. |
+| `.instrumentation/development.general.http.client.response_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP response body to record. Longer content is truncated. |
+
 **[14] `http.response.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all response headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -364,9 +400,23 @@ Examples:
 - A header `My-custom-header: abc, def` header SHOULD be recorded as the `http.response.header.my-custom-header`
   attribute with value `["abc", "def"]` or `["abc, def"]` depending on the HTTP library.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.client.response_captured_headers` | none | Set to the list of `response` header names to record, each as `http.response.header.<key>`. |
+
 **[15] `network.transport`:** Generally `tcp` for `HTTP/1.0`, `HTTP/1.1`, and `HTTP/2`. Generally `udp` for `HTTP/3`. Other obscure implementations are possible.
 
 **[16] `url.template`:** The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `http` domain. Applies to all `http` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **[17] `user_agent.synthetic.type`:** This attribute MAY be derived from the contents of the `user_agent.original` attribute. Components that populate the attribute are responsible for determining what they consider to be synthetic bot or test traffic. This attribute can either be set for self-identification purposes, or on telemetry detected to be generated as a result of a synthetic request. This attribute is useful for distinguishing between genuine client traffic and synthetic traffic generated by bots or tests.
 
@@ -578,6 +628,13 @@ HTTP method names are case-sensitive and `http.request.method` attribute value M
 Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
 Tracing instrumentations that do so, MUST also set `http.request.method_original` to the original value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.known_methods` | `CONNECT`, `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, `PUT`, `TRACE` | Set to the list of known HTTP methods; any other value is recorded as `_OTHER`. Known methods are case-sensitive. This is a full override of the default known methods, not a list of known methods in addition to the defaults. Equivalent to the `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` environment variable. |
+
 **[2] `url.path`:** Sensitive content provided in `url.path` SHOULD be scrubbed when instrumentations can identify it.
 
 **[3] `url.scheme`:** The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.
@@ -649,6 +706,14 @@ it is not a list of keys in addition to the defaults.
 When a query string value is redacted, the query string key SHOULD still be preserved, e.g.
 `q=OpenTelemetry&sig=REDACTED`.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.sanitization.url.sensitive_query_parameters` | `X-Amz-Signature`, `X-Amz-Credential`, `X-Amz-Security-Token`, `AWSAccessKeyId`, `Signature`, `sig`, `X-Goog-Signature` | Set to the list of query parameter names whose values are replaced with `REDACTED`. This is a full override of the default list, not an addition to it. Set to an empty list to disable redaction. |
+| `.instrumentation/development.general.http.server.sensitive_query_parameters` | `X-Amz-Signature`, `X-Amz-Credential`, `X-Amz-Security-Token`, `AWSAccessKeyId`, `Signature`, `sig`, `X-Goog-Signature` | Set to the list of query parameter names whose values are replaced with `REDACTED`. This is a full override of the default list, not an addition to it. Set to an empty list to disable redaction. |
+
 **[11] `client.address`:** The IP address of the original client behind all proxies, if known (e.g. from [Forwarded#for](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#for), [X-Forwarded-For](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-For), or a similar header). Otherwise, the immediate client peer address.
 
 **[12] `network.protocol.version`:** If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
@@ -680,6 +745,14 @@ When body is recorded, the instrumentation SHOULD record part of the body that w
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.request_capture_body_content` | `false` | Set to `true` to record the content of the HTTP request body. The request body may contain sensitive information. |
+| `.instrumentation/development.general.http.server.request_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP request body to record. Longer content is truncated. |
+
 **[16] `http.request.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all request headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -696,6 +769,13 @@ Examples:
   attribute with value `["application/json"]`.
 - A header `X-Forwarded-For: 1.2.3.4, 1.2.3.5` SHOULD be recorded as the `http.request.header.x-forwarded-for`
   attribute with value `["1.2.3.4", "1.2.3.5"]` or `["1.2.3.4, 1.2.3.5"]` depending on the HTTP library.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.request_captured_headers` | none | Set to the list of `request` header names to record, each as `http.request.header.<key>`. |
 
 **[17] `http.response.body.content`:** Captured value MAY be limited in size and thus value is expected to be truncated in many cases.
 When an instrumentation applies a byte-based limit while capturing the body as a string, it SHOULD truncate on a character
@@ -723,6 +803,14 @@ which may or may not include reading the response body, so on client spans this 
 The value MUST be either a string or a byte array. Instrumentations MUST NOT record a parsed or otherwise structured representation of the body,
 and MUST NOT base64-encode binary content into a string value.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.response_capture_body_content` | `false` | Set to `true` to record the content of the HTTP response body. The response body may contain sensitive information. |
+| `.instrumentation/development.general.http.server.response_capture_body_content_max_size` | no limit | Set to the maximum number of characters of the HTTP response body to record. Longer content is truncated. |
+
 **[18] `http.response.header.<key>`:** Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
 Including all response headers can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
@@ -738,6 +826,13 @@ Examples:
   attribute with value `["application/json"]`.
 - A header `My-custom-header: abc, def` header SHOULD be recorded as the `http.response.header.my-custom-header`
   attribute with value `["abc", "def"]` or `["abc, def"]` depending on the HTTP library.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.http.server.response_captured_headers` | none | Set to the list of `response` header names to record, each as `http.response.header.<key>`. |
 
 **[19] `network.transport`:** Generally `tcp` for `HTTP/1.0`, `HTTP/1.1`, and `HTTP/2`. Generally `udp` for `HTTP/3`. Other obscure implementations are possible.
 

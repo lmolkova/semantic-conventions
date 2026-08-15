@@ -47,6 +47,9 @@ groups:
 
   - id: span.rpc.call.client
     type: span
+    annotations:
+      config:
+        scope: rpc.client
     stability: release_candidate
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
@@ -75,6 +78,9 @@ groups:
 
   - id: span.rpc.call.server
     type: span
+    annotations:
+      config:
+        scope: rpc.server
     stability: release_candidate
     extends: attributes.rpc.server.server
     span_kind: server
@@ -100,6 +106,9 @@ groups:
 
   - id: span.rpc.connect_rpc.call.client
     type: span
+    annotations:
+      config:
+        scope: rpc.client
     stability: development
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
@@ -137,6 +146,9 @@ groups:
 
   - id: span.rpc.connect_rpc.call.server
     type: span
+    annotations:
+      config:
+        scope: rpc.server
     stability: development
     extends: attributes.rpc.server.server
     span_kind: server
@@ -171,6 +183,9 @@ groups:
 
   - id: span.rpc.grpc.call.client
     type: span
+    annotations:
+      config:
+        scope: rpc.client
     stability: release_candidate
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
@@ -246,6 +261,9 @@ groups:
         examples: [50051]
   - id: span.rpc.grpc.call.server
     type: span
+    annotations:
+      config:
+        scope: rpc.server
     stability: release_candidate
     extends: attributes.rpc.server.server
     span_kind: server
@@ -302,6 +320,9 @@ groups:
 
   - id: span.rpc.jsonrpc.call.client
     type: span
+    annotations:
+      config:
+        scope: rpc.client
     stability: development
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
@@ -336,6 +357,16 @@ groups:
           When tracing instrumentation converts RPC method to `_OTHER`, it MUST
           also set `rpc.method_original` span attribute to the original value.
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              known_methods:
+                type: value_filter
+                fallback_value: _OTHER
+                description: |
+                  Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`.
+                  Method names are case-sensitive.
+                  `rpc.method` is not recorded when this list is empty.
       - ref: rpc.status_code
         brief: >
           The [`error.code`](https://www.jsonrpc.org/specification#error_object)
@@ -354,6 +385,9 @@ groups:
 
   - id: span.rpc.jsonrpc.call.server
     type: span
+    annotations:
+      config:
+        scope: rpc.server
     stability: development
     extends: attributes.rpc.server.server
     span_kind: server
@@ -388,6 +422,16 @@ groups:
           When tracing instrumentation converts RPC method to `_OTHER`, it MUST
           also set `rpc.method_original` span attribute to the original value.
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              known_methods:
+                type: value_filter
+                fallback_value: _OTHER
+                description: |
+                  Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`.
+                  Method names are case-sensitive.
+                  `rpc.method` is not recorded when this list is empty.
       - ref: rpc.status_code
         brief: >
           The [`error.code`](https://www.jsonrpc.org/specification#error_object) property of
@@ -399,6 +443,9 @@ groups:
 
   - id: span.rpc.dubbo.call.client
     type: span
+    annotations:
+      config:
+        scope: rpc.client
     stability: release_candidate
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
@@ -507,6 +554,9 @@ groups:
 
   - id: span.rpc.dubbo.call.server
     type: span
+    annotations:
+      config:
+        scope: rpc.server
     stability: release_candidate
     extends: attributes.rpc.server.server
     span_kind: server

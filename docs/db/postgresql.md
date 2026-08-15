@@ -134,6 +134,13 @@ Parameterized query text SHOULD be collected by default (the query parameter val
 For batch operations, if the individual operations would all have the same `db.query.text` when executed as non-batch operations, then that query text SHOULD be used. Otherwise, all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
 Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.sanitize_query_text` | `true` | Set to `false` to record the query text as the application provided it, instead of replacing embedded literals with placeholders. |
+
 **[15] `db.stored_procedure.name`:** If operation applies to a specific stored procedure.
 
 **[16] `db.stored_procedure.name`:** It is RECOMMENDED to capture the value as provided by the application
@@ -168,6 +175,13 @@ Examples:
 
 - For a query `"SELECT * FROM users WHERE username = %(userName)s;` with parameter
   `userName = "jdoe"`, the attribute `db.query.parameter.userName` SHOULD be set to `"jdoe"`.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.query_parameters` | none | Set to the list of query parameter names to record, each as `db.query.parameter.<key>`. Use the parameter position (0-based) as the key for positional parameters. Parameter values may contain sensitive information. |
 
 **[19] `db.response.returned_rows`:** The number of rows returned by the database operation as observed
 by the instrumentation at the time the span ends.

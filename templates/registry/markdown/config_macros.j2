@@ -1,0 +1,118 @@
+{#- Macros rendering the declarative configuration that applies to an attribute or a signal. -#}
+
+{%- set config_root = ".instrumentation/development.general" -%}
+
+{#- TODO: `semconv_experimental` is a flat stand-in for the nested ExperimentalSemconvConfig
+    property at general.<domain>.semconv.experimental. Config types that a property can point
+    into should be modelled, rather than special-cased by name here and in the generators. -#}
+{%- macro path(item, scope, domain) -%}
+{%- if item.name == "semconv_experimental" -%}
+{{ config_root }}.{{ domain }}.semconv.experimental
+{%- else -%}
+{{ config_root }}.{{ scope }}.{{ item.name }}
+{%- endif -%}
+{%- endmacro -%}
+
+{#- Defaults are derived: enum members for a value filter, empty for a key filter, and for a
+    toggle the requirement level of what it gates - `opt_in` is off by default, anything else on.
+    `semconv_experimental` is the ExperimentalSemconvConfig gate, which is off by default. -#}
+{%- macro default(item) -%}
+{%- if item.prop.type == "value_filter" and item.attr.type is mapping -%}
+{% for m in item.attr.type.members if m.stability == "stable" and m.value != item.prop.fallback_value %}`{{ m.value }}`{% if not loop.last %}, {% endif %}{% endfor %}
+{%- elif item.prop.type == "value_filter" -%}
+none
+{%- elif item.prop.type == "key_filter" or item.prop.type == "attribute_mapping" -%}
+none
+{%- elif item.prop.type == "key_redaction" -%}
+{% for k in item.prop.default_keys %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}
+{%- elif item.prop.type == "value_limit" -%}
+no limit
+{%- elif item.prop.type == "toggle" -%}
+{{ "`false`" if item.name == "semconv_experimental" or item.req == "opt_in" else "`true`" }}
+{%- elif item.prop.default is defined -%}
+`{{ item.prop.default }}`
+{%- else -%}
+instrumentation-specific
+{%- endif -%}
+{%- endmacro -%}
+
+{#- A shared property describes itself, unless the declaration overrides it. -#}
+{%- macro description(item, domain) -%}
+{%- if item.prop.description -%}
+{{ item.prop.description | trim | replace("\n", " ") }}
+{%- elif item.name == "semconv_experimental" -%}
+Set to `true` to opt in to development semantic conventions for the `{{ domain }}` domain. Applies to all `{{ domain }}` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md).
+{%- endif -%}
+{%- endmacro -%}
+
+{#- On an attribute registry page the scope is unknown, since the attribute may be used by several
+    signals. Under a signal, a property resolves under that signal's scope, and additionally under
+    the scope its config block declares. -#}
+{%- macro rows(items, scope, domain) -%}
+| Property | Default | Description |
+|---|---|---|
+{% for item in items -%}
+{% for scope in ((not scope and ["<scope>"]) or ([item.scope, scope] if item.scope and item.scope != scope else [scope])) -%}
+| `{{ path(item, scope, domain) }}` | {{ default(item) }} | {{ description(item, domain) }}{% if item.prop.env_var %} Equivalent to the `{{ item.prop.env_var }}` environment variable.{% endif %} |
+{% endfor %}
+{%- endfor %}
+{%- endmacro -%}
+
+{#- Appended to an attribute's note. `refs` optionally carries signal groups that declare config
+    on a reference to this attribute, so a definition and its references merge into one table
+    rather than shadowing each other. `domain` is unset on the attribute registry pages, where
+    domain-scoped properties such as `semconv_experimental` have no meaning. -#}
+{%- macro attribute_note(attr, scope, domain, refs) -%}
+{%- set ns = namespace(items=[], names=[], req=attr.requirement_level) -%}
+{#- On a registry page the definition carries no requirement level, so take the most restrictive
+    one the signals referencing it declare. -#}
+{%- for group in refs | default([]) -%}
+{%- for ref in group.attributes | default([]) -%}
+{%- if ref.name == attr.name and ref.requirement_level == "opt_in" -%}
+{%- set ns.req = "opt_in" -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- if attr.annotations and attr.annotations.config -%}
+{%- for name, prop in attr.annotations.config.properties | items -%}
+{%- if name not in ns.names and not (name == "semconv_experimental" and not domain) -%}
+{%- set ns.names = ns.names + [name] -%}
+{%- set ns.items = ns.items + [{"name": name, "prop": prop, "attr": attr, "scope": attr.annotations.config.scope, "req": ns.req}] -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- for group in refs | default([]) -%}
+{%- for ref in group.attributes | default([]) -%}
+{%- if ref.name == attr.name and ref.annotations and ref.annotations.config -%}
+{%- for name, prop in ref.annotations.config.properties | items -%}
+{%- if name not in ns.names and not (name == "semconv_experimental" and not domain) -%}
+{%- set ns.names = ns.names + [name] -%}
+{%- set ns.items = ns.items + [{"name": name, "prop": prop, "attr": attr, "scope": ref.annotations.config.scope, "req": ref.requirement_level}] -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- if ns.items | length > 0 %}
+
+**Configuration:**
+
+{{ rows(ns.items | sort(attribute="name"), scope, domain) | trim }}
+{%- endif -%}
+{%- endmacro -%}
+
+{#- Signal-wide properties. Attribute-scoped ones are rendered in the attribute notes. -#}
+{%- macro table(group) -%}
+{%- set ns = namespace(items=[]) -%}
+{%- set scope = group.annotations.config.scope if group.annotations and group.annotations.config else none -%}
+{%- set domain = (scope | split("."))[0] if scope else none -%}
+{%- if scope -%}
+{%- for name, prop in (group.annotations.config.properties | default({})) | items -%}
+{%- set ns.items = ns.items + [{"name": name, "prop": prop, "attr": none, "kind": group.type, "req": group.requirement_level}] -%}
+{%- endfor -%}
+{%- endif -%}
+{%- if ns.items | length > 0 %}**Configuration:**
+
+{{ rows(ns.items | sort(attribute="name"), scope, domain) }}
+{% endif %}
+{%- endmacro -%}

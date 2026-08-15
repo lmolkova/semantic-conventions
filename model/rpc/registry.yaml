@@ -19,6 +19,13 @@ groups:
       - id: rpc.request.metadata
         type: template[string[]]
         stability: development
+        annotations:
+          config:
+            properties:
+              request_captured_metadata:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`.
         brief: >
           RPC request metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.
         note: |
@@ -31,6 +38,13 @@ groups:
       - id: rpc.response.metadata
         type: template[string[]]
         stability: development
+        annotations:
+          config:
+            properties:
+              response_captured_metadata:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`.
         brief: >
           RPC response metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.
         note: |

@@ -1,0 +1,129 @@
+params:
+  package_root: io.opentelemetry.semconv.prototype
+
+# `config_bindings` pairs each attribute with each of its properties, since an attribute may carry
+# more than one. A property lands in the signal's scope unless its config block declares its own.
+templates:
+  - pattern: span.java.j2
+    filter: >
+      [ .groups[]
+        | select(.type == "span")
+        | select(.annotations.config.scope != null)
+        | .annotations.config.scope as $scope
+        | { id: .id,
+            span_kind: .span_kind,
+            requirement_level: (if (.requirement_level | type) == "string"
+                                then .requirement_level else "" end),
+            stability: .stability,
+            scope: $scope,
+            domain: ($scope | split(".") | .[0]),
+            class_name: (.id | split(".") | .[1:] | join("_")),
+            experimental: ((.annotations.config.properties // {}) | has("semconv_experimental")),
+            group_properties: ((.annotations.config.properties // {}) | to_entries
+              | map(select(.key != "semconv_experimental"))
+              | map({name: .key, prop: .value})),
+            attributes: [ .attributes[] as $a
+              | ( { name: $a.name,
+                     type: $a.type,
+                     stability: $a.stability,
+                     sampling_relevant: ($a.sampling_relevant // false),
+                     requirement_level: (if ($a.requirement_level | type) == "string"
+                                         then $a.requirement_level else "conditionally_required" end),
+                     members: (if ($a.type | type) == "object"
+                               then [$a.type.members[] | select(.stability == "stable") | .value]
+                               else [] end),
+                     config_experimental: (($a.annotations.config.properties // {}) | has("semconv_experimental")),
+                     config_scope: $a.annotations.config.scope,
+                     configs: (($a.annotations.config.properties // {}) | to_entries
+                       | map(select(.key != "semconv_experimental"))
+                       | map({name: .key, prop: .value})) } ) ]
+          }
+        | . + { config_bindings: [ .attributes[] | . as $a | $a.configs[] | ($a + {config: .}) ] }
+      ]
+    application_mode: each
+    file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.class_name | pascal_case }}Span.java"
+
+  - pattern: metric.java.j2
+    filter: >
+      [ .groups[]
+        | select(.type == "metric")
+        | select(.annotations.config.scope != null)
+        | .annotations.config.scope as $scope
+        | { id: .id,
+            metric_name: .metric_name,
+            requirement_level: (if (.requirement_level | type) == "string"
+                                then .requirement_level else "" end),
+            instrument: .instrument,
+            brief: .brief,
+            unit: .unit,
+            stability: .stability,
+            value_type: (.annotations.code_generation.metric_value_type // "double"),
+            scope: $scope,
+            domain: ($scope | split(".") | .[0]),
+            class_name: (.metric_name | split(".") | join("_")),
+            experimental: ((.annotations.config.properties // {}) | has("semconv_experimental")),
+            group_properties: ((.annotations.config.properties // {}) | to_entries
+              | map(select(.key != "semconv_experimental"))
+              | map({name: .key, prop: .value})),
+            attributes: [ .attributes[] as $a
+              | ( { name: $a.name,
+                     type: $a.type,
+                     requirement_level: (if ($a.requirement_level | type) == "string"
+                                         then $a.requirement_level else "conditionally_required" end),
+                     members: (if ($a.type | type) == "object"
+                               then [$a.type.members[] | select(.stability == "stable") | .value]
+                               else [] end),
+                     config_experimental: (($a.annotations.config.properties // {}) | has("semconv_experimental")),
+                     config_scope: $a.annotations.config.scope,
+                     configs: (($a.annotations.config.properties // {}) | to_entries
+                       | map(select(.key != "semconv_experimental"))
+                       | map({name: .key, prop: .value})) } ) ]
+          }
+        | . + { config_bindings: [ .attributes[] | . as $a | $a.configs[] | ($a + {config: .}) ] }
+      ]
+    application_mode: each
+    file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.class_name | pascal_case }}Metric.java"
+
+  - pattern: event.java.j2
+    filter: >
+      [ .groups[]
+        | select(.type == "event")
+        | select(.annotations.config.scope != null)
+        | { id: .id,
+            event_name: .name,
+            requirement_level: (if (.requirement_level | type) == "string"
+                                then .requirement_level else "" end),
+            stability: .stability,
+            scope: .annotations.config.scope,
+            domain: (.annotations.config.scope | split(".") | .[0]),
+            class_name: (.name | split(".") | join("_")),
+            is_exception: ([(.attributes // [])[].name] | index("exception.type") != null),
+            experimental: ((.annotations.config.properties // {}) | has("semconv_experimental")),
+            group_properties: ((.annotations.config.properties // {}) | to_entries
+              | map(select(.key != "semconv_experimental"))
+              | map({name: .key, prop: .value})) }
+      ]
+    application_mode: each
+    file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.class_name | pascal_case }}Event.java"
+
+  # Attribute keys for the attributes a signal records, plus those a config property adds.
+  - pattern: attributes.java.j2
+    filter: >
+      [ .groups[]
+        | select(.annotations.config.scope != null)
+        | { domain: (.annotations.config.scope | split(".") | .[0]),
+            attrs: ([ (.attributes // [])[]
+              | { name: .name,
+                  type: .type,
+                  members: (if (.type | type) == "object"
+                            then [.type.members[] | select(.stability == "stable") | .value]
+                            else [] end) } ]
+              + [ ((.annotations.config.properties // {}) | to_entries[]
+                  | select(.value.type == "attribute_mapping")
+                  | { name: .value.target_attribute, type: "string", members: [] }) ]) }
+      ]
+      | group_by(.domain)
+      | map({ domain: .[0].domain,
+              attributes: (map(.attrs) | flatten | unique_by(.name) | sort_by(.name)) })
+    application_mode: each
+    file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.domain | pascal_case }}Attributes.java"

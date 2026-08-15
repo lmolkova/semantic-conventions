@@ -1,6 +1,17 @@
 groups:
   - id: span.http.client
     type: span
+    annotations:
+      config:
+        scope: http.client
+        properties:
+          service_peer_name_mapping:
+            type: attribute_mapping
+            match_attribute: server.address
+            target_attribute: service.peer.name
+            description: |
+              Set to the list of `server.address` values and the `service.peer.name` to record for each.
+              Requests to any other address record no `service.peer.name`.
     extends: attributes.http.client
     span_kind: client
     stability: stable
@@ -33,8 +44,22 @@ groups:
           recommended: if and only if request was retried.
       - ref: http.request.header
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              request_captured_headers:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of `request` header names to record, each as `http.request.header.<key>`.
       - ref: http.response.header
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              response_captured_headers:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of `response` header names to record, each as `http.response.header.<key>`.
       - ref: server.address
         sampling_relevant: true
       - ref: server.port
@@ -71,6 +96,9 @@ groups:
 
   - id: span.http.server
     type: span
+    annotations:
+      config:
+        scope: http.server
     extends: attributes.http.server
     span_kind: server
     brief: >
@@ -92,8 +120,22 @@ groups:
       - ref: http.request.header
         sampling_relevant: true
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              request_captured_headers:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of `request` header names to record, each as `http.request.header.<key>`.
       - ref: http.response.header
         requirement_level: opt_in
+        annotations:
+          config:
+            properties:
+              response_captured_headers:
+                type: key_filter
+                key_normalization: lowercase
+                description: Set to the list of `response` header names to record, each as `http.response.header.<key>`.
       - ref: server.address
         sampling_relevant: true
       - ref: server.port

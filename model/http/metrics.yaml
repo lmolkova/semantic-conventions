@@ -37,11 +37,18 @@ groups:
           conditionally_required: If available.
         note: >
           The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+        annotations:
+          config:
+            properties:
+              semconv_experimental:
+                type: toggle
 
   - id: metric.http.server.request.duration
     type: metric
     metric_name: http.server.request.duration
     annotations:
+      config:
+        scope: http.server
       code_generation:
         metric_value_type: double
     brief: "Duration of HTTP server requests."
@@ -56,6 +63,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.server
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Number of active HTTP server requests."
     instrument: updowncounter
@@ -93,6 +105,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.server
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Size of HTTP server request bodies."
     instrument: histogram
@@ -109,6 +126,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.server
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Size of HTTP server response bodies."
     instrument: histogram
@@ -123,6 +145,8 @@ groups:
     type: metric
     metric_name: http.client.request.duration
     annotations:
+      config:
+        scope: http.client
       code_generation:
         metric_value_type: double
     brief: "Duration of HTTP client requests."
@@ -137,6 +161,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Size of HTTP client request bodies."
     instrument: histogram
@@ -153,6 +182,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Size of HTTP client response bodies."
     instrument: histogram
@@ -169,6 +203,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Number of outbound HTTP connections that are currently active or idle on the client."
     instrument: updowncounter
@@ -194,6 +233,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "The duration of the successfully established outbound HTTP connections."
     instrument: histogram
@@ -217,6 +261,11 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     stability: development
     brief: "Number of active HTTP requests."
     instrument: updowncounter
@@ -250,3 +299,8 @@ groups:
           conditionally_required: If available.
         note: >
           The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.
+        annotations:
+          config:
+            properties:
+              semconv_experimental:
+                type: toggle

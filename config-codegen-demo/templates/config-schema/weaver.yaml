@@ -1,0 +1,43 @@
+templates:
+  - pattern: instrumentation.yaml.j2
+    filter: >
+      [ .groups[]
+        | select(.annotations.config.scope != null)
+        | .annotations.config.scope as $scope
+        | (if (.requirement_level | type) == "string" then .requirement_level else "" end) as $req
+        | [ ((.annotations.config.properties // {}) | to_entries
+              | map({fqn: .key, prop: .value, attr: null, req: $req}))
+          , ((.attributes // []) | map(. as $a | ($a.annotations.config // {}) | . as $c
+              | (.properties // {}) | to_entries
+              | map({fqn: .key, prop: .value, attr: $a,
+                     req: (if ($a.requirement_level | type) == "string"
+                           then $a.requirement_level else "" end),
+                     scope_override: $c.scope})) | flatten)
+          ] | flatten
+        | map(if .scope_override and .scope_override != $scope
+              then [(. + {scope: .scope_override}), (. + {scope: $scope})]
+              else [(. + {scope: $scope})] end)
+        | flatten
+        | .[]
+      ]
+      | map(select(.fqn != "semconv_experimental"))
+      | map(. + { target: .scope,
+                  name: .fqn,
+                  domain: (.scope | split(".") | .[0]),
+                  members: (if (.attr.type | type) == "object"
+                            then [.attr.type.members[] | select(.stability == "stable") | .value]
+                            else [] end) })
+      | unique_by([.target, .name])
+      | group_by(.target)
+      | map({ scope: .[0].target,
+              domain: .[0].domain,
+              properties: map({name, fqn, prop, req, members}) })
+      | . as $leaves
+      | $leaves + ([ $leaves[] | .scope | split(".") | . as $segments
+                     | range(1; ($segments | length)) | $segments[0:.] | join(".") ]
+          | unique | map({scope: ., domain: (. | split(".") | .[0]), properties: []}))
+      | unique_by(.scope)
+      | group_by(.domain)
+      | map({ domain: .[0].domain, scopes: . })
+    application_mode: each
+    file_name: "instrumentation-{{ ctx.domain }}.yaml"

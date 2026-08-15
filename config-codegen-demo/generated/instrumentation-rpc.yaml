@@ -1,0 +1,69 @@
+$defs:
+  ExperimentalRpcInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      client:
+        $ref: "#/$defs/ExperimentalRpcClientInstrumentation"
+        description: Configure instrumentations following the rpc client semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalRpcClientInstrumentation are used"
+      server:
+        $ref: "#/$defs/ExperimentalRpcServerInstrumentation"
+        description: Configure instrumentations following the rpc server semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalRpcServerInstrumentation are used"
+
+  ExperimentalRpcClientInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      known_methods:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`.
+          Method names are case-sensitive.
+          `rpc.method` is not recorded when this list is empty.
+        defaultBehavior: "no values are known and every value is recorded as `_OTHER`"
+      request_captured_metadata:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`.
+        defaultBehavior: "no keys are captured"
+      response_captured_metadata:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`.
+        defaultBehavior: "no keys are captured"
+
+  ExperimentalRpcServerInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      known_methods:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of recognized JSON-RPC method names; any other value is recorded as `_OTHER`.
+          Method names are case-sensitive.
+          `rpc.method` is not recorded when this list is empty.
+        defaultBehavior: "no values are known and every value is recorded as `_OTHER`"
+      request_captured_metadata:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`.
+        defaultBehavior: "no keys are captured"
+      response_captured_metadata:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`.
+        defaultBehavior: "no keys are captured"

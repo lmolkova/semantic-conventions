@@ -106,6 +106,13 @@ it is not a list of keys in addition to the defaults.
 When a query string value is redacted, the query string key SHOULD still be preserved, e.g.
 `q=OpenTelemetry&sig=REDACTED`.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.<scope>.sensitive_query_parameters` | `X-Amz-Signature`, `X-Amz-Credential`, `X-Amz-Security-Token`, `AWSAccessKeyId`, `Signature`, `sig`, `X-Goog-Signature` | Set to the list of query parameter names whose values are replaced with `REDACTED`. This is a full override of the default list, not an addition to it. Set to an empty list to disable redaction. |
+
 **[7] `url.registered_domain`:** This value can be determined precisely with the [public suffix list](https://publicsuffix.org/). For example, the registered domain for `foo.example.com` is `example.com`. Trying to approximate this by simply taking the last two labels will not work well for TLDs such as `co.uk`.
 
 **[8] `url.subdomain`:** The subdomain portion of `www.east.mydomain.co.uk` is `east`. If the domain has multiple levels of subdomain, such as `sub2.sub1.example.com`, the subdomain field should contain `sub2.sub1`, with no trailing period.

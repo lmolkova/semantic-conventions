@@ -116,6 +116,27 @@ groups:
       - id: url.query
         stability: stable
         type: string
+        annotations:
+          config:
+            # TODO: `url.full` needs this same property - sharing one config property between
+            # attributes is a separate problem.
+            scope: sanitization.url
+            properties:
+              sensitive_query_parameters:
+                type: key_redaction
+                fallback_value: REDACTED
+                default_keys:
+                  - X-Amz-Signature
+                  - X-Amz-Credential
+                  - X-Amz-Security-Token
+                  - AWSAccessKeyId
+                  - Signature
+                  - sig
+                  - X-Goog-Signature
+                description: |
+                  Set to the list of query parameter names whose values are replaced with `REDACTED`.
+                  This is a full override of the default list, not an addition to it.
+                  Set to an empty list to disable redaction.
         brief: >
           The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component
         examples: ["q=OpenTelemetry"]

@@ -6,12 +6,13 @@
 {%- import 'event_macros.j2' as event -%}
 {%- import 'entity_macros.j2' as entity -%}
 {%- import 'span_macros.j2' as span -%}
+{%- import 'config_macros.j2' as config -%}
 {%- import 'stability.j2' as stability %}
 {%- set attribute_registry_base_url=params.registry_base_url~"attributes" %}
 {%- set entity_registry_base_url=params.registry_base_url~"entities" %}
 
 {% macro generate_event(group) -%}
-{{ event.header(group) }}{{ generate_attributes(group) }}{{ event.body(group.body) }}{% endmacro -%}
+{{ event.header(group) }}{{ config.table(group) }}{{ generate_attributes(group) }}{{ event.body(group.body) }}{% endmacro -%}
 {%- macro generate_entity(group) -%}
 {{ entity.header(group) | trim }}
 
@@ -19,11 +20,11 @@
 {% endmacro -%}
 {%- macro generate_metric(group, entity_registry_base_url) -%}
 {{ mt.generate(group, entity_registry_base_url) }}
-{{ generate_attributes(group) }}{% endmacro -%}
+{{ config.table(group) }}{{ generate_attributes(group) }}{% endmacro -%}
 {%- macro generate_span(group) -%}
-{{ span.header(group) }}{{ generate_attributes(group) }}{% endmacro -%}
+{{ span.header(group) }}{{ config.table(group) }}{{ generate_attributes(group) }}{% endmacro -%}
 {%- macro generate_attributes(group) -%}
-{{ at.generate(group.attributes, tag_filter, attribute_registry_base_url, group.lineage.attributes) }}{% endmacro -%}
+{{ at.generate(group.attributes, tag_filter, attribute_registry_base_url, group.lineage.attributes, none, group) }}{% endmacro -%}
 {#- Public attribute groups carry stability and brief, same as signals -#}
 {%- macro generate_attribute_group(group) -%}
 {%- if group.stability %}**Status:** {{ stability.badge(group.stability, group.deprecated) }}

@@ -3,6 +3,13 @@ groups:
     name: rpc.client.call.exception
     stability: development
     type: event
+    annotations:
+      config:
+        scope: rpc.client
+        properties:
+          semconv_experimental:
+            type: toggle
+
     brief: >
       This event represents an exception that occurred during an outgoing RPC call,
       such as network failures, timeouts, serialization errors, or other errors that
@@ -27,6 +34,13 @@ groups:
     name: rpc.server.call.exception
     stability: development
     type: event
+    annotations:
+      config:
+        scope: rpc.server
+        properties:
+          semconv_experimental:
+            type: toggle
+
     brief: >
       This event represents an exception that occurred during incoming RPC call processing,
       such as application errors, internal failures, or other exceptions that prevent

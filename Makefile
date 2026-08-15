@@ -394,3 +394,34 @@ areas-table-check:
 
 .PHONY: generate-all
 generate-all: table-generation registry-generation areas-table-generation generate-gh-issue-templates
+
+# Prototype: generate Java instrumentation helpers and the declarative configuration
+# schema from the `annotations.config` blocks in the model. Not part of `check` or
+# `generate-all`. See config-codegen-demo/README.md.
+CONFIG_CODEGEN_DIR=config-codegen-demo
+
+.PHONY: config-codegen-demo
+config-codegen-demo:
+	rm -rf $(CONFIG_CODEGEN_DIR)/generated
+	mkdir -p $(CONFIG_CODEGEN_DIR)/generated
+	$(DOCKER_RUN) --rm \
+		$(DOCKER_USER_IS_HOST_USER_ARG) \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/templates,target=/home/weaver/templates,readonly' \
+		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/generated,target=/home/weaver/target' \
+		$(WEAVER_CONTAINER) registry generate \
+		--registry=/home/weaver/source \
+		--templates=/home/weaver/templates \
+		java \
+		/home/weaver/target
+	$(DOCKER_RUN) --rm \
+		$(DOCKER_USER_IS_HOST_USER_ARG) \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/templates,target=/home/weaver/templates,readonly' \
+		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/generated,target=/home/weaver/target' \
+		$(WEAVER_CONTAINER) registry generate \
+		--registry=/home/weaver/source \
+		--templates=/home/weaver/templates \
+		config-schema \
+		/home/weaver/target
+	docker run --rm -v $(PWD)/$(CONFIG_CODEGEN_DIR):/work -w /work gradle:8-jdk21 gradle test run --no-daemon

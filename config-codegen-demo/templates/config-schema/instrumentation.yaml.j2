@@ -1,0 +1,84 @@
+{%- macro type_name(scope) -%}
+Experimental{{ scope | replace(".", "_") | pascal_case }}Instrumentation
+{%- endmacro -%}
+{%- macro default_behavior(p) -%}
+{%- if p.prop.type == "value_filter" and p.members | length > 0 -%}
+{{ p.members | reject("equalto", p.prop.fallback_value) | join(", ") }} are known
+{%- elif p.prop.type == "value_filter" -%}
+no values are known and every value is recorded as `{{ p.prop.fallback_value }}`
+{%- elif p.prop.type == "key_filter" -%}
+no keys are captured
+{%- elif p.prop.type == "key_redaction" -%}
+the values of {{ p.prop.default_keys | join(", ") }} are replaced with `{{ p.prop.fallback_value }}`
+{%- elif p.prop.type == "value_limit" -%}
+the value is recorded in full
+{%- elif p.prop.type == "attribute_mapping" -%}
+no `{{ p.prop.target_attribute }}` is recorded
+{%- elif p.prop.type == "toggle" -%}
+{#- A toggle is off by default only for what is opt-in. -#}
+`{{ "false" if p.req == "opt_in" else "true" }}` is used
+{%- elif p.prop.default is defined -%}
+`{{ p.prop.default }}` is used
+{%- else -%}
+the instrumentation default is used
+{%- endif -%}
+{%- endmacro -%}
+{%- macro schema(p) -%}
+{%- if p.prop.type in ["value_filter", "key_filter", "key_redaction"] %}
+        type: array
+        items:
+          type: string
+{%- elif p.prop.type == "value_limit" %}
+        type: [integer, "null"]
+        minimum: 0
+{%- elif p.prop.type == "attribute_mapping" %}
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [match, value]
+          properties:
+            match:
+              type: string
+              description: A `{{ p.prop.match_attribute }}` value to match.
+            value:
+              type: string
+              description: The `{{ p.prop.target_attribute }}` to record on a match.
+{%- elif p.prop.type == "toggle" or p.prop.type == "boolean" %}
+        type: [boolean, "null"]
+{#- A property with no semantic type is a plain value: it reaches the schema and the docs,
+    and only loses code generation. -#}
+{%- elif p.prop.type == "string" or p.prop.type == "integer" %}
+        type: [{{ p.prop.type }}, "null"]
+{%- elif p.prop.type == "string[]" %}
+        type: array
+        items:
+          type: string
+{%- else %}
+        $ref: "#/$defs/ExperimentalSemconvConfig"
+{%- endif -%}
+{%- endmacro -%}
+$defs:
+{%- for s in ctx.scopes | sort(attribute="scope") %}
+  {{ type_name(s.scope) }}:
+    type: object
+    additionalProperties: false
+    properties:
+{%- for child in ctx.scopes | sort(attribute="scope") %}
+{%- if child.scope is startingwith(s.scope ~ ".") and (child.scope | split(".") | list | length) == (s.scope | split(".") | list | length) + 1 %}
+      {{ child.scope | split(".") | last }}:
+        $ref: "#/$defs/{{ type_name(child.scope) }}"
+        description: Configure instrumentations following the {{ child.scope | replace(".", " ") }} semantic conventions.
+        defaultBehavior: "defaults as described in {{ type_name(child.scope) }} are used"
+{%- endif %}
+{%- endfor %}
+{%- for p in s.properties | sort(attribute="name") %}
+      {{ p.name }}:{{ schema(p) }}
+        description: |
+          {{ p.prop.description | trim | indent(10) }}
+{%- if p.prop.env_var %}
+          Equivalent to the {{ p.prop.env_var }} environment variable.
+{%- endif %}
+        defaultBehavior: "{{ default_behavior(p) }}"
+{%- endfor %}
+{% endfor %}

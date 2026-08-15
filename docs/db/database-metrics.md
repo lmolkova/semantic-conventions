@@ -179,6 +179,14 @@ If a database operation involved multiple network calls (for example retries), t
 For batch operations, if the individual operations would all have the same `db.query.text` when executed as non-batch operations, then that query text SHOULD be used. Otherwise, all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
 Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.metric.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.db.client.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+
 ---
 
 `db.system.name` has the following list of well-known values. If one of them applies, then the respective value MUST be used; otherwise, a custom value MAY be used.
@@ -268,6 +276,12 @@ Explaining bucket configuration:
 | Name | Instrument Type | Unit (UCUM) | Description | Stability | Entity Associations |
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.response.returned_rows` | Histogram | `{row}` | The actual number of records returned by the database operation. | ![Development](https://img.shields.io/badge/-development-blue) | |
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 
@@ -363,6 +377,14 @@ If a database operation involved multiple network calls (for example retries), t
 For batch operations, if the individual operations would all have the same `db.query.text` when executed as non-batch operations, then that query text SHOULD be used. Otherwise, all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
 Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.metric.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.db.client.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+
 ---
 
 `db.system.name` has the following list of well-known values. If one of them applies, then the respective value MUST be used; otherwise, a custom value MAY be used.
@@ -440,6 +462,12 @@ This metric is [recommended][MetricRecommended].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.count` | UpDownCounter | `{connection}` | The number of connections that are currently in state described by the `state` attribute. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -473,6 +501,12 @@ This metric is [recommended][MetricRecommended].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.idle.max` | UpDownCounter | `{connection}` | The maximum number of idle open connections allowed. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -495,6 +529,12 @@ This metric is [recommended][MetricRecommended].
 | Name | Instrument Type | Unit (UCUM) | Description | Stability | Entity Associations |
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.idle.min` | UpDownCounter | `{connection}` | The minimum number of idle open connections allowed. | ![Development](https://img.shields.io/badge/-development-blue) | |
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 
@@ -519,6 +559,12 @@ This metric is [recommended][MetricRecommended].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.max` | UpDownCounter | `{connection}` | The maximum number of open connections allowed. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -541,6 +587,12 @@ This metric is [recommended][MetricRecommended].
 | Name | Instrument Type | Unit (UCUM) | Description | Stability | Entity Associations |
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.pending_requests` | UpDownCounter | `{request}` | The number of current pending requests for an open connection. | ![Development](https://img.shields.io/badge/-development-blue) | |
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 
@@ -565,6 +617,12 @@ This metric is [recommended][MetricRecommended].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.timeouts` | Counter | `{timeout}` | The number of connection timeouts that have occurred trying to obtain a connection from the pool. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -587,6 +645,12 @@ This metric is [recommended][MetricRecommended].
 | Name | Instrument Type | Unit (UCUM) | Description | Stability | Entity Associations |
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.create_time` | Histogram | `s` | The time it took to create a new connection. | ![Development](https://img.shields.io/badge/-development-blue) | |
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 
@@ -611,6 +675,12 @@ This metric is [recommended][MetricRecommended].
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.wait_time` | Histogram | `s` | The time it took to obtain an open connection from the pool. | ![Development](https://img.shields.io/badge/-development-blue) | |
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |
@@ -633,6 +703,12 @@ This metric is [recommended][MetricRecommended].
 | Name | Instrument Type | Unit (UCUM) | Description | Stability | Entity Associations |
 | -------- | --------------- | ----------- | -------------- | --------- | ------ |
 | `db.client.connection.use_time` | Histogram | `s` | The time between borrowing a connection and returning it to the pool. | ![Development](https://img.shields.io/badge/-development-blue) | |
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
 
 **Attributes:**
 

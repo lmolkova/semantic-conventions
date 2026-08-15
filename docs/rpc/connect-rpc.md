@@ -104,11 +104,25 @@ Including all request metadata values can be a security risk - explicit configur
 For example, a property `my-custom-key` with value `["1.2.3.4", "1.2.3.5"]` SHOULD be recorded as
 `rpc.request.metadata.my-custom-key` attribute with value `["1.2.3.4", "1.2.3.5"]`
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.client.request_captured_metadata` | none | Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`. |
+
 **[8] `rpc.response.metadata.<key>`:** Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
 Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
 For example, a property `my-custom-key` with value `["attribute_value"]` SHOULD be recorded as
 the `rpc.response.metadata.my-custom-key` attribute with value `["attribute_value"]`
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.client.response_captured_metadata` | none | Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`. |
 
 The following attributes can be important for making sampling decisions
 and SHOULD be provided **at span creation time** (if provided at all):
@@ -221,11 +235,25 @@ Including all request metadata values can be a security risk - explicit configur
 For example, a property `my-custom-key` with value `["1.2.3.4", "1.2.3.5"]` SHOULD be recorded as
 `rpc.request.metadata.my-custom-key` attribute with value `["1.2.3.4", "1.2.3.5"]`
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.server.request_captured_metadata` | none | Set to the list of request metadata keys to record, each as `rpc.request.metadata.<key>`. |
+
 **[8] `rpc.response.metadata.<key>`:** Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
 Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.
 
 For example, a property `my-custom-key` with value `["attribute_value"]` SHOULD be recorded as
 the `rpc.response.metadata.my-custom-key` attribute with value `["attribute_value"]`
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.rpc.server.response_captured_metadata` | none | Set to the list of response metadata keys to record, each as `rpc.response.metadata.<key>`. |
 
 The following attributes can be important for making sampling decisions
 and SHOULD be provided **at span creation time** (if provided at all):

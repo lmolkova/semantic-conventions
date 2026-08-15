@@ -123,6 +123,13 @@ When a query string value is redacted, the query string key SHOULD still be pres
 
 **[4] `db.operation.parameter.<key>`:** Many Elasticsearch URL paths allow dynamic values. These SHOULD be recorded in span attributes in the format `db.operation.parameter.<key>`, where `<key>` is the path parameter name. The implementation SHOULD reference the [Elasticsearch schema](https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json) in order to map the path parameter values to their names.
 
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.operation_parameters` | none | Set to the list of operation parameter names to record, each as `db.operation.parameter.<key>`. Parameter values may contain sensitive information. |
+
 **[5] `db.response.status_code`:** HTTP response codes in the 4xx and 5xx range SHOULD be considered errors.
 
 **[6] `error.type`:** The `error.type` SHOULD match the `db.response.status_code` returned by the database or the client library, or the canonical name of exception that occurred.
@@ -165,6 +172,13 @@ as a batch operation, and `db.operation.batch.size` SHOULD be set to `0`.
 **[13] `db.query.text`:** For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
 For batch operations, if the individual operations would all have the same `db.query.text` when executed as non-batch operations, then that query text SHOULD be used. Otherwise, all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
 Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
+
+
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.client.sanitize_query_text` | `true` | Set to `false` to record the query text as the application provided it, instead of replacing embedded literals with placeholders. |
 
 **[14] `elasticsearch.node.name`:** When communicating with an Elastic Cloud deployment, this should be collected from the "X-Found-Handling-Instance" HTTP response header.
 

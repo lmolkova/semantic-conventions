@@ -31,6 +31,12 @@ This event SHOULD be recorded when an exception occurs during database client op
 Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
 Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding database client span.
 
+**Configuration:**
+
+| Property | Default | Description |
+|---|---|---|
+| `.instrumentation/development.general.db.semconv.experimental` | `false` | Set to `true` to opt in to development semantic conventions for the `db` domain. Applies to all `db` instrumentation, not only this signal. See [Version selection](/docs/configuration/version-selection.md). |
+
 **Attributes:**
 
 | Key | Stability | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Value Type | Description | Example Values |

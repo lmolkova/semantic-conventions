@@ -1,0 +1,20 @@
+{%- import "macros.j2" as m -%}
+package {{ params.package_root }}.{{ ctx.domain }};
+
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.semconv.AttributeKeyTemplate;
+import java.util.List;
+
+public final class {{ m.attributes_class(ctx.domain) }} {
+
+  private {{ m.attributes_class(ctx.domain) }}() {}
+{% for a in ctx.attributes %}
+{%- if a.type is startingwith("template[") %}
+  public static final AttributeKeyTemplate<{{ m.template_type(a) }}> {{ m.const(a.name) }} =
+      AttributeKeyTemplate.{{ m.template_factory(a) }}("{{ a.name }}");
+{% else %}
+  public static final AttributeKey<{{ m.java_type(a) }}> {{ m.const(a.name) }} =
+      AttributeKey.{{ m.key_factory(a) }}("{{ a.name }}");
+{% endif %}
+{%- endfor -%}
+}

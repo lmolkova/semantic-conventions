@@ -1,0 +1,58 @@
+$defs:
+  ExperimentalDbInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      client:
+        $ref: "#/$defs/ExperimentalDbClientInstrumentation"
+        description: Configure instrumentations following the db client semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalDbClientInstrumentation are used"
+
+  ExperimentalDbClientInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      metric:
+        $ref: "#/$defs/ExperimentalDbClientMetricInstrumentation"
+        description: Configure instrumentations following the db client metric semantic conventions.
+        defaultBehavior: "defaults as described in ExperimentalDbClientMetricInstrumentation are used"
+      operation_parameters:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of operation parameter names to record, each as `db.operation.parameter.<key>`.
+          Parameter values may contain sensitive information.
+        defaultBehavior: "no keys are captured"
+      query_parameters:
+        type: array
+        items:
+          type: string
+        description: |
+          Set to the list of query parameter names to record, each as `db.query.parameter.<key>`.
+          Use the parameter position (0-based) as the key for positional parameters.
+          Parameter values may contain sensitive information.
+        defaultBehavior: "no keys are captured"
+      query_text:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record `db.query.text` as a metric attribute.
+          Query text may have high cardinality and may contain sensitive information.
+        defaultBehavior: "`false` is used"
+      sanitize_query_text:
+        type: [boolean, "null"]
+        description: |
+          Set to `false` to record the query text as the application provided it, instead of
+          replacing embedded literals with placeholders.
+        defaultBehavior: "`true` is used"
+
+  ExperimentalDbClientMetricInstrumentation:
+    type: object
+    additionalProperties: false
+    properties:
+      query_text:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record `db.query.text` as a metric attribute.
+          Query text may have high cardinality and may contain sensitive information.
+        defaultBehavior: "`false` is used"

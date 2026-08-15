@@ -18,6 +18,12 @@ groups:
 
       Instrumentations MAY provide a configuration option to populate exception events
       with the attributes captured on the corresponding HTTP client span.
+    annotations:
+      config:
+        scope: http.client
+        properties:
+          semconv_experimental:
+            type: toggle
     attributes:
       - ref: exception.type
         requirement_level:
@@ -42,6 +48,12 @@ groups:
 
       Instrumentations MAY provide a configuration option to populate exception events
       with the attributes captured on the corresponding HTTP server span.
+    annotations:
+      config:
+        scope: http.server
+        properties:
+          semconv_experimental:
+            type: toggle
     attributes:
       - ref: exception.type
         requirement_level:

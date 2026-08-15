@@ -1,0 +1,16 @@
+file_format: "1.0-rc.1"
+
+instrumentation/development:
+  general:
+    http:
+      client:
+        known_methods:
+          - GET
+          - POST
+        request_captured_headers:
+          - X-Request-Id
+        # `service.peer.name` is not something the instrumentation knows. Config supplies the
+        # `server.address` values to match and the name to record for each.
+        service_peer_name_mapping:
+          - match: localhost
+            value: shopping-cart
