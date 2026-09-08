@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.api.logs.LogRecordBuilder;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
@@ -145,7 +146,7 @@ class HttpSemconvTest {
 
     assertThat(serverTracer.filterHttpRequestMethod("POST")).isEqualTo("_OTHER");
     assertThat(metric.isEnabled()).isFalse();
-    assertThat(event.isEnabled()).isFalse();
+    assertThat(event.isEnabled(Severity.WARN)).isFalse();
     metric.add(1, null, null, null, null, null);
     event.emit(Severity.WARN, new IllegalStateException("before"));
     assertThat(metricReader.collectAllMetrics()).isEmpty();
@@ -163,7 +164,7 @@ class HttpSemconvTest {
 
     assertThat(serverTracer.filterHttpRequestMethod("POST")).isEqualTo("POST");
     assertThat(metric.isEnabled()).isTrue();
-    assertThat(event.isEnabled()).isTrue();
+    assertThat(event.isEnabled(Severity.WARN)).isTrue();
     serverTracer.start(
             "POST /users", "1.2.3.4", "POST", "example.com", 443L, "/users",
             null, "https", "curl/8", name -> List.of())
@@ -225,6 +226,35 @@ class HttpSemconvTest {
                         point ->
                             assertThat(point.getAttributes().get(DbAttributes.DB_QUERY_TEXT))
                                 .isEqualTo("SELECT * FROM users")));
+  }
+
+  @Test
+  void eventEnablementIncludesLoggerAndSeverity() {
+    AtomicReference<Severity> checkedSeverity = new AtomicReference<>();
+    io.opentelemetry.api.logs.Logger disabledLogger =
+        new io.opentelemetry.api.logs.Logger() {
+          @Override
+          public boolean isEnabled(Severity severity) {
+            checkedSeverity.set(severity);
+            return false;
+          }
+
+          @Override
+          public LogRecordBuilder logRecordBuilder() {
+            throw new AssertionError("disabled logger must not create a log record");
+          }
+        };
+    HttpClientRequestExceptionEvent event =
+        HttpClientRequestExceptionEvent.create(
+            disabledLogger,
+            httpServerConfig(
+                "      semconv:\n        experimental: true\n      client: {}\n"));
+
+    assertThat(event.isEnabled(Severity.ERROR)).isFalse();
+    assertThat(checkedSeverity.get()).isEqualTo(Severity.ERROR);
+
+    event.emit(Severity.WARN, new IllegalStateException("ignored"));
+    assertThat(checkedSeverity.get()).isEqualTo(Severity.WARN);
   }
 
   @Test
@@ -377,7 +407,8 @@ class HttpSemconvTest {
     SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder().build();
     SdkMeterProvider meterProvider = SdkMeterProvider.builder().build();
     assertThat(
-            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), off).isEnabled())
+            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), off)
+                .isEnabled(Severity.WARN))
         .isFalse();
 
     assertThat(HttpClientActiveRequestsMetric.create(meterProvider.get("test"), off).isEnabled())
@@ -386,7 +417,8 @@ class HttpSemconvTest {
     ConfigProvider on =
         httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n");
     assertThat(
-            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), on).isEnabled())
+            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), on)
+                .isEnabled(Severity.WARN))
         .isTrue();
     assertThat(HttpClientActiveRequestsMetric.create(meterProvider.get("test"), on).isEnabled())
         .isTrue();

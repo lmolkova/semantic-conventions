@@ -181,6 +181,9 @@ off-switch for any other. Span tracers also check the underlying `Tracer.isEnabl
 `start()` call, so SDK enablement can change without rebuilding the generated tracer. Gate appears
 only where a config property asks for one.
 
+Generated events combine their config gate with `Logger.isEnabled(severity)` for both explicit
+enablement checks and emission.
+
 Generated span, metric, and event helpers subscribe to configuration changes when the provider
 supports them. A change builds a new immutable state and swaps one volatile reference. Each
 operation reads one snapshot, and an in-flight span keeps the snapshot it started with.

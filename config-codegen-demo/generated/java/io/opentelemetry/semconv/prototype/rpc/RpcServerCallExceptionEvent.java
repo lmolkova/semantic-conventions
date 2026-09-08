@@ -38,8 +38,12 @@ public final class RpcServerCallExceptionEvent {
     return result;
   }
 
-  public boolean isEnabled() {
-    return state.enabled;
+  public boolean isEnabled(Severity severity) {
+    return isEnabled(state, severity);
+  }
+
+  private boolean isEnabled(State state, Severity severity) {
+    return state.enabled && logger.isEnabled(severity);
   }
 
   public void emit(Severity severity, Throwable throwable) {
@@ -50,7 +54,8 @@ public final class RpcServerCallExceptionEvent {
       Severity severity,
       Throwable throwable,
       Attributes attributes) {
-    if (!state.enabled) {
+    State state = this.state;
+    if (!isEnabled(state, severity)) {
       return;
     }
     ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();
