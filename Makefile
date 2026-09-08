@@ -407,21 +407,25 @@ config-codegen-demo:
 	$(DOCKER_RUN) --rm \
 		$(DOCKER_USER_IS_HOST_USER_ARG) \
 		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/templates,target=/home/weaver/templates,readonly' \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/policies,target=/home/weaver/policies,readonly' \
 		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
 		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/generated,target=/home/weaver/target' \
 		$(WEAVER_CONTAINER) registry generate \
 		--registry=/home/weaver/source \
 		--templates=/home/weaver/templates \
+		--policy=/home/weaver/policies \
 		java \
 		/home/weaver/target
 	$(DOCKER_RUN) --rm \
 		$(DOCKER_USER_IS_HOST_USER_ARG) \
 		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/templates,target=/home/weaver/templates,readonly' \
+		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/policies,target=/home/weaver/policies,readonly' \
 		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/source,readonly' \
 		--mount 'type=bind,source=$(PWD)/$(CONFIG_CODEGEN_DIR)/generated,target=/home/weaver/target' \
 		$(WEAVER_CONTAINER) registry generate \
 		--registry=/home/weaver/source \
 		--templates=/home/weaver/templates \
+		--policy=/home/weaver/policies \
 		config-schema \
 		/home/weaver/target
 	$(CONFIG_CODEGEN_DIR)/scripts/validate-config-schema.sh

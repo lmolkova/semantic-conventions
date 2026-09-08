@@ -70,7 +70,7 @@ public final class HttpClientInstrumentation {
 
     activeRequests.add(
         1,
-        method,
+        request.method(),
         request.uri().getHost(),
         port(request),
         request.uri().getScheme(),
@@ -96,7 +96,7 @@ public final class HttpClientInstrumentation {
     } finally {
       activeRequests.add(
           -1,
-          method,
+          request.method(),
           request.uri().getHost(),
           port(request),
           request.uri().getScheme(),
@@ -105,7 +105,7 @@ public final class HttpClientInstrumentation {
       duration.record(
           (System.nanoTime() - startNanos) / 1_000_000_000.0,
           errorType,
-          method,
+          request.method(),
           responseStatusCode,
           null,
           null,

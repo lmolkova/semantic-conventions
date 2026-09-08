@@ -1,6 +1,7 @@
 {%- import "macros.j2" as m -%}
 {%- set enabled = ctx.group_properties | selectattr("prop.type", "equalto", "toggle") | first -%}
 {%- set toggle_bindings = ctx.config_bindings | selectattr("config.prop.type", "equalto", "toggle") | list -%}
+{%- set filter_bindings = ctx.config_bindings | selectattr("config.prop.type", "equalto", "value_filter") | list -%}
 {%- set experimental_attributes = ctx.attributes | selectattr("config_experimental") | list -%}
 {%- set list_attributes = ctx.attributes | selectattr("type", "equalto", "string[]") | list -%}
 {%- set value_type = "double" if ctx.value_type == "double" else "long" -%}
@@ -17,7 +18,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.{{ "DoubleHistogram" if ctx.instrument == "histogram" else "LongUpDownCounter" }};
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.semconv.prototype.config.Config;
-{%- if list_attributes %}
+{%- if list_attributes or filter_bindings %}
 import java.util.List;
 {%- endif %}
 
@@ -25,6 +26,11 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
 
   private static final String SCOPE = "general.{{ ctx.scope }}";
   private static final String NAME = "{{ ctx.metric_name }}";
+{%- for a in filter_bindings %}
+
+  private static final List<String> {{ m.const(a.name) }}_DEFAULT =
+      List.of({{ m.default_list(a) }});
+{%- endfor %}
 
   private final {{ "DoubleHistogram" if ctx.instrument == "histogram" else "LongUpDownCounter" }} instrument;
   private volatile State state;
@@ -51,6 +57,9 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
 {%- for a in toggle_bindings %}
     private final boolean {{ a.config.name | camel_case }};
 {%- endfor %}
+{%- for a in filter_bindings %}
+    private final List<String> {{ a.config.name | camel_case }};
+{%- endfor %}
 
     private State(DeclarativeConfigProperties config) {
 {%- if enabled and ctx.experimental %}
@@ -69,6 +78,10 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
 {%- for a in toggle_bindings %}
       this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}
           .getBoolean("{{ a.config.name }}", {{ m.toggle_default(a.requirement_level) }});
+{%- endfor %}
+{%- for a in filter_bindings %}
+      this.{{ a.config.name | camel_case }} = Config.stringList(
+          {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_DEFAULT);
 {%- endfor %}
     }
   }
@@ -94,13 +107,30 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
     AttributesBuilder attributes = Attributes.builder();
 {%- for a in ctx.attributes %}
 {%- set toggle = a.configs | selectattr("prop.type", "equalto", "toggle") | first %}
+{%- set value_filter = a.configs | selectattr("prop.type", "equalto", "value_filter") | first %}
 {%- if toggle or a.config_experimental %}
     if ({% if toggle %}state.{{ toggle.name | camel_case }} && {% endif %}{% if a.config_experimental %}state.experimental && {% endif %}{{ a.name | camel_case }} != null) {
+{%- if value_filter %}
+      attributes.put(
+          {{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }},
+          state.{{ value_filter.name | camel_case }}.contains({{ a.name | camel_case }})
+              ? {{ a.name | camel_case }}
+              : "{{ value_filter.prop.fallback_value }}");
+{%- else %}
       attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
+{%- endif %}
     }
 {%- else %}
     if ({{ a.name | camel_case }} != null) {
+{%- if value_filter %}
+      attributes.put(
+          {{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }},
+          state.{{ value_filter.name | camel_case }}.contains({{ a.name | camel_case }})
+              ? {{ a.name | camel_case }}
+              : "{{ value_filter.prop.fallback_value }}");
+{%- else %}
       attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
+{%- endif %}
     }
 {%- endif %}
 {%- endfor %}

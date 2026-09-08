@@ -32,8 +32,8 @@ application {
 tasks.named<JavaExec>("run") {
   environment("OTEL_SERVICE_NAME", "config-codegen-demo")
   environment("OTEL_TRACES_EXPORTER", "console")
-  environment("OTEL_METRICS_EXPORTER", "none")
-  environment("OTEL_LOGS_EXPORTER", "none")
+  environment("OTEL_METRICS_EXPORTER", "console")
+  environment("OTEL_LOGS_EXPORTER", "console")
 }
 
 java {

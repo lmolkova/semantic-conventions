@@ -88,8 +88,16 @@ public final class Demo {
               .header("X-Request-Id", "not-captured")
               .header("X-Config-Version", "updated")
               .build());
+
+      try {
+        instrumentation.send(
+            HttpRequest.newBuilder(URI.create("http://localhost:1/unreachable")).build());
+      } catch (java.io.IOException expected) {
+        System.out.println("Expected request failure: " + expected.getClass().getSimpleName());
+      }
     } finally {
       server.stop(0);
+      sdk.close();
     }
   }
 

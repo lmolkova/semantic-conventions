@@ -75,6 +75,17 @@ groups:
     attributes:
       - ref: http.request.method
         requirement_level: required
+        annotations:
+          config:
+            properties:
+              known_methods:
+                type: value_filter
+                fallback_value: _OTHER
+                env_var: OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS
+                description: |
+                  Set to the list of known HTTP methods; any other value is recorded as `_OTHER`.
+                  Known methods are case-sensitive.
+                  This is a full override of the default known methods, not a list of known methods in addition to the defaults.
       - ref: url.scheme
         requirement_level: required
         examples: ["http", "https"]
@@ -273,6 +284,17 @@ groups:
     attributes:
       - ref: http.request.method
         requirement_level: recommended
+        annotations:
+          config:
+            properties:
+              known_methods:
+                type: value_filter
+                fallback_value: _OTHER
+                env_var: OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS
+                description: |
+                  Set to the list of known HTTP methods; any other value is recorded as `_OTHER`.
+                  Known methods are case-sensitive.
+                  This is a full override of the default known methods, not a list of known methods in addition to the defaults.
       - ref: server.address
         requirement_level: required
         note: |

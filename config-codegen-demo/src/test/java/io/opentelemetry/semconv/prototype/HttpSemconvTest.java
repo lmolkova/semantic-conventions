@@ -26,6 +26,7 @@ import io.opentelemetry.semconv.prototype.http.HttpAttributes;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.semconv.prototype.http.HttpClientActiveRequestsMetric;
+import io.opentelemetry.semconv.prototype.http.HttpClientRequestDurationMetric;
 import io.opentelemetry.semconv.prototype.http.HttpClientRequestExceptionEvent;
 import io.opentelemetry.semconv.prototype.http.HttpClientSpan;
 import io.opentelemetry.semconv.prototype.http.HttpClientTracer;
@@ -226,6 +227,52 @@ class HttpSemconvTest {
                         point ->
                             assertThat(point.getAttributes().get(DbAttributes.DB_QUERY_TEXT))
                                 .isEqualTo("SELECT * FROM users")));
+  }
+
+  @Test
+  void metricValueFilterUsesCurrentConfigSnapshot() {
+    InMemoryMetricReader metricReader = InMemoryMetricReader.create();
+    SdkMeterProvider meterProvider =
+        SdkMeterProvider.builder().registerMetricReader(metricReader).build();
+    MutableConfigProvider config =
+        new MutableConfigProvider(
+            httpServerConfig(
+                    "      client:\n"
+                        + "        known_methods:\n"
+                        + "          - GET\n")
+                .getInstrumentationConfig());
+    HttpClientRequestDurationMetric metric =
+        HttpClientRequestDurationMetric.create(meterProvider.get("test"), config);
+
+    recordHttpDuration(metric, "POST");
+    assertThat(metricReader.collectAllMetrics())
+        .singleElement()
+        .satisfies(
+            data ->
+                assertThat(data.getHistogramData().getPoints())
+                    .singleElement()
+                    .satisfies(
+                        point ->
+                            assertThat(point.getAttributes().get(HttpAttributes.HTTP_REQUEST_METHOD))
+                                .isEqualTo("_OTHER")));
+
+    config.set(
+        httpServerConfig(
+                "      client:\n"
+                    + "        known_methods:\n"
+                    + "          - POST\n")
+            .getInstrumentationConfig());
+    recordHttpDuration(metric, "POST");
+
+    assertThat(metricReader.collectAllMetrics())
+        .singleElement()
+        .satisfies(
+            data ->
+                assertThat(data.getHistogramData().getPoints())
+                    .anySatisfy(
+                        point ->
+                            assertThat(point.getAttributes().get(HttpAttributes.HTTP_REQUEST_METHOD))
+                                .isEqualTo("POST")));
   }
 
   @Test
@@ -598,6 +645,11 @@ class HttpSemconvTest {
         null,
         null,
         null);
+  }
+
+  private static void recordHttpDuration(
+      HttpClientRequestDurationMetric metric, String method) {
+    metric.record(1, null, method, null, null, null, null, null, null, null);
   }
 
   private static Tracer tracer(InMemorySpanExporter exporter) {

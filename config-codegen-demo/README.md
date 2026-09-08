@@ -27,18 +27,18 @@ it, not hand written. A closed set is what makes the schema, the docs and the co
 
 | type | meaning | Java |
 | --- | --- | --- |
-| `value_filter` | config supplies the allow-list of accepted values, anything else becomes `fallback_value` | `filterHttpRequestMethod(config, value)` |
-| `key_filter` | config supplies which keys of a template attribute to record | `populateRequestCapturedHeaders(attributes, lookup, config)` |
-| `toggle` | config gates an attribute or a whole signal | `setHttpRequestBodyContent(...)`, `isEnabled()` |
-| `value_limit` | config supplies a maximum size, longer values are truncated | `truncateHttpRequestBodyContent(config, value)` |
-| `key_redaction` | config supplies which keys inside the value are replaced with `fallback_value` | `redactUrlQuery(config, value)` |
-| `attribute_mapping` | config supplies values of one attribute to match and the attribute to record on a match | `populateServicePeerNameMapping(attributes, config, serverAddress)` |
-| `semconv_experimental` | opting in to development features | the experimental gate |
+| `value_filter` | config supplies the allow-list of accepted values, anything else becomes `fallback_value` | filtering inside generated span and metric helpers |
+| `key_filter` | config supplies which keys of a template attribute to record | `span.setRequestCapturedHeaders(lookup)` |
+| `toggle` | config gates an attribute or a whole signal | `span.setHttpRequestBodyContent(...)`, `isEnabled()` |
+| `value_limit` | config supplies a maximum size, longer values are truncated | truncation inside the generated span setter |
+| `key_redaction` | config supplies which keys inside the value are replaced with `fallback_value` | `tracer.redactUrlQuery(value)` |
+| `attribute_mapping` | config supplies values of one attribute to match and the attribute to record on a match | mapping inside generated span start |
 
 A knob that no semantic type fits declares a plain type instead - `boolean`, `string`, `integer` or
 `string[]`, with an optional `default`. It reaches the schema and the docs and only loses code
 generation, so an unmodelled knob is never inexpressible or forced into the wrong role.
 `sanitize_query_text` on `db.query.text` is one: it changes the value, not whether it is recorded.
+Generation rejects unknown property types and conflicting declarations of the same scoped property.
 
 ```yaml
 - id: http.request.method
@@ -55,6 +55,9 @@ generation, so an unmodelled knob is never inexpressible or forced into the wron
 Defaults are derived rather than declared. A `value_filter` defaults to the attribute's stable enum
 members, and a `toggle` the requirement level of what it gates: `false` for `opt_in`, `true`
 otherwise.
+
+`semconv_experimental` is a reserved property name whose type is `toggle`; generators map it to
+the domain's shared semconv configuration instead of emitting it as a regular property.
 
 ## Placement and naming
 
@@ -78,9 +81,9 @@ scope, which is how a property shared across domains, such as `url.query` saniti
 home. Both scopes work at runtime: the signal's scope is read first and the declared one is the
 fallback, so a shared property can still be overridden for a single signal.
 
-A declared scope also keeps a property that governs one signal kind out of the others.
-`db.query.text` is opt-in on the database metrics and recommended on the spans, so its toggle
-declares `db.client.metric` and never reads as if it governed spans.
+A property name can also identify what it governs within a shared scope. `db.query.text` is opt-in
+on the database metrics and recommended on the spans, so the metric attribute declares
+`metric_query_text` under `db.client`. Span helpers do not read that metric-specific property.
 
 ```yaml
   - id: span.http.client
@@ -141,7 +144,8 @@ HttpServerTracer httpServerTracer =
 public HttpServerSpan start(
     String spanName, String httpRequestMethod, ...,
     Function<String, List<String>> requestCapturedHeaders) {
-  if (!enabled || !tracer.isEnabled()) {
+  State state = this.state;
+  if (!isEnabled(state)) {
     return HttpServerSpan.noop();
   }
   ...
@@ -163,7 +167,7 @@ for (String key : requestCapturedHeaders) {
 experimental gate and a development metric's `isEnabled` is that gate:
 
 ```java
-public void setUrlTemplate(Span span, String value) {
+public void setUrlTemplate(String value) {
   if (!experimental) {
     return;
 }
@@ -188,7 +192,8 @@ Generated span, metric, and event helpers subscribe to configuration changes whe
 supports them. A change builds a new immutable state and swaps one volatile reference. Each
 operation reads one snapshot, and an in-flight span keeps the snapshot it started with.
 Metric helpers take typed attribute values and build their own `Attributes`. Configuration does not
-change their API: a disabled opt-in value is simply not added while recording.
+change their API: a disabled opt-in value is simply not added while recording, and a configured
+value filter is applied before the attribute is recorded.
 
 The released incubating `ConfigProvider` does not have the proposed listener methods yet, so this
 demo uses `DynamicConfigProvider` as a temporary adapter. It does not change the generated API:
@@ -228,6 +233,8 @@ GET {http.request.header.x-request-id=[abc123], http.response.status_code=200,
 
 The second span uses the new mapping, captures `X-Config-Version` instead of `X-Request-Id`, and
 records `_OTHER` because the updated known-method list contains only `POST`.
+The demo then sends a request to an unreachable endpoint to emit the generated exception event.
+Trace, metric, and log console exporters are enabled, and closing the SDK flushes all three.
 
 ## Open questions
 

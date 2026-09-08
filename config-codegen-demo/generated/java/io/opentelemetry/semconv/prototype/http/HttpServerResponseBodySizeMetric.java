@@ -7,11 +7,15 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.semconv.prototype.config.Config;
+import java.util.List;
 
 public final class HttpServerResponseBodySizeMetric {
 
   private static final String SCOPE = "general.http.server";
   private static final String NAME = "http.server.response.body.size";
+
+  private static final List<String> HTTP_REQUEST_METHOD_DEFAULT =
+      List.of("CONNECT", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE");
 
   private final DoubleHistogram instrument;
   private volatile State state;
@@ -28,9 +32,12 @@ public final class HttpServerResponseBodySizeMetric {
   private static final class State {
 
     private final boolean enabled;
+    private final List<String> knownMethods;
 
     private State(DeclarativeConfigProperties config) {
       this.enabled = Config.experimental(config, "http");
+      this.knownMethods = Config.stringList(
+          Config.at(config, SCOPE), "known_methods", HTTP_REQUEST_METHOD_DEFAULT);
     }
   }
 
@@ -67,7 +74,11 @@ public final class HttpServerResponseBodySizeMetric {
       attributes.put(HttpAttributes.ERROR_TYPE, errorType);
     }
     if (httpRequestMethod != null) {
-      attributes.put(HttpAttributes.HTTP_REQUEST_METHOD, httpRequestMethod);
+      attributes.put(
+          HttpAttributes.HTTP_REQUEST_METHOD,
+          state.knownMethods.contains(httpRequestMethod)
+              ? httpRequestMethod
+              : "_OTHER");
     }
     if (httpResponseStatusCode != null) {
       attributes.put(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, httpResponseStatusCode);
