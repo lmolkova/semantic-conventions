@@ -13,11 +13,10 @@ public final class DbClientConnectionMaxMetric {
   private static final String NAME = "db.client.connection.max";
 
   private final LongUpDownCounter instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private DbClientConnectionMaxMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = Config.experimental(config, "db");
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .upDownCounterBuilder(NAME)
         .setUnit("{connection}")
@@ -25,18 +24,30 @@ public final class DbClientConnectionMaxMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "db");
+    }
+  }
+
   public static DbClientConnectionMaxMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new DbClientConnectionMaxMetric(meter, configProvider);
+    DbClientConnectionMaxMetric result =
+        new DbClientConnectionMaxMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void add(long value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.add(value, attributes);

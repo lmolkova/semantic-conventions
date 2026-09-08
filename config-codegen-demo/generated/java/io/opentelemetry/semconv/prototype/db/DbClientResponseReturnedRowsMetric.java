@@ -13,11 +13,10 @@ public final class DbClientResponseReturnedRowsMetric {
   private static final String NAME = "db.client.response.returned_rows";
 
   private final DoubleHistogram instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private DbClientResponseReturnedRowsMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = Config.experimental(config, "db");
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .histogramBuilder(NAME)
         .setUnit("{row}")
@@ -25,18 +24,30 @@ public final class DbClientResponseReturnedRowsMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "db");
+    }
+  }
+
   public static DbClientResponseReturnedRowsMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new DbClientResponseReturnedRowsMetric(meter, configProvider);
+    DbClientResponseReturnedRowsMetric result =
+        new DbClientResponseReturnedRowsMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void record(double value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.record(value, attributes);

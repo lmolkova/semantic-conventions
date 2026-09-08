@@ -14,21 +14,32 @@ public final class DbClientOperationExceptionEvent {
   private static final String NAME = "db.client.operation.exception";
 
   private final Logger logger;
-  private final boolean enabled;
+  private volatile State state;
 
   private DbClientOperationExceptionEvent(Logger logger, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
     this.logger = logger;
-    this.enabled = Config.experimental(config, "db");
+    this.state = new State(Config.instrumentation(configProvider));
+  }
+
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "db");
+    }
   }
 
   public static DbClientOperationExceptionEvent create(
       Logger logger, ConfigProvider configProvider) {
-    return new DbClientOperationExceptionEvent(logger, configProvider);
+    DbClientOperationExceptionEvent result =
+        new DbClientOperationExceptionEvent(logger, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
   public void emit(Severity severity, Throwable throwable) {
@@ -39,7 +50,7 @@ public final class DbClientOperationExceptionEvent {
       Severity severity,
       Throwable throwable,
       Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();

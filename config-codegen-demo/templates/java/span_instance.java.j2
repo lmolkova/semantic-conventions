@@ -1,0 +1,184 @@
+{%- import "macros.j2" as m -%}
+{%- set post_start_key_filters = ctx.config_bindings
+    | selectattr("config.prop.type", "equalto", "key_filter")
+    | rejectattr("sampling_relevant") | list -%}
+{%- set toggle_attrs = ctx.config_bindings
+    | selectattr("config.prop.type", "equalto", "toggle") | list -%}
+{%- set limit_attrs = ctx.config_bindings
+    | selectattr("config.prop.type", "equalto", "value_limit") | list -%}
+{%- set experimental_attrs = ctx.attributes
+    | selectattr("config_experimental") | rejectattr("configs") | list -%}
+{%- set post_start_experimental_config = (post_start_key_filters + toggle_attrs)
+    | selectattr("config_experimental") | list -%}
+{%- set needs_experimental = experimental_attrs or post_start_experimental_config -%}
+package {{ params.package_root }}.{{ ctx.domain }};
+
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public final class {{ ctx.class_name | pascal_case }}Span {
+
+  private static final {{ ctx.class_name | pascal_case }}Span NOOP =
+      new {{ ctx.class_name | pascal_case }}Span();
+
+  private final Span delegate;
+  private final boolean noop;
+{%- for a in post_start_key_filters %}
+  private final List<String> {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in toggle_attrs %}
+  private final boolean {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in limit_attrs %}
+  private final int {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- if needs_experimental %}
+  private final boolean experimental;
+{%- endif %}
+
+  private {{ ctx.class_name | pascal_case }}Span() {
+    this.delegate = null;
+    this.noop = true;
+{%- for a in post_start_key_filters %}
+    this.{{ a.config.name | camel_case }} = List.of();
+{%- endfor %}
+{%- for a in toggle_attrs %}
+    this.{{ a.config.name | camel_case }} = false;
+{%- endfor %}
+{%- for a in limit_attrs %}
+    this.{{ a.config.name | camel_case }} = -1;
+{%- endfor %}
+{%- if needs_experimental %}
+    this.experimental = false;
+{%- endif %}
+  }
+
+  {{ ctx.class_name | pascal_case }}Span(
+      Span delegate
+{%- for a in post_start_key_filters %},
+      List<String> {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- for a in toggle_attrs %},
+      boolean {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- for a in limit_attrs %},
+      int {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- if needs_experimental %},
+      boolean experimental
+{%- endif %}) {
+    this.delegate = delegate;
+    this.noop = false;
+{%- for a in post_start_key_filters %}
+    this.{{ a.config.name | camel_case }} = {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in toggle_attrs %}
+    this.{{ a.config.name | camel_case }} = {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in limit_attrs %}
+    this.{{ a.config.name | camel_case }} = {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- if needs_experimental %}
+    this.experimental = experimental;
+{%- endif %}
+  }
+
+  static {{ ctx.class_name | pascal_case }}Span noop() {
+    return NOOP;
+  }
+
+  public <T> {{ ctx.class_name | pascal_case }}Span setAttribute(AttributeKey<T> key, T value) {
+    if (!noop) {
+      delegate.setAttribute(key, value);
+    }
+    return this;
+  }
+
+  public Scope makeCurrent() {
+    return noop ? Scope.noop() : delegate.makeCurrent();
+  }
+
+  public void end() {
+    if (!noop) {
+      delegate.end();
+    }
+  }
+{%- for a in post_start_key_filters %}
+
+  public void set{{ a.config.name | pascal_case }}({{ m.lookup_type(a) }} lookup) {
+    if (noop) {
+      return;
+    }
+{%- if a.config_experimental %}
+    if (!experimental) {
+      return;
+    }
+{%- endif %}
+    for (String key : {{ a.config.name | camel_case }}) {
+      {{ m.template_type(a) }} value = lookup.apply(key);
+{%- if a.type is endingwith("[]]") %}
+      if (value != null && !value.isEmpty()) {
+{%- else %}
+      if (value != null) {
+{%- endif %}
+        delegate.setAttribute(
+            {{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}.getAttributeKey({{ m.normalized_key(a) }}),
+            value);
+      }
+    }
+  }
+{%- endfor %}
+{%- for a in toggle_attrs %}
+
+  public void set{{ a.name | pascal_case }}(Supplier<{{ m.java_type(a) }}> value) {
+    if (noop) {
+      return;
+    }
+{%- if a.config_experimental %}
+    if (!experimental) {
+      return;
+    }
+{%- endif %}
+    if (!{{ a.config.name | camel_case }}) {
+      return;
+    }
+    {{ m.java_type(a) }} resolved = value.get();
+    if (resolved != null) {
+{%- set limit = a.configs | selectattr("prop.type", "equalto", "value_limit") | first %}
+{%- if limit %}
+      resolved = truncate{{ a.name | pascal_case }}(resolved);
+{%- endif %}
+      delegate.setAttribute({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, resolved);
+    }
+  }
+{%- endfor %}
+{%- for a in limit_attrs %}
+
+  private String truncate{{ a.name | pascal_case }}(String value) {
+    int limit = {{ a.config.name | camel_case }};
+    if (limit < 0 || value == null || value.length() <= limit) {
+      return value;
+    }
+    return value.substring(0, limit);
+  }
+{%- endfor %}
+{%- for a in experimental_attrs %}
+
+  public void set{{ a.name | pascal_case }}({{ m.java_type(a) }} value) {
+    if (noop) {
+      return;
+    }
+    if (!experimental) {
+      return;
+    }
+    if (value != null) {
+      delegate.setAttribute({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, value);
+    }
+  }
+{%- endfor %}
+}

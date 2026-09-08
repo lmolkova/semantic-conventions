@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.prototype.config.DynamicConfigProvider;
 import io.opentelemetry.semconv.prototype.http.HttpAttributes;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
@@ -33,8 +34,10 @@ import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 class HttpSemconvTest {
@@ -43,14 +46,19 @@ class HttpSemconvTest {
       AttributeKey.stringArrayKey("http.request.header.x-foo");
   private static final AttributeKey<List<String>> RESPONSE_HEADER_FOO =
       AttributeKey.stringArrayKey("http.response.header.x-foo");
+  private static final AttributeKey<List<String>> RESPONSE_HEADER_BAR =
+      AttributeKey.stringArrayKey("http.response.header.x-bar");
 
   private static ConfigProvider config(String yaml) {
+    return () -> configProperties(yaml);
+  }
+
+  private static DeclarativeConfigProperties configProperties(String yaml) {
     DeclarativeConfigProperties root =
         DeclarativeConfiguration.toConfigProperties(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    DeclarativeConfigProperties instrumentation =
-        root.getStructured("instrumentation/development", DeclarativeConfigProperties.empty());
-    return () -> instrumentation;
+    return root.getStructured(
+        "instrumentation/development", DeclarativeConfigProperties.empty());
   }
 
   private static ConfigProvider httpServerConfig(String properties) {
@@ -106,6 +114,107 @@ class HttpSemconvTest {
             .getInstrumentationConfig());
 
     assertThat(serverSpan.filterHttpRequestMethod("POST")).isEqualTo("_OTHER");
+  }
+
+  @Test
+  void dynamicConfigUpdatesSpansMetricsAndEvents() {
+    InMemorySpanExporter spanExporter = InMemorySpanExporter.create();
+    InMemoryMetricReader metricReader = InMemoryMetricReader.create();
+    SdkMeterProvider meterProvider =
+        SdkMeterProvider.builder().registerMetricReader(metricReader).build();
+    InMemoryLogRecordExporter logExporter = InMemoryLogRecordExporter.create();
+    SdkLoggerProvider loggerProvider =
+        SdkLoggerProvider.builder()
+            .addLogRecordProcessor(SimpleLogRecordProcessor.create(logExporter))
+            .build();
+    MutableConfigProvider config =
+        new MutableConfigProvider(
+            httpServerConfig(
+                    "      server:\n"
+                        + "        known_methods:\n"
+                        + "          - GET\n"
+                        + "      client: {}\n")
+                .getInstrumentationConfig());
+    HttpServerTracer serverTracer =
+        HttpServerTracer.create(tracer(spanExporter), config);
+    HttpClientActiveRequestsMetric metric =
+        HttpClientActiveRequestsMetric.create(meterProvider.get("test"), config);
+    HttpClientRequestExceptionEvent event =
+        HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), config);
+
+    assertThat(serverTracer.filterHttpRequestMethod("POST")).isEqualTo("_OTHER");
+    assertThat(metric.isEnabled()).isFalse();
+    assertThat(event.isEnabled()).isFalse();
+    metric.add(1, Attributes.empty());
+    event.emit(Severity.WARN, new IllegalStateException("before"));
+    assertThat(metricReader.collectAllMetrics()).isEmpty();
+    assertThat(logExporter.getFinishedLogRecordItems()).isEmpty();
+
+    config.set(
+        httpServerConfig(
+                "      semconv:\n"
+                    + "        experimental: true\n"
+                    + "      server:\n"
+                    + "        known_methods:\n"
+                    + "          - POST\n"
+                    + "      client: {}\n")
+            .getInstrumentationConfig());
+
+    assertThat(serverTracer.filterHttpRequestMethod("POST")).isEqualTo("POST");
+    assertThat(metric.isEnabled()).isTrue();
+    assertThat(event.isEnabled()).isTrue();
+    serverTracer.start(
+            "POST /users", "1.2.3.4", "POST", "example.com", 443L, "/users",
+            null, "https", "curl/8", name -> List.of())
+        .end();
+    metric.add(1, Attributes.empty());
+    event.emit(Severity.WARN, new IllegalStateException("after"));
+
+    assertThat(spanExporter.getFinishedSpanItems().get(0).getAttributes()
+            .get(HttpAttributes.HTTP_REQUEST_METHOD))
+        .isEqualTo("POST");
+    assertThat(metricReader.collectAllMetrics()).hasSize(1);
+    assertThat(logExporter.getFinishedLogRecordItems()).hasSize(1);
+  }
+
+  @Test
+  void inFlightSpanKeepsItsConfigSnapshot() {
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    MutableConfigProvider config =
+        new MutableConfigProvider(
+            httpServerConfig(
+                    "      client:\n"
+                        + "        response_captured_headers:\n"
+                        + "          - X-Foo\n")
+                .getInstrumentationConfig());
+    HttpClientTracer clientTracer = HttpClientTracer.create(tracer(exporter), config);
+    HttpClientSpan oldSpan =
+        clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/one");
+
+    config.set(
+        httpServerConfig(
+                "      client:\n"
+                    + "        response_captured_headers:\n"
+                    + "          - X-Bar\n")
+            .getInstrumentationConfig());
+
+    Map<String, List<String>> headers =
+        Map.of("X-Foo", List.of("old"), "X-Bar", List.of("new"));
+    oldSpan.setResponseCapturedHeaders(headers::get);
+    oldSpan.end();
+    HttpClientSpan newSpan =
+        clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/two");
+    newSpan.setResponseCapturedHeaders(headers::get);
+    newSpan.end();
+
+    assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(RESPONSE_HEADER_FOO))
+        .containsExactly("old");
+    assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(RESPONSE_HEADER_BAR))
+        .isNull();
+    assertThat(exporter.getFinishedSpanItems().get(1).getAttributes().get(RESPONSE_HEADER_FOO))
+        .isNull();
+    assertThat(exporter.getFinishedSpanItems().get(1).getAttributes().get(RESPONSE_HEADER_BAR))
+        .containsExactly("new");
   }
 
   @Test
@@ -395,5 +504,32 @@ class HttpSemconvTest {
         .addSpanProcessor(SimpleSpanProcessor.create(exporter))
         .build()
         .get("test");
+  }
+
+  private static final class MutableConfigProvider implements DynamicConfigProvider {
+
+    private volatile DeclarativeConfigProperties config;
+    private final List<Consumer<DeclarativeConfigProperties>> listeners =
+        new CopyOnWriteArrayList<>();
+
+    private MutableConfigProvider(DeclarativeConfigProperties config) {
+      this.config = config;
+    }
+
+    @Override
+    public DeclarativeConfigProperties getInstrumentationConfig() {
+      return config;
+    }
+
+    @Override
+    public void addInstrumentationConfigListener(
+        Consumer<DeclarativeConfigProperties> listener) {
+      listeners.add(listener);
+    }
+
+    private void set(DeclarativeConfigProperties config) {
+      this.config = config;
+      listeners.forEach(listener -> listener.accept(config));
+    }
   }
 }

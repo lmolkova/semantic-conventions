@@ -5,6 +5,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public final class Config {
 
@@ -14,6 +15,17 @@ public final class Config {
     DeclarativeConfigProperties config =
         configProvider == null ? null : configProvider.getInstrumentationConfig();
     return config == null ? DeclarativeConfigProperties.empty() : config;
+  }
+
+  public static void onInstrumentationChange(
+      ConfigProvider configProvider, Consumer<DeclarativeConfigProperties> listener) {
+    if (configProvider instanceof DynamicConfigProvider) {
+      ((DynamicConfigProvider) configProvider)
+          .addInstrumentationConfigListener(
+              config ->
+                  listener.accept(
+                      config == null ? DeclarativeConfigProperties.empty() : config));
+    }
   }
 
   public static DeclarativeConfigProperties at(DeclarativeConfigProperties root, String path) {

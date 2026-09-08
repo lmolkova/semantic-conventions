@@ -67,7 +67,11 @@ Config.at(config, SCOPE)
 
 {% macro value_filter_method(attr) %}
   public String filter{{ attr.name | pascal_case }}(String value) {
-    return {{ attr.config.name | camel_case }}.contains(value)
+    return filter{{ attr.name | pascal_case }}(state, value);
+  }
+
+  private static String filter{{ attr.name | pascal_case }}(State state, String value) {
+    return state.{{ attr.config.name | camel_case }}.contains(value)
         ? value
         : "{{ attr.config.prop.fallback_value }}";
   }
@@ -82,15 +86,16 @@ Config.at(config, SCOPE)
 {%- endmacro -%}
 
 {% macro key_filter_method(attr, domain) %}
-  private void populate{{ attr.config.name | pascal_case }}(
+  private static void populate{{ attr.config.name | pascal_case }}(
+      State state,
       AttributesBuilder attributes,
       {{ lookup_type(attr) }} lookup) {
 {%- if attr.config_experimental %}
-    if (!experimental) {
+    if (!state.experimental) {
       return;
     }
 {%- endif %}
-    for (String key : {{ attr.config.name | camel_case }}) {
+    for (String key : state.{{ attr.config.name | camel_case }}) {
       {{ template_type(attr) }} value = lookup.apply(key);
 {%- if attr.type is endingwith("[]]") %}
       if (value != null && !value.isEmpty()) {
@@ -142,7 +147,7 @@ Config.at(config, SCOPE)
 {#- Config supplies a maximum size, and a longer value is truncated. -#}
 {% macro value_limit_method(attr) %}
   public String truncate{{ attr.name | pascal_case }}(String value) {
-    int limit = {{ attr.config.name | camel_case }};
+    int limit = state.{{ attr.config.name | camel_case }};
     if (limit < 0 || value == null || value.length() <= limit) {
       return value;
     }
@@ -154,7 +159,7 @@ Config.at(config, SCOPE)
 {% macro key_redaction_method(attr) %}
   public String redact{{ attr.name | pascal_case }}(String value) {
     return Redaction.redactQueryParameters(
-        value, {{ attr.config.name | camel_case }}, "{{ attr.config.prop.fallback_value }}");
+        value, state.{{ attr.config.name | camel_case }}, "{{ attr.config.prop.fallback_value }}");
   }
 {%- endmacro %}
 
@@ -163,10 +168,17 @@ Config.at(config, SCOPE)
   public void populate{{ p.name | pascal_case }}(
       AttributesBuilder attributes,
       String {{ p.prop.match_attribute | camel_case }}) {
+    populate{{ p.name | pascal_case }}(state, attributes, {{ p.prop.match_attribute | camel_case }});
+  }
+
+  private static void populate{{ p.name | pascal_case }}(
+      State state,
+      AttributesBuilder attributes,
+      String {{ p.prop.match_attribute | camel_case }}) {
     if ({{ p.prop.match_attribute | camel_case }} == null) {
       return;
     }
-    String mapped = {{ p.name | camel_case }}.get({{ p.prop.match_attribute | camel_case }});
+    String mapped = state.{{ p.name | camel_case }}.get({{ p.prop.match_attribute | camel_case }});
     if (mapped != null) {
       attributes.put({{ attributes_class(domain) }}.{{ const(p.prop.target_attribute) }}, mapped);
     }

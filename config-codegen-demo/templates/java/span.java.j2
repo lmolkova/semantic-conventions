@@ -47,78 +47,93 @@ public final class {{ ctx.class_name | pascal_case }}Tracer {
 {%- endfor %}
 
   private final Tracer tracer;
-  private final boolean enabled;
-{%- if needs_experimental %}
-  private final boolean experimental;
-{%- endif %}
-{%- for a in filter_attrs %}
-  private final List<String> {{ a.config.name | camel_case }};
-{%- endfor %}
-{%- for a in header_attrs %}
-  private final List<String> {{ a.config.name | camel_case }};
-{%- endfor %}
-{%- for a in toggle_attrs %}
-  private final boolean {{ a.config.name | camel_case }};
-{%- endfor %}
-{%- for a in limit_attrs %}
-  private final int {{ a.config.name | camel_case }};
-{%- endfor %}
-{%- for a in redaction_attrs %}
-  private final List<String> {{ a.config.name | camel_case }};
-{%- endfor %}
-{%- for p in mappings %}
-  private final Map<String, String> {{ p.name | camel_case }};
-{%- endfor %}
+  private volatile State state;
 
   private {{ ctx.class_name | pascal_case }}Tracer(
       Tracer tracer, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
     this.tracer = tracer;
+    this.state = new State(Config.instrumentation(configProvider));
+  }
+
+  private static final class State {
+
+    private final boolean enabled;
 {%- if needs_experimental %}
-    this.experimental = Config.experimental(config, "{{ ctx.domain }}");
-{%- endif %}
-{%- if enabled and ctx.experimental %}
-    this.enabled = experimental
-        && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
-{%- elif enabled %}
-    this.enabled = Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
-{%- elif ctx.experimental %}
-    this.enabled = experimental;
-{%- else %}
-    this.enabled = true;
+    private final boolean experimental;
 {%- endif %}
 {%- for a in filter_attrs %}
-    this.{{ a.config.name | camel_case }} = Config.stringList(
-        {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_DEFAULT);
+    private final List<String> {{ a.config.name | camel_case }};
 {%- endfor %}
 {%- for a in header_attrs %}
-    this.{{ a.config.name | camel_case }} = Config.stringList(
-        {{ m.config_at(a) }}, "{{ a.config.name }}", List.of());
+    private final List<String> {{ a.config.name | camel_case }};
 {%- endfor %}
 {%- for a in toggle_attrs %}
-    this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getBoolean(
-        "{{ a.config.name }}", {{ m.toggle_default(a.requirement_level) }});
+    private final boolean {{ a.config.name | camel_case }};
 {%- endfor %}
 {%- for a in limit_attrs %}
-    this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getInt("{{ a.config.name }}", -1);
+    private final int {{ a.config.name | camel_case }};
 {%- endfor %}
 {%- for a in redaction_attrs %}
-    this.{{ a.config.name | camel_case }} = Config.stringList(
-        {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_SENSITIVE_DEFAULT);
+    private final List<String> {{ a.config.name | camel_case }};
 {%- endfor %}
 {%- for p in mappings %}
-    this.{{ p.name | camel_case }} = Config.stringMap(
-        Config.at(config, SCOPE).getStructuredList("{{ p.name }}", List.of()), "match", "value");
+    private final Map<String, String> {{ p.name | camel_case }};
 {%- endfor %}
+
+    private State(DeclarativeConfigProperties config) {
+{%- if needs_experimental %}
+      this.experimental = Config.experimental(config, "{{ ctx.domain }}");
+{%- endif %}
+{%- if enabled and ctx.experimental %}
+      this.enabled = experimental
+          && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif enabled %}
+      this.enabled = Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+{%- elif ctx.experimental %}
+      this.enabled = experimental;
+{%- else %}
+      this.enabled = true;
+{%- endif %}
+{%- for a in filter_attrs %}
+      this.{{ a.config.name | camel_case }} = Config.stringList(
+          {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_DEFAULT);
+{%- endfor %}
+{%- for a in header_attrs %}
+      this.{{ a.config.name | camel_case }} = Config.stringList(
+          {{ m.config_at(a) }}, "{{ a.config.name }}", List.of());
+{%- endfor %}
+{%- for a in toggle_attrs %}
+      this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getBoolean(
+          "{{ a.config.name }}", {{ m.toggle_default(a.requirement_level) }});
+{%- endfor %}
+{%- for a in limit_attrs %}
+      this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getInt("{{ a.config.name }}", -1);
+{%- endfor %}
+{%- for a in redaction_attrs %}
+      this.{{ a.config.name | camel_case }} = Config.stringList(
+          {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_SENSITIVE_DEFAULT);
+{%- endfor %}
+{%- for p in mappings %}
+      this.{{ p.name | camel_case }} = Config.stringMap(
+          Config.at(config, SCOPE).getStructuredList("{{ p.name }}", List.of()), "match", "value");
+{%- endfor %}
+    }
   }
 
   public static {{ ctx.class_name | pascal_case }}Tracer create(
       Tracer tracer, ConfigProvider configProvider) {
-    return new {{ ctx.class_name | pascal_case }}Tracer(tracer, configProvider);
+    {{ ctx.class_name | pascal_case }}Tracer result =
+        new {{ ctx.class_name | pascal_case }}Tracer(tracer, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled && tracer.isEnabled();
+    return isEnabled(state);
+  }
+
+  private boolean isEnabled(State state) {
+    return state.enabled && tracer.isEnabled();
   }
 
 {%- set ps = namespace(list=["String spanName"]) -%}
@@ -130,24 +145,25 @@ public final class {{ ctx.class_name | pascal_case }}Tracer {
 {%- endfor %}
   public {{ ctx.class_name | pascal_case }}Span start(
       {{ ps.list | join(",\n      ") }}) {
-    if (!enabled || !tracer.isEnabled()) {
+    State state = this.state;
+    if (!isEnabled(state)) {
       return {{ ctx.class_name | pascal_case }}Span.noop();
     }
     AttributesBuilder attributes = Attributes.builder();
 {%- for a in start_attrs %}
     if ({{ a.name | camel_case }} != null) {
 {%- if a.configs | selectattr("prop.type", "equalto", "value_filter") | first %}
-      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, filter{{ a.name | pascal_case }}({{ a.name | camel_case }}));
+      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, filter{{ a.name | pascal_case }}(state, {{ a.name | camel_case }}));
 {%- else %}
       attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
 {%- endif %}
     }
 {%- endfor %}
 {%- for a in sampling_headers %}
-    populate{{ a.config.name | pascal_case }}(attributes, {{ a.config.name | camel_case }});
+    populate{{ a.config.name | pascal_case }}(state, attributes, {{ a.config.name | camel_case }});
 {%- endfor %}
 {%- for p in mappings %}
-    populate{{ p.name | pascal_case }}(attributes, {{ p.prop.match_attribute | camel_case }});
+    populate{{ p.name | pascal_case }}(state, attributes, {{ p.prop.match_attribute | camel_case }});
 {%- endfor %}
     Span span =
         tracer
@@ -158,16 +174,16 @@ public final class {{ ctx.class_name | pascal_case }}Tracer {
     return new {{ ctx.class_name | pascal_case }}Span(
         span
 {%- for a in post_start_headers %},
-        {{ a.config.name | camel_case }}
+        state.{{ a.config.name | camel_case }}
 {%- endfor %}
 {%- for a in toggle_attrs %},
-        {{ a.config.name | camel_case }}
+        state.{{ a.config.name | camel_case }}
 {%- endfor %}
 {%- for a in limit_attrs %},
-        {{ a.config.name | camel_case }}
+        state.{{ a.config.name | camel_case }}
 {%- endfor %}
 {%- if span_needs_experimental %},
-        experimental
+        state.experimental
 {%- endif %});
   }
 {% for a in filter_attrs %}

@@ -13,11 +13,10 @@ public final class DbClientConnectionCreateTimeMetric {
   private static final String NAME = "db.client.connection.create_time";
 
   private final DoubleHistogram instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private DbClientConnectionCreateTimeMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = Config.experimental(config, "db");
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .histogramBuilder(NAME)
         .setUnit("s")
@@ -25,18 +24,30 @@ public final class DbClientConnectionCreateTimeMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "db");
+    }
+  }
+
   public static DbClientConnectionCreateTimeMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new DbClientConnectionCreateTimeMetric(meter, configProvider);
+    DbClientConnectionCreateTimeMetric result =
+        new DbClientConnectionCreateTimeMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void record(double value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.record(value, attributes);

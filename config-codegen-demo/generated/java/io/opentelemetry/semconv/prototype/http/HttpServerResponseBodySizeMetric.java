@@ -13,11 +13,10 @@ public final class HttpServerResponseBodySizeMetric {
   private static final String NAME = "http.server.response.body.size";
 
   private final DoubleHistogram instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private HttpServerResponseBodySizeMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = Config.experimental(config, "http");
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .histogramBuilder(NAME)
         .setUnit("By")
@@ -25,18 +24,30 @@ public final class HttpServerResponseBodySizeMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "http");
+    }
+  }
+
   public static HttpServerResponseBodySizeMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new HttpServerResponseBodySizeMetric(meter, configProvider);
+    HttpServerResponseBodySizeMetric result =
+        new HttpServerResponseBodySizeMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void record(double value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.record(value, attributes);

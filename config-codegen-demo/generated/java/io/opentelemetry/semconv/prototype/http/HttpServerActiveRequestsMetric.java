@@ -13,11 +13,10 @@ public final class HttpServerActiveRequestsMetric {
   private static final String NAME = "http.server.active_requests";
 
   private final LongUpDownCounter instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private HttpServerActiveRequestsMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = Config.experimental(config, "http");
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .upDownCounterBuilder(NAME)
         .setUnit("{request}")
@@ -25,18 +24,30 @@ public final class HttpServerActiveRequestsMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "http");
+    }
+  }
+
   public static HttpServerActiveRequestsMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new HttpServerActiveRequestsMetric(meter, configProvider);
+    HttpServerActiveRequestsMetric result =
+        new HttpServerActiveRequestsMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void add(long value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.add(value, attributes);

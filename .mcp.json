@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "semconv-weaver": {
+      "command": "/Users/lmolkova/.cargo/bin/weaver",
+      "args": [
+        "registry",
+        "mcp",
+        "--v2",
+        "-r",
+        "model"
+      ]
+    }
+  }
+}

@@ -125,7 +125,7 @@ is dropped because the semantic type already says what the array is for.
 
 `generated/java/` holds a tracer and typed span class per span convention, one class per metric or
 event, and one attribute key class per domain. Each tracer accepts a `ConfigProvider` when it is
-created and resolves all relevant properties into immutable fields. Span, metric, and event
+created and resolves all relevant properties into an immutable state snapshot. Span, metric, and event
 operations do not traverse `DeclarativeConfigProperties`.
 The hand written runtime files are `Config`, which resolves and snapshots properties, and
 `Redaction`, which rewrites a query string.
@@ -181,9 +181,13 @@ off-switch for any other. Span tracers also check the underlying `Tracer.isEnabl
 `start()` call, so SDK enablement can change without rebuilding the generated tracer. Gate appears
 only where a config property asks for one.
 
-Configuration changes take effect when an instrumentation creates new generated signal helpers.
-A future `ConfigProvider` listener can rebuild and swap these immutable instances without adding
-configuration lookups to telemetry operations.
+Generated span, metric, and event helpers subscribe to configuration changes when the provider
+supports them. A change builds a new immutable state and swaps one volatile reference. Each
+operation reads one snapshot, and an in-flight span keeps the snapshot it started with.
+
+The released incubating `ConfigProvider` does not have the proposed listener methods yet, so this
+demo uses `DynamicConfigProvider` as a temporary adapter. It does not change the generated API:
+providers without listener support keep the initialization-time snapshot.
 
 An event declaring the `exception.*` attributes gets a helper taking a `Throwable`, which calls
 `ExtendedLogRecordBuilder.setException` rather than asking the caller to unpack it.
@@ -200,16 +204,20 @@ This regenerates both artifacts, runs the tests and runs the demo.
 
 [`HttpClientInstrumentation`](src/main/java/io/opentelemetry/semconv/prototype/demo/HttpClientInstrumentation.java)
 instruments a real JDK `HttpClient` call with the generated helpers.
-[`Demo`](src/main/java/io/opentelemetry/semconv/prototype/demo/Demo.java) sends one request through
-it with [`demo-config.yaml`](src/main/resources/demo-config.yaml) and prints the span, and
+[`Demo`](src/main/java/io/opentelemetry/semconv/prototype/demo/Demo.java) contains both configurations
+inline. It sends a request, updates the same provider, and sends another request without recreating
+the instrumentation.
 
-`demo-config.yaml` configures a `service_peer_name_mapping`, so the request records an attribute the
+The initial config defines a `service_peer_name_mapping`, so the request records an attribute the
 instrumentation never passes:
 
 ```
 GET {http.request.header.x-request-id=[abc123], http.response.status_code=200,
      server.address=localhost, service.peer.name=shopping-cart, http.request.method=GET, ...}
 ```
+
+The second span uses the new mapping, captures `X-Config-Version` instead of `X-Request-Id`, and
+records `_OTHER` because the updated known-method list contains only `POST`.
 
 ## Open questions
 

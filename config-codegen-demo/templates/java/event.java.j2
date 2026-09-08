@@ -16,30 +16,41 @@ public final class {{ ctx.class_name | pascal_case }}Event {
   private static final String NAME = "{{ ctx.event_name }}";
 
   private final Logger logger;
-  private final boolean enabled;
+  private volatile State state;
 
   private {{ ctx.class_name | pascal_case }}Event(Logger logger, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
     this.logger = logger;
+    this.state = new State(Config.instrumentation(configProvider));
+  }
+
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
 {%- if enabled and ctx.experimental %}
-    this.enabled = Config.experimental(config, "{{ ctx.domain }}")
-        && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+      this.enabled = Config.experimental(config, "{{ ctx.domain }}")
+          && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
 {%- elif enabled %}
-    this.enabled = Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+      this.enabled = Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
 {%- elif ctx.experimental %}
-    this.enabled = Config.experimental(config, "{{ ctx.domain }}");
+      this.enabled = Config.experimental(config, "{{ ctx.domain }}");
 {%- else %}
-    this.enabled = true;
+      this.enabled = true;
 {%- endif %}
+    }
   }
 
   public static {{ ctx.class_name | pascal_case }}Event create(
       Logger logger, ConfigProvider configProvider) {
-    return new {{ ctx.class_name | pascal_case }}Event(logger, configProvider);
+    {{ ctx.class_name | pascal_case }}Event result =
+        new {{ ctx.class_name | pascal_case }}Event(logger, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 {% if ctx.is_exception %}
   public void emit(Severity severity, Throwable throwable) {
@@ -50,7 +61,7 @@ public final class {{ ctx.class_name | pascal_case }}Event {
       Severity severity,
       Throwable throwable,
       Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();
@@ -63,7 +74,7 @@ public final class {{ ctx.class_name | pascal_case }}Event {
   }
 {%- else %}
   public void emit(Severity severity, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     logger

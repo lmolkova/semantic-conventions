@@ -13,11 +13,10 @@ public final class HttpClientRequestDurationMetric {
   private static final String NAME = "http.client.request.duration";
 
   private final DoubleHistogram instrument;
-  private final boolean enabled;
+  private volatile State state;
 
   private HttpClientRequestDurationMetric(Meter meter, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
-    this.enabled = true;
+    this.state = new State(Config.instrumentation(configProvider));
     this.instrument = meter
         .histogramBuilder(NAME)
         .setUnit("s")
@@ -25,18 +24,30 @@ public final class HttpClientRequestDurationMetric {
         .build();
   }
 
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = true;
+    }
+  }
+
   public static HttpClientRequestDurationMetric create(
       Meter meter, ConfigProvider configProvider) {
-    return new HttpClientRequestDurationMetric(meter, configProvider);
+    HttpClientRequestDurationMetric result =
+        new HttpClientRequestDurationMetric(meter, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
 
   public void record(double value, Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     instrument.record(value, attributes);

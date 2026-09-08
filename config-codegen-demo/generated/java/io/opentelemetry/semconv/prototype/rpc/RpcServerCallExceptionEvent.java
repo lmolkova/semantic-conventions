@@ -14,21 +14,32 @@ public final class RpcServerCallExceptionEvent {
   private static final String NAME = "rpc.server.call.exception";
 
   private final Logger logger;
-  private final boolean enabled;
+  private volatile State state;
 
   private RpcServerCallExceptionEvent(Logger logger, ConfigProvider configProvider) {
-    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
     this.logger = logger;
-    this.enabled = Config.experimental(config, "rpc");
+    this.state = new State(Config.instrumentation(configProvider));
+  }
+
+  private static final class State {
+
+    private final boolean enabled;
+
+    private State(DeclarativeConfigProperties config) {
+      this.enabled = Config.experimental(config, "rpc");
+    }
   }
 
   public static RpcServerCallExceptionEvent create(
       Logger logger, ConfigProvider configProvider) {
-    return new RpcServerCallExceptionEvent(logger, configProvider);
+    RpcServerCallExceptionEvent result =
+        new RpcServerCallExceptionEvent(logger, configProvider);
+    Config.onInstrumentationChange(configProvider, config -> result.state = new State(config));
+    return result;
   }
 
   public boolean isEnabled() {
-    return enabled;
+    return state.enabled;
   }
 
   public void emit(Severity severity, Throwable throwable) {
@@ -39,7 +50,7 @@ public final class RpcServerCallExceptionEvent {
       Severity severity,
       Throwable throwable,
       Attributes attributes) {
-    if (!enabled) {
+    if (!state.enabled) {
       return;
     }
     ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();
