@@ -69,16 +69,7 @@ $defs:
       service_peer_name_mapping:
         type: array
         items:
-          type: object
-          additionalProperties: false
-          required: [match, value]
-          properties:
-            match:
-              type: string
-              description: A `server.address` value to match.
-            value:
-              type: string
-              description: The `service.peer.name` to record on a match.
+          $ref: "#/$defs/ExperimentalServicePeerNameMappingEntry"
         description: |
           Set to the list of `server.address` values and the `service.peer.name` to record for each.
           Requests to any other address record no `service.peer.name`.
@@ -147,3 +138,15 @@ $defs:
           This is a full override of the default list, not an addition to it.
           Set to an empty list to disable redaction.
         defaultBehavior: "the values of X-Amz-Signature, X-Amz-Credential, X-Amz-Security-Token, AWSAccessKeyId, Signature, sig, X-Goog-Signature are replaced with `REDACTED`"
+
+  ExperimentalServicePeerNameMappingEntry:
+    type: object
+    additionalProperties: false
+    required: [match, value]
+    properties:
+      match:
+        type: string
+        description: A `server.address` value to match.
+      value:
+        type: string
+        description: The `service.peer.name` to record on a match.

@@ -1,6 +1,9 @@
 {%- macro type_name(scope) -%}
 Experimental{{ scope | replace(".", "_") | pascal_case }}Instrumentation
 {%- endmacro -%}
+{%- macro mapping_type_name(p) -%}
+Experimental{{ p.name | pascal_case }}Entry
+{%- endmacro -%}
 {%- macro default_behavior(p) -%}
 {%- if p.prop.type == "value_filter" and p.members | length > 0 -%}
 {{ p.members | reject("equalto", p.prop.fallback_value) | join(", ") }} are known
@@ -34,16 +37,7 @@ the instrumentation default is used
 {%- elif p.prop.type == "attribute_mapping" %}
         type: array
         items:
-          type: object
-          additionalProperties: false
-          required: [match, value]
-          properties:
-            match:
-              type: string
-              description: A `{{ p.prop.match_attribute }}` value to match.
-            value:
-              type: string
-              description: The `{{ p.prop.target_attribute }}` to record on a match.
+          $ref: "#/$defs/{{ mapping_type_name(p) }}"
 {%- elif p.prop.type == "toggle" or p.prop.type == "boolean" %}
         type: [boolean, "null"]
 {#- A property with no semantic type is a plain value: it reaches the schema and the docs,
@@ -81,4 +75,24 @@ $defs:
 {%- endif %}
         defaultBehavior: "{{ default_behavior(p) }}"
 {%- endfor %}
+{% endfor %}
+{%- set mappings = namespace(names=[], properties=[]) %}
+{%- for s in ctx.scopes %}
+{%- for p in s.properties if p.prop.type == "attribute_mapping" and p.name not in mappings.names %}
+{%- set mappings.names = mappings.names + [p.name] %}
+{%- set mappings.properties = mappings.properties + [p] %}
+{%- endfor %}
+{%- endfor %}
+{%- for p in mappings.properties %}
+  {{ mapping_type_name(p) }}:
+    type: object
+    additionalProperties: false
+    required: [match, value]
+    properties:
+      match:
+        type: string
+        description: A `{{ p.prop.match_attribute }}` value to match.
+      value:
+        type: string
+        description: The `{{ p.prop.target_attribute }}` to record on a match.
 {% endfor %}

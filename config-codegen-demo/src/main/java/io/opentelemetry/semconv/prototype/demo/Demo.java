@@ -94,9 +94,9 @@ public final class Demo {
   }
 
   /**
-   * The instrumentation reads the `.instrumentation/development` subtree. It is loaded as untyped
-   * properties because the SDK's model of that subtree does not know the properties this prototype
-   * adds - those exist only once the generated schema lands in opentelemetry-configuration.
+   * Temporary bridge until the Java SDK is generated from the schema produced by this prototype.
+   * The checked-in merged schema is used for validation only and does not change the configuration
+   * model baked into the SDK dependency.
    */
   private static DeclarativeConfigProperties loadConfig(String yaml) {
     return DeclarativeConfiguration.toConfigProperties(

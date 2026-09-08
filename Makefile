@@ -424,4 +424,5 @@ config-codegen-demo:
 		--templates=/home/weaver/templates \
 		config-schema \
 		/home/weaver/target
+	$(CONFIG_CODEGEN_DIR)/scripts/validate-config-schema.sh
 	docker run --rm -v $(PWD)/$(CONFIG_CODEGEN_DIR):/work -w /work gradle:8-jdk21 gradle test run --no-daemon

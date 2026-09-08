@@ -206,6 +206,11 @@ make config-codegen-demo
 ```
 
 This regenerates both artifacts, runs the tests and runs the demo.
+It also merges the generated configuration definitions into a pinned checkout of
+`opentelemetry-configuration` and runs that repository's schema compiler and AJV validation.
+The resulting [instrumentation schema](generated/merged/schema/instrumentation.yaml) and
+[compiled configuration schema](generated/merged/opentelemetry_configuration.json) are retained
+for inspection.
 
 [`HttpClientInstrumentation`](src/main/java/io/opentelemetry/semconv/prototype/demo/HttpClientInstrumentation.java)
 instruments a real JDK `HttpClient` call with the generated helpers.
