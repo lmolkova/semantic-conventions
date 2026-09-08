@@ -7,8 +7,8 @@ repositories {
   mavenCentral()
 }
 
-val otelVersion = "1.55.0"
-val otelAlphaVersion = "1.55.0-alpha"
+val otelVersion = "1.61.0"
+val otelAlphaVersion = "1.61.0-alpha"
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api:$otelVersion")

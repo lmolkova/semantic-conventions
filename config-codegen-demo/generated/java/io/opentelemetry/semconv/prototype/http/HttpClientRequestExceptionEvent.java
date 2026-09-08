@@ -2,6 +2,7 @@ package io.opentelemetry.semconv.prototype.http;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder;
+import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.Severity;
@@ -12,24 +13,33 @@ public final class HttpClientRequestExceptionEvent {
   private static final String SCOPE = "general.http.client";
   private static final String NAME = "http.client.request.exception";
 
-  private HttpClientRequestExceptionEvent() {}
+  private final Logger logger;
+  private final boolean enabled;
 
-  public static boolean isEnabled(DeclarativeConfigProperties config) {
-    return Config.experimental(config, "http");
+  private HttpClientRequestExceptionEvent(Logger logger, ConfigProvider configProvider) {
+    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
+    this.logger = logger;
+    this.enabled = Config.experimental(config, "http");
   }
 
-  public static void emit(
-      Logger logger, DeclarativeConfigProperties config, Severity severity, Throwable throwable) {
-    emit(logger, config, severity, throwable, Attributes.empty());
+  public static HttpClientRequestExceptionEvent create(
+      Logger logger, ConfigProvider configProvider) {
+    return new HttpClientRequestExceptionEvent(logger, configProvider);
   }
 
-  public static void emit(
-      Logger logger,
-      DeclarativeConfigProperties config,
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void emit(Severity severity, Throwable throwable) {
+    emit(severity, throwable, Attributes.empty());
+  }
+
+  public void emit(
       Severity severity,
       Throwable throwable,
       Attributes attributes) {
-    if (!isEnabled(config)) {
+    if (!enabled) {
       return;
     }
     ExtendedLogRecordBuilder builder = (ExtendedLogRecordBuilder) logger.logRecordBuilder();

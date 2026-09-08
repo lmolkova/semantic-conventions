@@ -1,10 +1,20 @@
 package io.opentelemetry.semconv.prototype.config;
 
+import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class Config {
 
   private Config() {}
+
+  public static DeclarativeConfigProperties instrumentation(ConfigProvider configProvider) {
+    DeclarativeConfigProperties config =
+        configProvider == null ? null : configProvider.getInstrumentationConfig();
+    return config == null ? DeclarativeConfigProperties.empty() : config;
+  }
 
   public static DeclarativeConfigProperties at(DeclarativeConfigProperties root, String path) {
     DeclarativeConfigProperties current = root == null ? DeclarativeConfigProperties.empty() : root;
@@ -31,5 +41,23 @@ public final class Config {
 
   public static boolean experimental(DeclarativeConfigProperties root, String domain) {
     return at(root, "general." + domain + ".semconv").getBoolean("experimental", false);
+  }
+
+  public static List<String> stringList(
+      DeclarativeConfigProperties properties, String key, List<String> defaultValue) {
+    return List.copyOf(properties.getScalarList(key, String.class, defaultValue));
+  }
+
+  public static Map<String, String> stringMap(
+      List<DeclarativeConfigProperties> entries, String keyProperty, String valueProperty) {
+    Map<String, String> result = new LinkedHashMap<>();
+    for (DeclarativeConfigProperties entry : entries) {
+      String key = entry.getString(keyProperty);
+      String value = entry.getString(valueProperty);
+      if (key != null && value != null) {
+        result.put(key, value);
+      }
+    }
+    return Map.copyOf(result);
   }
 }

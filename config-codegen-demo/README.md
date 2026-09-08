@@ -29,7 +29,7 @@ it, not hand written. A closed set is what makes the schema, the docs and the co
 | --- | --- | --- |
 | `value_filter` | config supplies the allow-list of accepted values, anything else becomes `fallback_value` | `filterHttpRequestMethod(config, value)` |
 | `key_filter` | config supplies which keys of a template attribute to record | `populateRequestCapturedHeaders(attributes, lookup, config)` |
-| `toggle` | config gates an attribute or a whole signal | `setHttpRequestBodyContent(...)`, `isEnabled(config)` |
+| `toggle` | config gates an attribute or a whole signal | `setHttpRequestBodyContent(...)`, `isEnabled()` |
 | `value_limit` | config supplies a maximum size, longer values are truncated | `truncateHttpRequestBodyContent(config, value)` |
 | `key_redaction` | config supplies which keys inside the value are replaced with `fallback_value` | `redactUrlQuery(config, value)` |
 | `attribute_mapping` | config supplies values of one attribute to match and the attribute to record on a match | `populateServicePeerNameMapping(attributes, config, serverAddress)` |
@@ -123,34 +123,38 @@ holds by hand today. For HTTP every property name that exists there is reproduce
 `request_capture_body_content` and `response_capture_body_content`, and the inconsistent `minItems`
 is dropped because the semantic type already says what the array is for.
 
-`generated/java/` holds one class per signal and one attribute key class per domain, built on
-`DeclarativeConfigProperties` and `AttributesBuilder` from opentelemetry-java. The hand written
-runtime files are `Config`, which resolves a scope, and `Redaction`, which rewrites a query string.
+`generated/java/` holds a tracer and typed span class per span convention, one class per metric or
+event, and one attribute key class per domain. Each tracer accepts a `ConfigProvider` when it is
+created and resolves all relevant properties into immutable fields. Span, metric, and event
+operations do not traverse `DeclarativeConfigProperties`.
+The hand written runtime files are `Config`, which resolves and snapshots properties, and
+`Redaction`, which rewrites a query string.
 
 A span helper takes exactly the sampling relevant attributes and short circuits into a non recording
 but still propagating span, so a disabled signal does not break trace propagation:
 
 ```java
 // auto-generated
-public static Span start(
-    Tracer tracer, DeclarativeConfigProperties config, String spanName,
-    String httpRequestMethod, ...,
+HttpServerTracer httpServerTracer =
+    HttpServerTracer.create(tracer, configProvider);
+
+public HttpServerSpan start(
+    String spanName, String httpRequestMethod, ...,
     Function<String, List<String>> requestCapturedHeaders) {
-  if (!isEnabled(config)) {
-    return Span.wrap(Span.current().getSpanContext());
+  if (!enabled || !tracer.isEnabled()) {
+    return HttpServerSpan.noop();
   }
   ...
-  attributes.put(HTTP_REQUEST_METHOD, filterHttpRequestMethod(config, httpRequestMethod));
-  populateRequestCapturedHeaders(attributes, requestCapturedHeaders, config);
+  attributes.put(HTTP_REQUEST_METHOD, filterHttpRequestMethod(httpRequestMethod));
+  populateRequestCapturedHeaders(attributes, requestCapturedHeaders);
 ```
 
 Captured headers are sampling relevant on the server, so the server helper takes a header lookup and
-records them before the span exists. Which keys to record comes from config, not from the caller:
+records them before the span exists. The keys were resolved from `ConfigProvider` when the helper
+was created:
 
 ```java
-List<String> keys =
-    Config.at(config, SCOPE).getScalarList("request_captured_headers", String.class, List.of());
-for (String key : keys) {
+for (String key : requestCapturedHeaders) {
   ...
   attributes.put(HTTP_REQUEST_HEADER.getAttributeKey(key.toLowerCase(Locale.ROOT)), value);
 ```
@@ -159,15 +163,27 @@ for (String key : keys) {
 experimental gate and a development metric's `isEnabled` is that gate:
 
 ```java
-public static void setUrlTemplate(Span span, String value, DeclarativeConfigProperties config) {
-  if (!Config.experimental(config, "http")) {
+public void setUrlTemplate(Span span, String value) {
+  if (!experimental) {
     return;
-  }
+}
 ```
 
-A signal's own toggle is its `isEnabled`, off by default for an `opt_in` signal and an off-switch
-for any other. Gate appears only where a config property
-asks for one.
+The builder helper is private. Configured attributes that are not sampling relevant are set after
+the span starts through a public method:
+
+```java
+span.setResponseCapturedHeaders(responseHeaders::get);
+```
+
+A signal's own toggle is part of its `isEnabled()`, off by default for an `opt_in` signal and an
+off-switch for any other. Span tracers also check the underlying `Tracer.isEnabled()` on every
+`start()` call, so SDK enablement can change without rebuilding the generated tracer. Gate appears
+only where a config property asks for one.
+
+Configuration changes take effect when an instrumentation creates new generated signal helpers.
+A future `ConfigProvider` listener can rebuild and swap these immutable instances without adding
+configuration lookups to telemetry operations.
 
 An event declaring the `exception.*` attributes gets a helper taking a `Throwable`, which calls
 `ExtendedLogRecordBuilder.setException` rather than asking the caller to unpack it.

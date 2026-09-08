@@ -6,13 +6,20 @@
 {%- set limit_attrs = ctx.config_bindings | selectattr("config.prop.type", "equalto", "value_limit") | list -%}
 {%- set redaction_attrs = ctx.config_bindings | selectattr("config.prop.type", "equalto", "key_redaction") | list -%}
 {%- set sampling_headers = header_attrs | selectattr("sampling_relevant") | list -%}
+{%- set post_start_headers = header_attrs | rejectattr("sampling_relevant") | list -%}
 {%- set experimental_attrs = ctx.attributes | selectattr("config_experimental") | rejectattr("configs") | list -%}
+{%- set configured_experimental_attrs = ctx.config_bindings | selectattr("config_experimental") | list -%}
+{%- set needs_experimental = ctx.experimental or experimental_attrs or configured_experimental_attrs -%}
+{%- set post_start_experimental_config = (post_start_headers + toggle_attrs)
+    | selectattr("config_experimental") | list -%}
+{%- set span_needs_experimental = experimental_attrs or post_start_experimental_config -%}
 {%- set enabled = ctx.group_properties | selectattr("prop.type", "equalto", "toggle") | first -%}
 {%- set mappings = ctx.group_properties | selectattr("prop.type", "equalto", "attribute_mapping") | list -%}
 package {{ params.package_root }}.{{ ctx.domain }};
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
@@ -21,10 +28,11 @@ import io.opentelemetry.semconv.prototype.config.Config;
 import io.opentelemetry.semconv.prototype.config.Redaction;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class {{ ctx.class_name | pascal_case }}Span {
+public final class {{ ctx.class_name | pascal_case }}Tracer {
 
   private static final String SCOPE = "general.{{ ctx.scope }}";
 {%- for a in filter_attrs %}
@@ -38,74 +46,140 @@ public final class {{ ctx.class_name | pascal_case }}Span {
       List.of({% for k in a.config.prop.default_keys %}"{{ k }}"{% if not loop.last %}, {% endif %}{% endfor %});
 {%- endfor %}
 
-  private {{ ctx.class_name | pascal_case }}Span() {}
+  private final Tracer tracer;
+  private final boolean enabled;
+{%- if needs_experimental %}
+  private final boolean experimental;
+{%- endif %}
+{%- for a in filter_attrs %}
+  private final List<String> {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in header_attrs %}
+  private final List<String> {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in toggle_attrs %}
+  private final boolean {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in limit_attrs %}
+  private final int {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for a in redaction_attrs %}
+  private final List<String> {{ a.config.name | camel_case }};
+{%- endfor %}
+{%- for p in mappings %}
+  private final Map<String, String> {{ p.name | camel_case }};
+{%- endfor %}
 
-  public static boolean isEnabled(DeclarativeConfigProperties config) {
+  private {{ ctx.class_name | pascal_case }}Tracer(
+      Tracer tracer, ConfigProvider configProvider) {
+    DeclarativeConfigProperties config = Config.instrumentation(configProvider);
+    this.tracer = tracer;
+{%- if needs_experimental %}
+    this.experimental = Config.experimental(config, "{{ ctx.domain }}");
+{%- endif %}
 {%- if enabled and ctx.experimental %}
-    return Config.experimental(config, "{{ ctx.domain }}")
+    this.enabled = experimental
         && Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
 {%- elif enabled %}
-    return Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
+    this.enabled = Config.at(config, SCOPE).getBoolean("{{ enabled.name }}", {{ m.toggle_default(ctx.requirement_level) }});
 {%- elif ctx.experimental %}
-    return Config.experimental(config, "{{ ctx.domain }}");
+    this.enabled = experimental;
 {%- else %}
-    return true;
+    this.enabled = true;
 {%- endif %}
+{%- for a in filter_attrs %}
+    this.{{ a.config.name | camel_case }} = Config.stringList(
+        {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_DEFAULT);
+{%- endfor %}
+{%- for a in header_attrs %}
+    this.{{ a.config.name | camel_case }} = Config.stringList(
+        {{ m.config_at(a) }}, "{{ a.config.name }}", List.of());
+{%- endfor %}
+{%- for a in toggle_attrs %}
+    this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getBoolean(
+        "{{ a.config.name }}", {{ m.toggle_default(a.requirement_level) }});
+{%- endfor %}
+{%- for a in limit_attrs %}
+    this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}.getInt("{{ a.config.name }}", -1);
+{%- endfor %}
+{%- for a in redaction_attrs %}
+    this.{{ a.config.name | camel_case }} = Config.stringList(
+        {{ m.config_at(a) }}, "{{ a.config.name }}", {{ m.const(a.name) }}_SENSITIVE_DEFAULT);
+{%- endfor %}
+{%- for p in mappings %}
+    this.{{ p.name | camel_case }} = Config.stringMap(
+        Config.at(config, SCOPE).getStructuredList("{{ p.name }}", List.of()), "match", "value");
+{%- endfor %}
   }
 
-{%- set ps = namespace(list=["Tracer tracer", "DeclarativeConfigProperties config", "String spanName"]) -%}
+  public static {{ ctx.class_name | pascal_case }}Tracer create(
+      Tracer tracer, ConfigProvider configProvider) {
+    return new {{ ctx.class_name | pascal_case }}Tracer(tracer, configProvider);
+  }
+
+  public boolean isEnabled() {
+    return enabled && tracer.isEnabled();
+  }
+
+{%- set ps = namespace(list=["String spanName"]) -%}
 {%- for a in start_attrs -%}
 {%- set ps.list = ps.list + [m.java_type(a) ~ " " ~ (a.name | camel_case)] -%}
 {%- endfor -%}
 {%- for a in sampling_headers -%}
 {%- set ps.list = ps.list + [m.lookup_type(a) ~ " " ~ (a.config.name | camel_case)] -%}
 {%- endfor %}
-  public static Span start(
+  public {{ ctx.class_name | pascal_case }}Span start(
       {{ ps.list | join(",\n      ") }}) {
-    if (!isEnabled(config)) {
-      return Span.wrap(Span.current().getSpanContext());
+    if (!enabled || !tracer.isEnabled()) {
+      return {{ ctx.class_name | pascal_case }}Span.noop();
     }
     AttributesBuilder attributes = Attributes.builder();
 {%- for a in start_attrs %}
     if ({{ a.name | camel_case }} != null) {
 {%- if a.configs | selectattr("prop.type", "equalto", "value_filter") | first %}
-      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, filter{{ a.name | pascal_case }}(config, {{ a.name | camel_case }}));
+      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, filter{{ a.name | pascal_case }}({{ a.name | camel_case }}));
 {%- else %}
       attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
 {%- endif %}
     }
 {%- endfor %}
 {%- for a in sampling_headers %}
-    populate{{ a.config.name | pascal_case }}(attributes, {{ a.config.name | camel_case }}, config);
+    populate{{ a.config.name | pascal_case }}(attributes, {{ a.config.name | camel_case }});
 {%- endfor %}
 {%- for p in mappings %}
-    populate{{ p.name | pascal_case }}(attributes, config, {{ p.prop.match_attribute | camel_case }});
+    populate{{ p.name | pascal_case }}(attributes, {{ p.prop.match_attribute | camel_case }});
 {%- endfor %}
-    return tracer
-        .spanBuilder(spanName)
-        .setSpanKind(SpanKind.{{ ctx.span_kind | upper }})
-        .setAllAttributes(attributes.build())
-        .startSpan();
+    Span span =
+        tracer
+            .spanBuilder(spanName)
+            .setSpanKind(SpanKind.{{ ctx.span_kind | upper }})
+            .setAllAttributes(attributes.build())
+            .startSpan();
+    return new {{ ctx.class_name | pascal_case }}Span(
+        span
+{%- for a in post_start_headers %},
+        {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- for a in toggle_attrs %},
+        {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- for a in limit_attrs %},
+        {{ a.config.name | camel_case }}
+{%- endfor %}
+{%- if span_needs_experimental %},
+        experimental
+{%- endif %});
   }
 {% for a in filter_attrs %}
 {{- m.value_filter_method(a) }}
 {% endfor %}
-{%- for a in header_attrs %}
+{%- for a in sampling_headers %}
 {{- m.key_filter_method(a, ctx.domain) }}
-{% endfor %}
-{%- for a in toggle_attrs %}
-{{- m.toggle_method(a, ctx.domain) }}
-{% endfor %}
-{%- for a in limit_attrs %}
-{{- m.value_limit_method(a) }}
 {% endfor %}
 {%- for a in redaction_attrs %}
 {{- m.key_redaction_method(a) }}
 {% endfor %}
 {%- for p in mappings %}
 {{- m.attribute_mapping_method(p, ctx.domain) }}
-{% endfor %}
-{%- for a in experimental_attrs %}
-{{- m.experimental_setter(a, ctx.domain) }}
 {% endfor %}
 }

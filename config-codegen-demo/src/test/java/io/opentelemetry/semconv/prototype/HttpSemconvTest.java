@@ -4,9 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
@@ -19,33 +20,40 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.prototype.http.HttpAttributes;
-import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.semconv.prototype.http.HttpClientActiveRequestsMetric;
 import io.opentelemetry.semconv.prototype.http.HttpClientRequestExceptionEvent;
 import io.opentelemetry.semconv.prototype.http.HttpClientSpan;
+import io.opentelemetry.semconv.prototype.http.HttpClientTracer;
 import io.opentelemetry.semconv.prototype.http.HttpServerRequestDurationMetric;
 import io.opentelemetry.semconv.prototype.http.HttpServerSpan;
+import io.opentelemetry.semconv.prototype.http.HttpServerTracer;
 import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class HttpSemconvTest {
 
   private static final AttributeKey<List<String>> REQUEST_HEADER_FOO =
       AttributeKey.stringArrayKey("http.request.header.x-foo");
+  private static final AttributeKey<List<String>> RESPONSE_HEADER_FOO =
+      AttributeKey.stringArrayKey("http.response.header.x-foo");
 
-  private static DeclarativeConfigProperties config(String yaml) {
+  private static ConfigProvider config(String yaml) {
     DeclarativeConfigProperties root =
         DeclarativeConfiguration.toConfigProperties(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    return root.getStructured("instrumentation/development", DeclarativeConfigProperties.empty());
+    DeclarativeConfigProperties instrumentation =
+        root.getStructured("instrumentation/development", DeclarativeConfigProperties.empty());
+    return () -> instrumentation;
   }
 
-  private static DeclarativeConfigProperties httpServerConfig(String properties) {
+  private static ConfigProvider httpServerConfig(String properties) {
     return config(
         "file_format: \"1.0-rc.1\"\n"
             + "instrumentation/development:\n"
@@ -58,12 +66,13 @@ class HttpSemconvTest {
   void unknownMethodIsFilteredForAttributeAndSpanName() {
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     Tracer tracer = tracer(exporter);
-    DeclarativeConfigProperties config =
+    ConfigProvider config =
         httpServerConfig("      server:\n        known_methods:\n          - GET\n");
+    HttpServerTracer serverSpan = HttpServerTracer.create(tracer, config);
 
-    String method = HttpServerSpan.filterHttpRequestMethod(config, "POST");
-    HttpServerSpan.start(
-            tracer, config, method + " /users", "1.2.3.4", "POST", "example.com", 443L, "/users",
+    String method = serverSpan.filterHttpRequestMethod("POST");
+    serverSpan.start(
+            method + " /users", "1.2.3.4", "POST", "example.com", 443L, "/users",
             null, "https", "curl/8", name -> List.of())
         .end();
 
@@ -76,23 +85,75 @@ class HttpSemconvTest {
   void knownMethodIsPreservedByDefault() {
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     Tracer tracer = tracer(exporter);
-    DeclarativeConfigProperties config = httpServerConfig("      server: {}\n");
+    ConfigProvider config = httpServerConfig("      server: {}\n");
+    HttpServerTracer serverSpan = HttpServerTracer.create(tracer, config);
 
-    String method = HttpServerSpan.filterHttpRequestMethod(config, "POST");
+    String method = serverSpan.filterHttpRequestMethod("POST");
     assertThat(method).isEqualTo("POST");
+  }
+
+  @Test
+  void configurationIsResolvedAtInitialization() {
+    ConfigProvider initial =
+        httpServerConfig("      server:\n        known_methods:\n          - GET\n");
+    AtomicReference<DeclarativeConfigProperties> current =
+        new AtomicReference<>(initial.getInstrumentationConfig());
+    HttpServerTracer serverSpan =
+        HttpServerTracer.create(SdkTracerProvider.builder().build().get("test"), current::get);
+
+    current.set(
+        httpServerConfig("      server:\n        known_methods:\n          - POST\n")
+            .getInstrumentationConfig());
+
+    assertThat(serverSpan.filterHttpRequestMethod("POST")).isEqualTo("_OTHER");
+  }
+
+  @Test
+  void tracerEnablementIsCheckedOnEachStart() {
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    Tracer delegate = tracer(exporter);
+    AtomicBoolean enabled = new AtomicBoolean(true);
+    Tracer dynamicTracer =
+        new Tracer() {
+          @Override
+          public boolean isEnabled() {
+            return enabled.get();
+          }
+
+          @Override
+          public SpanBuilder spanBuilder(String spanName) {
+            return delegate.spanBuilder(spanName);
+          }
+        };
+    HttpClientTracer clientTracer =
+        HttpClientTracer.create(
+            dynamicTracer, httpServerConfig("      client: {}\n"));
+
+    clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/one").end();
+    enabled.set(false);
+    HttpClientSpan disabled =
+        clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/two");
+    HttpClientSpan alsoDisabled =
+        clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/three");
+    disabled.end();
+
+    assertThat(clientTracer.isEnabled()).isFalse();
+    assertThat(alsoDisabled).isSameAs(disabled);
+    assertThat(exporter.getFinishedSpanItems()).hasSize(1);
   }
 
   @Test
   void headersAreCapturedOnlyWhenConfiguredAndBeforeSpanStarts() {
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     Tracer tracer = tracer(exporter);
-    DeclarativeConfigProperties configured =
+    ConfigProvider configured =
         httpServerConfig(
             "      server:\n        request_captured_headers:\n          - X-Foo\n");
+    HttpServerTracer serverSpan = HttpServerTracer.create(tracer, configured);
 
     Map<String, List<String>> headers = Map.of("X-Foo", List.of("bar"), "X-Other", List.of("no"));
-    HttpServerSpan.start(
-            tracer, configured, "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
+    serverSpan.start(
+            "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
             "https", "curl/8", headers::get)
         .end();
 
@@ -106,16 +167,35 @@ class HttpSemconvTest {
   void headersAreNotCapturedByDefault() {
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     Tracer tracer = tracer(exporter);
-    DeclarativeConfigProperties config = httpServerConfig("      server: {}\n");
+    ConfigProvider config = httpServerConfig("      server: {}\n");
+    HttpServerTracer serverSpan = HttpServerTracer.create(tracer, config);
 
     Map<String, List<String>> headers = Map.of("X-Foo", List.of("bar"));
-    HttpServerSpan.start(
-            tracer, config, "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
+    serverSpan.start(
+            "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
             "https", "curl/8", headers::get)
         .end();
 
     assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(REQUEST_HEADER_FOO))
         .isNull();
+  }
+
+  @Test
+  void responseHeadersAreSetAfterSpanStarts() {
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    HttpClientTracer clientTracer =
+        HttpClientTracer.create(
+            tracer(exporter),
+            httpServerConfig(
+                "      client:\n        response_captured_headers:\n          - X-Foo\n"));
+    HttpClientSpan span =
+        clientTracer.start("GET", "GET", "example.com", 443L, "https://example.com/users");
+
+    span.setResponseCapturedHeaders(name -> List.of("bar"));
+    span.end();
+
+    assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(RESPONSE_HEADER_FOO))
+        .containsExactly("bar");
   }
 
   @Test
@@ -134,17 +214,26 @@ class HttpSemconvTest {
 
   @Test
   void developmentSignalIsOffUntilExperimentalIsSet() {
-    DeclarativeConfigProperties off = httpServerConfig("      client: {}\n");
-    assertThat(HttpClientRequestExceptionEvent.isEnabled(off)).isFalse();
+    ConfigProvider off = httpServerConfig("      client: {}\n");
+    SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder().build();
+    SdkMeterProvider meterProvider = SdkMeterProvider.builder().build();
+    assertThat(
+            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), off).isEnabled())
+        .isFalse();
 
-    assertThat(HttpClientActiveRequestsMetric.isEnabled(off)).isFalse();
+    assertThat(HttpClientActiveRequestsMetric.create(meterProvider.get("test"), off).isEnabled())
+        .isFalse();
 
-    DeclarativeConfigProperties on =
+    ConfigProvider on =
         httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n");
-    assertThat(HttpClientRequestExceptionEvent.isEnabled(on)).isTrue();
-    assertThat(HttpClientActiveRequestsMetric.isEnabled(on)).isTrue();
+    assertThat(
+            HttpClientRequestExceptionEvent.create(loggerProvider.get("test"), on).isEnabled())
+        .isTrue();
+    assertThat(HttpClientActiveRequestsMetric.create(meterProvider.get("test"), on).isEnabled())
+        .isTrue();
 
-    assertThat(HttpServerSpan.isEnabled(off)).isTrue();
+    assertThat(HttpServerTracer.create(SdkTracerProvider.builder().build().get("test"), off).isEnabled())
+        .isTrue();
   }
 
   @Test
@@ -153,21 +242,21 @@ class HttpSemconvTest {
     Tracer tracer = tracer(exporter);
     AttributeKey<String> urlTemplate = AttributeKey.stringKey("url.template");
 
-    Span off =
-        HttpClientSpan.start(
-            tracer, httpServerConfig("      client: {}\n"), "GET", "GET", "example.com", 443L,
-            "https://example.com/users/1");
-    HttpClientSpan.setUrlTemplate(off, "/users/{id}", httpServerConfig("      client: {}\n"));
+    HttpClientTracer offConfig =
+        HttpClientTracer.create(tracer, httpServerConfig("      client: {}\n"));
+    HttpClientSpan off =
+        offConfig.start("GET", "GET", "example.com", 443L, "https://example.com/users/1");
+    off.setUrlTemplate("/users/{id}");
     off.end();
     assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(urlTemplate)).isNull();
 
     exporter.reset();
-    DeclarativeConfigProperties on =
+    ConfigProvider on =
         httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n");
-    Span span =
-        HttpClientSpan.start(
-            tracer, on, "GET", "GET", "example.com", 443L, "https://example.com/users/1");
-    HttpClientSpan.setUrlTemplate(span, "/users/{id}", on);
+    HttpClientTracer onConfig = HttpClientTracer.create(tracer, on);
+    HttpClientSpan span =
+        onConfig.start("GET", "GET", "example.com", 443L, "https://example.com/users/1");
+    span.setUrlTemplate("/users/{id}");
     span.end();
     assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(urlTemplate))
         .isEqualTo("/users/{id}");
@@ -177,19 +266,21 @@ class HttpSemconvTest {
   void activeRequestsMetricIsGatedOnExperimental() {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     SdkMeterProvider provider = SdkMeterProvider.builder().registerMetricReader(reader).build();
-    LongUpDownCounter counter = HttpClientActiveRequestsMetric.create(provider.get("test"));
+    HttpClientActiveRequestsMetric off =
+        HttpClientActiveRequestsMetric.create(
+            provider.get("test"), httpServerConfig("      client: {}\n"));
 
-    HttpClientActiveRequestsMetric.add(
-        counter, httpServerConfig("      client: {}\n"), 1, Attributes.empty());
+    off.add(1, Attributes.empty());
     assertThat(reader.collectAllMetrics()).isEmpty();
 
-    HttpClientActiveRequestsMetric.add(
-        counter,
-        httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n"),
-        1,
-        Attributes.empty());
-    assertThat(reader.collectAllMetrics()).singleElement().satisfies(
-        metric -> assertThat(metric.getName()).isEqualTo("http.client.active_requests"));
+    HttpClientActiveRequestsMetric on =
+        HttpClientActiveRequestsMetric.create(
+            provider.get("test"),
+            httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n"));
+    on.add(1, Attributes.empty());
+    assertThat(reader.collectAllMetrics())
+        .singleElement()
+        .satisfies(metric -> assertThat(metric.getName()).isEqualTo("http.client.active_requests"));
   }
 
   @Test
@@ -199,11 +290,12 @@ class HttpSemconvTest {
         SdkLoggerProvider.builder()
             .addLogRecordProcessor(SimpleLogRecordProcessor.create(exporter))
             .build();
-    DeclarativeConfigProperties config =
+    ConfigProvider config =
         httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n");
 
-    HttpClientRequestExceptionEvent.emit(
-        provider.get("test"), config, Severity.WARN, new IllegalStateException("boom"));
+    HttpClientRequestExceptionEvent event =
+        HttpClientRequestExceptionEvent.create(provider.get("test"), config);
+    event.emit(Severity.WARN, new IllegalStateException("boom"));
 
     LogRecordData record = exporter.getFinishedLogRecordItems().get(0);
     assertThat(record.getEventName()).isEqualTo("http.client.request.exception");
@@ -231,28 +323,34 @@ class HttpSemconvTest {
 
   @Test
   void sensitiveQueryParametersAreRedacted() {
-    DeclarativeConfigProperties defaults = httpServerConfig("      server: {}\n");
-    assertThat(HttpServerSpan.redactUrlQuery(defaults, "sig=secret&q=1"))
+    Tracer tracer = SdkTracerProvider.builder().build().get("test");
+    HttpServerTracer defaults =
+        HttpServerTracer.create(tracer, httpServerConfig("      server: {}\n"));
+    assertThat(defaults.redactUrlQuery("sig=secret&q=1"))
         .isEqualTo("sig=REDACTED&q=1");
 
-    DeclarativeConfigProperties overridden =
-        config(
-            "file_format: \"1.0-rc.1\"\n"
-                + "instrumentation/development:\n"
-                + "  general:\n"
-                + "    sanitization:\n"
-                + "      url:\n"
-                + "        sensitive_query_parameters:\n"
-                + "          - token\n");
-    assertThat(HttpServerSpan.redactUrlQuery(overridden, "sig=secret&token=abc"))
+    HttpServerTracer overridden =
+        HttpServerTracer.create(
+            tracer,
+            config(
+                "file_format: \"1.0-rc.1\"\n"
+                    + "instrumentation/development:\n"
+                    + "  general:\n"
+                    + "    sanitization:\n"
+                    + "      url:\n"
+                    + "        sensitive_query_parameters:\n"
+                    + "          - token\n"));
+    assertThat(overridden.redactUrlQuery("sig=secret&token=abc"))
         .isEqualTo("sig=secret&token=REDACTED");
 
-    DeclarativeConfigProperties perSignal =
-        httpServerConfig(
-            "      server:\n"
-                + "        sensitive_query_parameters:\n"
-                + "          - only-here\n");
-    assertThat(HttpServerSpan.redactUrlQuery(perSignal, "sig=secret&only-here=abc"))
+    HttpServerTracer perSignal =
+        HttpServerTracer.create(
+            tracer,
+            httpServerConfig(
+                "      server:\n"
+                    + "        sensitive_query_parameters:\n"
+                    + "          - only-here\n"));
+    assertThat(perSignal.redactUrlQuery("sig=secret&only-here=abc"))
         .isEqualTo("sig=secret&only-here=REDACTED");
   }
 
@@ -261,17 +359,17 @@ class HttpSemconvTest {
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     Tracer tracer = tracer(exporter);
     AttributeKey<String> servicePeerName = AttributeKey.stringKey("service.peer.name");
-    DeclarativeConfigProperties config =
+    ConfigProvider config =
         httpServerConfig(
             "      client:\n"
                 + "        service_peer_name_mapping:\n"
                 + "          - match: example.com\n"
                 + "            value: shop\n");
 
-    HttpClientSpan.start(
-            tracer, config, "GET", "GET", "example.com", 443L, "https://example.com/users/1")
+    HttpClientTracer clientSpan = HttpClientTracer.create(tracer, config);
+    clientSpan.start("GET", "GET", "example.com", 443L, "https://example.com/users/1")
         .end();
-    HttpClientSpan.start(tracer, config, "GET", "GET", "other.com", 443L, "https://other.com/1")
+    clientSpan.start("GET", "GET", "other.com", 443L, "https://other.com/1")
         .end();
 
     assertThat(exporter.getFinishedSpanItems().get(0).getAttributes().get(servicePeerName))
@@ -280,13 +378,14 @@ class HttpSemconvTest {
   }
 
   private static String bodyContent(
-      Tracer tracer, InMemorySpanExporter exporter, DeclarativeConfigProperties config) {
+      Tracer tracer, InMemorySpanExporter exporter, ConfigProvider config) {
     exporter.reset();
-    Span span =
-        HttpServerSpan.start(
-            tracer, config, "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
+    HttpServerTracer serverSpan = HttpServerTracer.create(tracer, config);
+    HttpServerSpan span =
+        serverSpan.start(
+            "GET /users", "1.2.3.4", "GET", "example.com", 443L, "/users", null,
             "https", "curl/8", name -> List.of());
-    HttpServerSpan.setHttpRequestBodyContent(span, () -> "hello", config);
+    span.setHttpRequestBodyContent(() -> "hello");
     span.end();
     return exporter.getFinishedSpanItems().get(0).getAttributes().get(HttpAttributes.HTTP_REQUEST_BODY_CONTENT);
   }

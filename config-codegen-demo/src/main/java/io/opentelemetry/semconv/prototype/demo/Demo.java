@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.demo;
 
 import com.sun.net.httpserver.HttpServer;
+import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
@@ -40,7 +41,7 @@ public final class Demo {
               sdk.getTracer("demo"),
               sdk.getMeter("demo"),
               sdk.getLogsBridge().get("demo"),
-              instrumentationConfig());
+              instrumentationConfigProvider());
 
       instrumentation.send(
           HttpRequest.newBuilder(
@@ -57,10 +58,12 @@ public final class Demo {
    * properties because the SDK's model of that subtree does not know the properties this prototype
    * adds - those exist only once the generated schema lands in opentelemetry-configuration.
    */
-  private static DeclarativeConfigProperties instrumentationConfig() throws Exception {
+  private static ConfigProvider instrumentationConfigProvider() throws Exception {
     try (InputStream yaml = Demo.class.getResourceAsStream("/demo-config.yaml")) {
-      return DeclarativeConfiguration.toConfigProperties(yaml)
+      DeclarativeConfigProperties config =
+          DeclarativeConfiguration.toConfigProperties(yaml)
           .getStructured("instrumentation/development", DeclarativeConfigProperties.empty());
+      return () -> config;
     }
   }
 }

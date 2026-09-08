@@ -41,6 +41,33 @@ templates:
         | . + { config_bindings: [ .attributes[] | . as $a | $a.configs[] | ($a + {config: .}) ] }
       ]
     application_mode: each
+    file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.class_name | pascal_case }}Tracer.java"
+
+  - pattern: span_instance.java.j2
+    filter: >
+      [ .groups[]
+        | select(.type == "span")
+        | select(.annotations.config.scope != null)
+        | .annotations.config.scope as $scope
+        | { id: .id,
+            scope: $scope,
+            domain: ($scope | split(".") | .[0]),
+            class_name: (.id | split(".") | .[1:] | join("_")),
+            attributes: [ .attributes[] as $a
+              | ( { name: $a.name,
+                     type: $a.type,
+                     sampling_relevant: ($a.sampling_relevant // false),
+                     members: (if ($a.type | type) == "object"
+                               then [$a.type.members[] | select(.stability == "stable") | .value]
+                               else [] end),
+                     config_experimental: (($a.annotations.config.properties // {}) | has("semconv_experimental")),
+                     configs: (($a.annotations.config.properties // {}) | to_entries
+                       | map(select(.key != "semconv_experimental"))
+                       | map({name: .key, prop: .value})) } ) ]
+          }
+        | . + { config_bindings: [ .attributes[] | . as $a | $a.configs[] | ($a + {config: .}) ] }
+      ]
+    application_mode: each
     file_name: "java/io/opentelemetry/semconv/prototype/{{ ctx.domain }}/{{ ctx.class_name | pascal_case }}Span.java"
 
   - pattern: metric.java.j2
