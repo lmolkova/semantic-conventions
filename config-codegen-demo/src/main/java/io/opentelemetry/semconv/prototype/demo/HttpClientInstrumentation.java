@@ -1,7 +1,5 @@
 package io.opentelemetry.semconv.prototype.demo;
 
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.Severity;
@@ -70,39 +68,51 @@ public final class HttpClientInstrumentation {
 
     span.setUrlTemplate(urlTemplate);
 
-    AttributesBuilder metricAttributes = Attributes.builder();
-    metricAttributes.put(HttpAttributes.HTTP_REQUEST_METHOD, method);
-    metricAttributes.put(HttpAttributes.SERVER_ADDRESS, request.uri().getHost());
-
-    Attributes inFlight =
-        Attributes.builder()
-            .put(HttpAttributes.HTTP_REQUEST_METHOD, method)
-            .put(HttpAttributes.SERVER_ADDRESS, request.uri().getHost())
-            .put(HttpAttributes.URL_SCHEME, request.uri().getScheme())
-            .build();
-    activeRequests.add(1, inFlight);
+    activeRequests.add(
+        1,
+        method,
+        request.uri().getHost(),
+        port(request),
+        request.uri().getScheme(),
+        urlTemplate);
 
     long startNanos = System.nanoTime();
+    String errorType = null;
+    Long responseStatusCode = null;
     try (Scope ignored = span.makeCurrent()) {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       span.setResponseCapturedHeaders(name -> response.headers().allValues(name));
       span.setHttpResponseBodyContent(response::body);
 
-      span.setAttribute(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, (long) response.statusCode());
-      metricAttributes.put(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, (long) response.statusCode());
+      responseStatusCode = (long) response.statusCode();
+      span.setAttribute(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, responseStatusCode);
       return response;
     } catch (IOException | InterruptedException | RuntimeException e) {
-      span.setAttribute(HttpAttributes.ERROR_TYPE, e.getClass().getName());
-      metricAttributes.put(HttpAttributes.ERROR_TYPE, e.getClass().getName());
+      errorType = e.getClass().getName();
+      span.setAttribute(HttpAttributes.ERROR_TYPE, errorType);
       requestException.emit(Severity.WARN, e);
       throw e;
     } finally {
-      activeRequests.add(-1, inFlight);
+      activeRequests.add(
+          -1,
+          method,
+          request.uri().getHost(),
+          port(request),
+          request.uri().getScheme(),
+          urlTemplate);
       span.end();
       duration.record(
           (System.nanoTime() - startNanos) / 1_000_000_000.0,
-          metricAttributes.build());
+          errorType,
+          method,
+          responseStatusCode,
+          null,
+          null,
+          request.uri().getHost(),
+          port(request),
+          request.uri().getScheme(),
+          urlTemplate);
     }
   }
 

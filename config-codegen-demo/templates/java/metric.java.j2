@@ -1,15 +1,25 @@
 {%- import "macros.j2" as m -%}
 {%- set enabled = ctx.group_properties | selectattr("prop.type", "equalto", "toggle") | first -%}
+{%- set toggle_bindings = ctx.config_bindings | selectattr("config.prop.type", "equalto", "toggle") | list -%}
+{%- set experimental_attributes = ctx.attributes | selectattr("config_experimental") | list -%}
+{%- set list_attributes = ctx.attributes | selectattr("type", "equalto", "string[]") | list -%}
 {%- set value_type = "double" if ctx.value_type == "double" else "long" -%}
-{%- set boxed = "Double" if ctx.value_type == "double" else "Long" -%}
+{%- set ps = namespace(list=[value_type ~ " value"]) -%}
+{%- for a in ctx.attributes -%}
+{%- set ps.list = ps.list + [m.java_type(a) ~ " " ~ (a.name | camel_case)] -%}
+{%- endfor -%}
 package {{ params.package_root }}.{{ ctx.domain }};
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.{{ "DoubleHistogram" if ctx.instrument == "histogram" else "LongUpDownCounter" }};
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.semconv.prototype.config.Config;
+{%- if list_attributes %}
+import java.util.List;
+{%- endif %}
 
 public final class {{ ctx.class_name | pascal_case }}Metric {
 
@@ -35,6 +45,12 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
   private static final class State {
 
     private final boolean enabled;
+{%- if experimental_attributes %}
+    private final boolean experimental;
+{%- endif %}
+{%- for a in toggle_bindings %}
+    private final boolean {{ a.config.name | camel_case }};
+{%- endfor %}
 
     private State(DeclarativeConfigProperties config) {
 {%- if enabled and ctx.experimental %}
@@ -47,6 +63,13 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
 {%- else %}
       this.enabled = true;
 {%- endif %}
+{%- if experimental_attributes %}
+      this.experimental = Config.experimental(config, "{{ ctx.domain }}");
+{%- endif %}
+{%- for a in toggle_bindings %}
+      this.{{ a.config.name | camel_case }} = {{ m.config_at(a) }}
+          .getBoolean("{{ a.config.name }}", {{ m.toggle_default(a.requirement_level) }});
+{%- endfor %}
     }
   }
 
@@ -62,19 +85,25 @@ public final class {{ ctx.class_name | pascal_case }}Metric {
     return state.enabled;
   }
 
-{% if ctx.instrument == "histogram" %}
-  public void record(double value, Attributes attributes) {
+  public void {{ "record" if ctx.instrument == "histogram" else "add" }}(
+      {{ ps.list | join(",\n      ") }}) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.record(value, attributes);
-  }
-{% else %}
-  public void add(long value, Attributes attributes) {
-    if (!state.enabled) {
-      return;
+    AttributesBuilder attributes = Attributes.builder();
+{%- for a in ctx.attributes %}
+{%- set toggle = a.configs | selectattr("prop.type", "equalto", "toggle") | first %}
+{%- if toggle or a.config_experimental %}
+    if ({% if toggle %}state.{{ toggle.name | camel_case }} && {% endif %}{% if a.config_experimental %}state.experimental && {% endif %}{{ a.name | camel_case }} != null) {
+      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
     }
-    instrument.add(value, attributes);
+{%- else %}
+    if ({{ a.name | camel_case }} != null) {
+      attributes.put({{ m.attributes_class(ctx.domain) }}.{{ m.const(a.name) }}, {{ a.name | camel_case }});
+    }
+{%- endif %}
+{%- endfor %}
+    instrument.{{ "record" if ctx.instrument == "histogram" else "add" }}(value, attributes.build());
   }
-{% endif %}
 }

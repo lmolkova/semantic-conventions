@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.db;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -45,12 +46,17 @@ public final class DbClientConnectionWaitTimeMetric {
     return state.enabled;
   }
 
-
-  public void record(double value, Attributes attributes) {
+  public void record(
+      double value,
+      String dbClientConnectionPoolName) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.record(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (dbClientConnectionPoolName != null) {
+      attributes.put(DbAttributes.DB_CLIENT_CONNECTION_POOL_NAME, dbClientConnectionPoolName);
+    }
+    instrument.record(value, attributes.build());
   }
-
 }

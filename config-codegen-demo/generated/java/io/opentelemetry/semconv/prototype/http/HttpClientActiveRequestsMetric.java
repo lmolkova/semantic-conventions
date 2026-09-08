@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.http;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
@@ -27,9 +28,11 @@ public final class HttpClientActiveRequestsMetric {
   private static final class State {
 
     private final boolean enabled;
+    private final boolean experimental;
 
     private State(DeclarativeConfigProperties config) {
       this.enabled = Config.experimental(config, "http");
+      this.experimental = Config.experimental(config, "http");
     }
   }
 
@@ -45,12 +48,33 @@ public final class HttpClientActiveRequestsMetric {
     return state.enabled;
   }
 
-
-  public void add(long value, Attributes attributes) {
+  public void add(
+      long value,
+      String httpRequestMethod,
+      String serverAddress,
+      Long serverPort,
+      String urlScheme,
+      String urlTemplate) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.add(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (httpRequestMethod != null) {
+      attributes.put(HttpAttributes.HTTP_REQUEST_METHOD, httpRequestMethod);
+    }
+    if (serverAddress != null) {
+      attributes.put(HttpAttributes.SERVER_ADDRESS, serverAddress);
+    }
+    if (serverPort != null) {
+      attributes.put(HttpAttributes.SERVER_PORT, serverPort);
+    }
+    if (urlScheme != null) {
+      attributes.put(HttpAttributes.URL_SCHEME, urlScheme);
+    }
+    if (state.experimental && urlTemplate != null) {
+      attributes.put(HttpAttributes.URL_TEMPLATE, urlTemplate);
+    }
+    instrument.add(value, attributes.build());
   }
-
 }

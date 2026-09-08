@@ -3,7 +3,6 @@ package io.opentelemetry.semconv.prototype;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.logs.Severity;
@@ -20,6 +19,8 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.prototype.config.DynamicConfigProvider;
+import io.opentelemetry.semconv.prototype.db.DbAttributes;
+import io.opentelemetry.semconv.prototype.db.DbClientOperationDurationMetric;
 import io.opentelemetry.semconv.prototype.http.HttpAttributes;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
@@ -145,7 +146,7 @@ class HttpSemconvTest {
     assertThat(serverTracer.filterHttpRequestMethod("POST")).isEqualTo("_OTHER");
     assertThat(metric.isEnabled()).isFalse();
     assertThat(event.isEnabled()).isFalse();
-    metric.add(1, Attributes.empty());
+    metric.add(1, null, null, null, null, null);
     event.emit(Severity.WARN, new IllegalStateException("before"));
     assertThat(metricReader.collectAllMetrics()).isEmpty();
     assertThat(logExporter.getFinishedLogRecordItems()).isEmpty();
@@ -167,7 +168,7 @@ class HttpSemconvTest {
             "POST /users", "1.2.3.4", "POST", "example.com", 443L, "/users",
             null, "https", "curl/8", name -> List.of())
         .end();
-    metric.add(1, Attributes.empty());
+    metric.add(1, null, null, null, null, null);
     event.emit(Severity.WARN, new IllegalStateException("after"));
 
     assertThat(spanExporter.getFinishedSpanItems().get(0).getAttributes()
@@ -175,6 +176,57 @@ class HttpSemconvTest {
         .isEqualTo("POST");
     assertThat(metricReader.collectAllMetrics()).hasSize(1);
     assertThat(logExporter.getFinishedLogRecordItems()).hasSize(1);
+  }
+
+  @Test
+  void dynamicConfigFiltersMetricAttributes() {
+    InMemoryMetricReader metricReader = InMemoryMetricReader.create();
+    SdkMeterProvider meterProvider =
+        SdkMeterProvider.builder().registerMetricReader(metricReader).build();
+    MutableConfigProvider config =
+        new MutableConfigProvider(
+            configProperties(
+                "file_format: \"1.0-rc.1\"\n"
+                    + "instrumentation/development:\n"
+                    + "  general:\n"
+                    + "    db:\n"
+                    + "      client:\n"
+                    + "        metric:\n"
+                    + "          query_text: false\n"));
+    DbClientOperationDurationMetric metric =
+        DbClientOperationDurationMetric.create(meterProvider.get("test"), config);
+    recordDbDuration(metric, "SELECT * FROM users");
+    assertThat(metricReader.collectAllMetrics())
+        .singleElement()
+        .satisfies(
+            data ->
+                assertThat(data.getHistogramData().getPoints())
+                    .singleElement()
+                    .satisfies(
+                        point ->
+                            assertThat(point.getAttributes().get(DbAttributes.DB_QUERY_TEXT))
+                                .isNull()));
+
+    config.set(
+        configProperties(
+            "file_format: \"1.0-rc.1\"\n"
+                + "instrumentation/development:\n"
+                + "  general:\n"
+                + "    db:\n"
+                + "      client:\n"
+                + "        metric:\n"
+                + "          query_text: true\n"));
+    recordDbDuration(metric, "SELECT * FROM users");
+
+    assertThat(metricReader.collectAllMetrics())
+        .singleElement()
+        .satisfies(
+            data ->
+                assertThat(data.getHistogramData().getPoints())
+                    .anySatisfy(
+                        point ->
+                            assertThat(point.getAttributes().get(DbAttributes.DB_QUERY_TEXT))
+                                .isEqualTo("SELECT * FROM users")));
   }
 
   @Test
@@ -379,14 +431,14 @@ class HttpSemconvTest {
         HttpClientActiveRequestsMetric.create(
             provider.get("test"), httpServerConfig("      client: {}\n"));
 
-    off.add(1, Attributes.empty());
+    off.add(1, null, null, null, null, null);
     assertThat(reader.collectAllMetrics()).isEmpty();
 
     HttpClientActiveRequestsMetric on =
         HttpClientActiveRequestsMetric.create(
             provider.get("test"),
             httpServerConfig("      semconv:\n        experimental: true\n      client: {}\n"));
-    on.add(1, Attributes.empty());
+    on.add(1, null, null, null, null, null);
     assertThat(reader.collectAllMetrics())
         .singleElement()
         .satisfies(metric -> assertThat(metric.getName()).isEqualTo("http.client.active_requests"));
@@ -497,6 +549,25 @@ class HttpSemconvTest {
     span.setHttpRequestBodyContent(() -> "hello");
     span.end();
     return exporter.getFinishedSpanItems().get(0).getAttributes().get(HttpAttributes.HTTP_REQUEST_BODY_CONTENT);
+  }
+
+  private static void recordDbDuration(
+      DbClientOperationDurationMetric metric, String queryText) {
+    metric.record(
+        1,
+        null,
+        null,
+        null,
+        null,
+        queryText,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   private static Tracer tracer(InMemorySpanExporter exporter) {

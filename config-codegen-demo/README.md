@@ -184,6 +184,8 @@ only where a config property asks for one.
 Generated span, metric, and event helpers subscribe to configuration changes when the provider
 supports them. A change builds a new immutable state and swaps one volatile reference. Each
 operation reads one snapshot, and an in-flight span keeps the snapshot it started with.
+Metric helpers take typed attribute values and build their own `Attributes`. Configuration does not
+change their API: a disabled opt-in value is simply not added while recording.
 
 The released incubating `ConfigProvider` does not have the proposed listener methods yet, so this
 demo uses `DynamicConfigProvider` as a temporary adapter. It does not change the generated API:

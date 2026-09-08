@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.http;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
@@ -45,12 +46,37 @@ public final class HttpClientOpenConnectionsMetric {
     return state.enabled;
   }
 
-
-  public void add(long value, Attributes attributes) {
+  public void add(
+      long value,
+      String httpConnectionState,
+      String networkPeerAddress,
+      String networkProtocolVersion,
+      String serverAddress,
+      Long serverPort,
+      String urlScheme) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.add(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (httpConnectionState != null) {
+      attributes.put(HttpAttributes.HTTP_CONNECTION_STATE, httpConnectionState);
+    }
+    if (networkPeerAddress != null) {
+      attributes.put(HttpAttributes.NETWORK_PEER_ADDRESS, networkPeerAddress);
+    }
+    if (networkProtocolVersion != null) {
+      attributes.put(HttpAttributes.NETWORK_PROTOCOL_VERSION, networkProtocolVersion);
+    }
+    if (serverAddress != null) {
+      attributes.put(HttpAttributes.SERVER_ADDRESS, serverAddress);
+    }
+    if (serverPort != null) {
+      attributes.put(HttpAttributes.SERVER_PORT, serverPort);
+    }
+    if (urlScheme != null) {
+      attributes.put(HttpAttributes.URL_SCHEME, urlScheme);
+    }
+    instrument.add(value, attributes.build());
   }
-
 }

@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.http;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -45,12 +46,53 @@ public final class HttpServerRequestDurationMetric {
     return state.enabled;
   }
 
-
-  public void record(double value, Attributes attributes) {
+  public void record(
+      double value,
+      String errorType,
+      String httpRequestMethod,
+      Long httpResponseStatusCode,
+      String httpRoute,
+      String networkProtocolName,
+      String networkProtocolVersion,
+      String serverAddress,
+      Long serverPort,
+      String urlScheme,
+      String userAgentSyntheticType) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.record(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (errorType != null) {
+      attributes.put(HttpAttributes.ERROR_TYPE, errorType);
+    }
+    if (httpRequestMethod != null) {
+      attributes.put(HttpAttributes.HTTP_REQUEST_METHOD, httpRequestMethod);
+    }
+    if (httpResponseStatusCode != null) {
+      attributes.put(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, httpResponseStatusCode);
+    }
+    if (httpRoute != null) {
+      attributes.put(HttpAttributes.HTTP_ROUTE, httpRoute);
+    }
+    if (networkProtocolName != null) {
+      attributes.put(HttpAttributes.NETWORK_PROTOCOL_NAME, networkProtocolName);
+    }
+    if (networkProtocolVersion != null) {
+      attributes.put(HttpAttributes.NETWORK_PROTOCOL_VERSION, networkProtocolVersion);
+    }
+    if (serverAddress != null) {
+      attributes.put(HttpAttributes.SERVER_ADDRESS, serverAddress);
+    }
+    if (serverPort != null) {
+      attributes.put(HttpAttributes.SERVER_PORT, serverPort);
+    }
+    if (urlScheme != null) {
+      attributes.put(HttpAttributes.URL_SCHEME, urlScheme);
+    }
+    if (userAgentSyntheticType != null) {
+      attributes.put(HttpAttributes.USER_AGENT_SYNTHETIC_TYPE, userAgentSyntheticType);
+    }
+    instrument.record(value, attributes.build());
   }
-
 }

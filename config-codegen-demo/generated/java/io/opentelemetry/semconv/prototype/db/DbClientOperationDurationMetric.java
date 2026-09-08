@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.db;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -27,9 +28,12 @@ public final class DbClientOperationDurationMetric {
   private static final class State {
 
     private final boolean enabled;
+    private final boolean queryText;
 
     private State(DeclarativeConfigProperties config) {
       this.enabled = true;
+      this.queryText = Config.resolve(config, "query_text", SCOPE, "general.db.client.metric")
+          .getBoolean("query_text", false);
     }
   }
 
@@ -45,12 +49,65 @@ public final class DbClientOperationDurationMetric {
     return state.enabled;
   }
 
-
-  public void record(double value, Attributes attributes) {
+  public void record(
+      double value,
+      String dbCollectionName,
+      String dbNamespace,
+      String dbOperationName,
+      String dbQuerySummary,
+      String dbQueryText,
+      String dbResponseStatusCode,
+      String dbStoredProcedureName,
+      String dbSystemName,
+      String errorType,
+      String networkPeerAddress,
+      Long networkPeerPort,
+      String serverAddress,
+      Long serverPort) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.record(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (dbCollectionName != null) {
+      attributes.put(DbAttributes.DB_COLLECTION_NAME, dbCollectionName);
+    }
+    if (dbNamespace != null) {
+      attributes.put(DbAttributes.DB_NAMESPACE, dbNamespace);
+    }
+    if (dbOperationName != null) {
+      attributes.put(DbAttributes.DB_OPERATION_NAME, dbOperationName);
+    }
+    if (dbQuerySummary != null) {
+      attributes.put(DbAttributes.DB_QUERY_SUMMARY, dbQuerySummary);
+    }
+    if (state.queryText && dbQueryText != null) {
+      attributes.put(DbAttributes.DB_QUERY_TEXT, dbQueryText);
+    }
+    if (dbResponseStatusCode != null) {
+      attributes.put(DbAttributes.DB_RESPONSE_STATUS_CODE, dbResponseStatusCode);
+    }
+    if (dbStoredProcedureName != null) {
+      attributes.put(DbAttributes.DB_STORED_PROCEDURE_NAME, dbStoredProcedureName);
+    }
+    if (dbSystemName != null) {
+      attributes.put(DbAttributes.DB_SYSTEM_NAME, dbSystemName);
+    }
+    if (errorType != null) {
+      attributes.put(DbAttributes.ERROR_TYPE, errorType);
+    }
+    if (networkPeerAddress != null) {
+      attributes.put(DbAttributes.NETWORK_PEER_ADDRESS, networkPeerAddress);
+    }
+    if (networkPeerPort != null) {
+      attributes.put(DbAttributes.NETWORK_PEER_PORT, networkPeerPort);
+    }
+    if (serverAddress != null) {
+      attributes.put(DbAttributes.SERVER_ADDRESS, serverAddress);
+    }
+    if (serverPort != null) {
+      attributes.put(DbAttributes.SERVER_PORT, serverPort);
+    }
+    instrument.record(value, attributes.build());
   }
-
 }

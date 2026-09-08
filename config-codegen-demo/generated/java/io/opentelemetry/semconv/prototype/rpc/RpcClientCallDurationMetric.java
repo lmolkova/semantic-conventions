@@ -1,6 +1,7 @@
 package io.opentelemetry.semconv.prototype.rpc;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.incubator.config.ConfigProvider;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -45,12 +46,37 @@ public final class RpcClientCallDurationMetric {
     return state.enabled;
   }
 
-
-  public void record(double value, Attributes attributes) {
+  public void record(
+      double value,
+      String errorType,
+      String rpcMethod,
+      String rpcStatusCode,
+      String rpcSystemName,
+      String serverAddress,
+      Long serverPort) {
+    State state = this.state;
     if (!state.enabled) {
       return;
     }
-    instrument.record(value, attributes);
+    AttributesBuilder attributes = Attributes.builder();
+    if (errorType != null) {
+      attributes.put(RpcAttributes.ERROR_TYPE, errorType);
+    }
+    if (rpcMethod != null) {
+      attributes.put(RpcAttributes.RPC_METHOD, rpcMethod);
+    }
+    if (rpcStatusCode != null) {
+      attributes.put(RpcAttributes.RPC_STATUS_CODE, rpcStatusCode);
+    }
+    if (rpcSystemName != null) {
+      attributes.put(RpcAttributes.RPC_SYSTEM_NAME, rpcSystemName);
+    }
+    if (serverAddress != null) {
+      attributes.put(RpcAttributes.SERVER_ADDRESS, serverAddress);
+    }
+    if (serverPort != null) {
+      attributes.put(RpcAttributes.SERVER_PORT, serverPort);
+    }
+    instrument.record(value, attributes.build());
   }
-
 }
