@@ -40,9 +40,9 @@ groups:
         requirement_level: opt_in
         annotations:
           config:
-            scope: db.client.metric
+            scope: db.client
             properties:
-              query_text:
+              metric_query_text:
                 type: toggle
                 description: |
                   Set to `true` to record `db.query.text` as a metric attribute.
@@ -270,9 +270,9 @@ groups:
         requirement_level: opt_in
         annotations:
           config:
-            scope: db.client.metric
+            scope: db.client
             properties:
-              query_text:
+              metric_query_text:
                 type: toggle
                 description: |
                   Set to `true` to record `db.query.text` as a metric attribute.

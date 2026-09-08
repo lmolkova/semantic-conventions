@@ -28,12 +28,12 @@ public final class DbClientOperationDurationMetric {
   private static final class State {
 
     private final boolean enabled;
-    private final boolean queryText;
+    private final boolean metricQueryText;
 
     private State(DeclarativeConfigProperties config) {
       this.enabled = true;
-      this.queryText = Config.resolve(config, "query_text", SCOPE, "general.db.client.metric")
-          .getBoolean("query_text", false);
+      this.metricQueryText = Config.resolve(config, "metric_query_text", SCOPE, "general.db.client")
+          .getBoolean("metric_query_text", false);
     }
   }
 
@@ -81,7 +81,7 @@ public final class DbClientOperationDurationMetric {
     if (dbQuerySummary != null) {
       attributes.put(DbAttributes.DB_QUERY_SUMMARY, dbQuerySummary);
     }
-    if (state.queryText && dbQueryText != null) {
+    if (state.metricQueryText && dbQueryText != null) {
       attributes.put(DbAttributes.DB_QUERY_TEXT, dbQueryText);
     }
     if (dbResponseStatusCode != null) {

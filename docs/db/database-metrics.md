@@ -184,8 +184,7 @@ Parameterized query text SHOULD NOT be sanitized. Even though parameterized quer
 
 | Property | Default | Description |
 |---|---|---|
-| `.instrumentation/development.general.db.client.metric.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
-| `.instrumentation/development.general.db.client.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.db.client.metric_query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
 
 ---
 
@@ -382,8 +381,7 @@ Parameterized query text SHOULD NOT be sanitized. Even though parameterized quer
 
 | Property | Default | Description |
 |---|---|---|
-| `.instrumentation/development.general.db.client.metric.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
-| `.instrumentation/development.general.db.client.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.db.client.metric_query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
 
 ---
 

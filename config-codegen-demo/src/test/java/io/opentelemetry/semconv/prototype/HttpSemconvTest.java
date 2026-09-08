@@ -191,8 +191,7 @@ class HttpSemconvTest {
                     + "  general:\n"
                     + "    db:\n"
                     + "      client:\n"
-                    + "        metric:\n"
-                    + "          query_text: false\n"));
+                    + "        metric_query_text: false\n"));
     DbClientOperationDurationMetric metric =
         DbClientOperationDurationMetric.create(meterProvider.get("test"), config);
     recordDbDuration(metric, "SELECT * FROM users");
@@ -214,8 +213,7 @@ class HttpSemconvTest {
                 + "  general:\n"
                 + "    db:\n"
                 + "      client:\n"
-                + "        metric:\n"
-                + "          query_text: true\n"));
+                + "        metric_query_text: true\n"));
     recordDbDuration(metric, "SELECT * FROM users");
 
     assertThat(metricReader.collectAllMetrics())

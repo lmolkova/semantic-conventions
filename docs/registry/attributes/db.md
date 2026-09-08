@@ -153,7 +153,7 @@ Parameterized query text SHOULD NOT be sanitized. Even though parameterized quer
 
 | Property | Default | Description |
 |---|---|---|
-| `.instrumentation/development.general.<scope>.query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
+| `.instrumentation/development.general.<scope>.metric_query_text` | `false` | Set to `true` to record `db.query.text` as a metric attribute. Query text may have high cardinality and may contain sensitive information. |
 | `.instrumentation/development.general.<scope>.sanitize_query_text` | `true` | Set to `false` to record the query text as the application provided it, instead of replacing embedded literals with placeholders. |
 
 **[9] `db.response.status_code`:** The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
