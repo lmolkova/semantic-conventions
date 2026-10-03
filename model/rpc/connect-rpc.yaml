@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/open-telemetry/weaver/v0.26.1/schemas/semconv.schema.v2.json
+file_format: definition/2
+
+attribute_groups:
+  - id: rpc.connect_rpc.attributes.common
+    visibility: internal
+    attributes:
+      - ref: rpc.system.name
+        note: 'MUST be set to `connectrpc`.'
+        examples: ['connectrpc']
+
+span_refinements:
+  - id: span.rpc.connect_rpc.call.client
+    ref: rpc.call.client
+    stability: development
+    brief: This span represents an outgoing Remote Procedure Call (RPC).
+    note: |
+      `rpc.system.name` MUST be set to `"connectrpc"` and SHOULD be provided **at span creation time.**
+
+      **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#name) section.
+
+      **Span kind** MUST be `CLIENT`.
+
+      **Span status**: refer to the [Recording Errors](/docs/general/recording-errors.md)
+      document for details on how to record span status.
+    attributes:
+      - ref_group: rpc.connect_rpc.attributes.common
+      - ref: rpc.status_code
+        requirement_level:
+          conditionally_required: if available.
+        brief: The [error code](https://connectrpc.com//docs/protocol/#error-codes) of the Connect response.
+        note: |
+          All status codes except `OK` SHOULD be considered errors.
+      - ref: rpc.request.metadata
+        requirement_level: opt_in
+      - ref: rpc.response.metadata
+        requirement_level: opt_in
+      - ref: server.address
+        brief: The domain name or address of the Connect RPC server.
+        requirement_level: required
+        note: >
+          When an IP address is provided instead of a domain name,
+          instrumentations SHOULD NOT do a reverse DNS lookup to obtain DNS
+          name and SHOULD set `server.address` to the provided IP address.
+      - ref: server.port
+        requirement_level:
+          conditionally_required: if available.
+
+  - id: span.rpc.connect_rpc.call.server
+    ref: rpc.call.server
+    stability: development
+    brief: This span represents an incoming Remote Procedure Call (RPC).
+    note: |
+      `rpc.system.name` MUST be set to `"connectrpc"` and SHOULD be provided **at span creation time.**
+
+      **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#name) section.
+
+      **Span kind** MUST be `SERVER`.
+
+      **Span status**: refer to the [Recording Errors](/docs/general/recording-errors.md)
+      document for details on how to record span status.
+    attributes:
+      - ref_group: rpc.connect_rpc.attributes.common
+      - ref: rpc.status_code
+        requirement_level:
+          conditionally_required: if available.
+        brief: The [error code](https://connectrpc.com/docs/protocol/#error-codes) of the Connect response.
+        note: |
+          The following error codes SHOULD be considered errors:
+
+          - `unknown`
+          - `deadline_exceeded`
+          - `unimplemented`
+          - `internal`
+          - `unavailable`
+          - `data_loss`
+      - ref: rpc.request.metadata
+        requirement_level: opt_in
+      - ref: rpc.response.metadata
+        requirement_level: opt_in
