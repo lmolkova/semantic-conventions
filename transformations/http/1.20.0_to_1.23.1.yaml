@@ -1,0 +1,316 @@
+# HTTP pre-stability -> stable migration (v1.20.0 -> v1.23.1), spans and
+# duration metrics.
+#
+# Source: the HTTP migration guide,
+# https://github.com/open-telemetry/semantic-conventions/blob/main/docs/non-normative/http-migration.md
+# It also covers data from 1.21.0 / 1.22.0 producers (intermediate names),
+# because a 1.20 -> 1.23.1 set holds every change in that range
+# (spec `rules-cover-one-migration`). Those policies have ids ending in -v121.
+#
+# Not expressible here:
+#   - http.target split into url.path + url.query (derive)
+#   - error.type derived from status code / exception (derive)
+#   - net.sock.peer.addr -> client.address fallback when http.client_ip is
+#     unknown (copy one attribute into another)
+#   - http.request.header.<key> / http.response.header.<key> dash/underscore
+#     normalization (templated keys)
+#   - span names ({method} -> HTTP for _OTHER)
+# Not bridgeable: new defaults / derivations in stable (server.port captured
+# even when it's the default port, network.peer.port captured even when it
+# equals server.port, url.scheme / server.address now from forwarding headers).
+#
+# Operation order (remove, redact, convert, scale, rename, add) is relied on:
+# a `remove` in one policy runs before a `rename` of the same key in another.
+file_format: transform/2.0
+source_schema_url: https://opentelemetry.io/schemas/1.20.0
+target_schema_url: https://opentelemetry.io/schemas/1.23.1
+
+policies:
+  # ===================================================================
+  # Spans (1.20 shape: http.method is Required, so it scopes HTTP spans)
+  # ===================================================================
+  - id: http-span-common
+    name: HTTP span attributes common to client and server renamed or removed
+    description: >-
+      net.protocol.version values "2.0"/"3.0" are fixed by
+      http-span-protocol-version-2/3 (their remove runs before this rename).
+      net.sock.family and net.sock.peer.name have no stable equivalent.
+    trace:
+      match:
+        - {span_attribute: [http.method], exists: true}
+      transform:
+        remove:
+          - {span_attribute: [net.sock.family]}
+          - {span_attribute: [net.sock.peer.name]}
+        rename:
+          - {span_attribute: [http.status_code], to: http.response.status_code}
+          - {span_attribute: [http.request_content_length], to: http.request.body.size}
+          - {span_attribute: [http.response_content_length], to: http.response.body.size}
+          - {span_attribute: [net.protocol.name], to: network.protocol.name}
+          - {span_attribute: [net.protocol.version], to: network.protocol.version}
+          - {span_attribute: [net.sock.peer.addr], to: network.peer.address}
+          - {span_attribute: [net.sock.peer.port], to: network.peer.port}
+
+  - id: http-span-method-known
+    name: http.method with one of the 9 well-known methods becomes http.request.method
+    description: >-
+      Stable captures only the well-known methods by default (configurable);
+      everything else becomes _OTHER (see http-span-method-other).
+    trace:
+      match:
+        - {span_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$"}
+      transform:
+        rename:
+          - {span_attribute: [http.method], to: http.request.method}
+
+  - id: http-span-method-other
+    name: Unknown http.method becomes http.request.method=_OTHER plus http.request.method_original
+    description: >-
+      Exact for the default known-method list. Instrumentations configured
+      with extra known methods emit them as-is in stable; this policy still
+      maps them to _OTHER.
+    trace:
+      match:
+        - {span_attribute: [http.method], exists: true}
+        - {span_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+      transform:
+        rename:
+          - {span_attribute: [http.method], to: http.request.method_original}
+        add:
+          - {span_attribute: [http.request.method], value: _OTHER}
+
+  - id: http-span-protocol-version-2
+    name: net.protocol.version "2.0" becomes network.protocol.version "2"
+    trace:
+      match:
+        - {span_attribute: [http.method], exists: true}
+        - {span_attribute: [net.protocol.version], exact: "2.0"}
+      transform:
+        remove:
+          - {span_attribute: [net.protocol.version]}
+        add:
+          - {span_attribute: [network.protocol.version], value: "2"}
+
+  - id: http-span-protocol-version-3
+    name: net.protocol.version "3.0" becomes network.protocol.version "3"
+    trace:
+      match:
+        - {span_attribute: [http.method], exists: true}
+        - {span_attribute: [net.protocol.version], exact: "3.0"}
+      transform:
+        remove:
+          - {span_attribute: [net.protocol.version]}
+        add:
+          - {span_attribute: [network.protocol.version], value: "3"}
+
+  - id: http-span-client
+    name: HTTP client span attributes renamed
+    trace:
+      match:
+        - {span_kind: client}
+        - {span_attribute: [http.method], exists: true}
+      transform:
+        rename:
+          - {span_attribute: [http.url], to: url.full}
+          - {span_attribute: [http.resend_count], to: http.request.resend_count}
+          - {span_attribute: [net.peer.name], to: server.address}
+          - {span_attribute: [net.peer.port], to: server.port}
+
+  - id: http-span-server
+    name: HTTP server span attributes renamed
+    description: >-
+      http.target is left in place: splitting it into url.path and url.query
+      is not expressible. When http.client_ip is absent, stable would also put
+      the peer address in client.address; copying isn't expressible either.
+    trace:
+      match:
+        - {span_kind: server}
+        - {span_attribute: [http.method], exists: true}
+      transform:
+        rename:
+          - {span_attribute: [http.scheme], to: url.scheme}
+          - {span_attribute: [http.client_ip], to: client.address}
+          - {span_attribute: [net.host.name], to: server.address}
+          - {span_attribute: [net.host.port], to: server.port}
+          - {span_attribute: [net.sock.host.addr], to: network.local.address}
+          - {span_attribute: [net.sock.host.port], to: network.local.port}
+
+  # --- 1.21 / 1.22 intermediate span names (not in the guide) -----------
+  - id: http-span-client-v121
+    name: 1.21/1.22 HTTP client socket attributes renamed to network.peer.*
+    description: >-
+      1.21 used server.socket.* for the peer of a client span; 1.22 moved it
+      to network.peer.*. server.socket.domain has no stable equivalent.
+    trace:
+      match:
+        - {span_kind: client}
+        - {span_attribute: [http.request.method], exists: true}
+      transform:
+        remove:
+          - {span_attribute: [server.socket.domain]}
+        rename:
+          - {span_attribute: [server.socket.address], to: network.peer.address}
+          - {span_attribute: [server.socket.port], to: network.peer.port}
+          - {span_attribute: [http.resend_count], to: http.request.resend_count}
+
+  - id: http-span-server-v121
+    name: 1.21 HTTP server socket attributes renamed to network.peer.* / network.local.*
+    trace:
+      match:
+        - {span_kind: server}
+        - {span_attribute: [http.request.method], exists: true}
+      transform:
+        rename:
+          - {span_attribute: [client.socket.address], to: network.peer.address}
+          - {span_attribute: [client.socket.port], to: network.peer.port}
+          - {span_attribute: [server.socket.address], to: network.local.address}
+          - {span_attribute: [server.socket.port], to: network.local.port}
+
+  # ===================================================================
+  # Metrics
+  # ===================================================================
+  # 1.20 http.server.duration is in ms and has http.method (Required).
+  # 1.21 http.server.duration is already in s and has http.request.method,
+  # so the scale must be guarded by the http.method matcher.
+  - id: http-server-duration
+    name: 1.20 http.server.duration (ms) becomes http.server.request.duration (s)
+    metric:
+      match:
+        - {metric_field: name, exact: http.server.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+      transform:
+        scale:
+          - {metric_field: unit, from: ms, to: s}
+        rename:
+          - {metric_field: name, to: http.server.request.duration}
+          - {datapoint_attribute: [http.method], to: http.request.method}
+          - {datapoint_attribute: [http.status_code], to: http.response.status_code}
+          - {datapoint_attribute: [http.scheme], to: url.scheme}
+          - {datapoint_attribute: [net.protocol.name], to: network.protocol.name}
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
+          - {datapoint_attribute: [net.host.name], to: server.address}
+          - {datapoint_attribute: [net.host.port], to: server.port}
+
+  - id: http-server-duration-method-other
+    name: Unknown http.method on http.server.duration becomes http.request.method=_OTHER
+    description: >-
+      The remove runs before http-server-duration's rename, so the rename is a
+      no-op on these series. Exact for the default known-method list.
+    metric:
+      match:
+        - {metric_field: name, exact: http.server.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+        - {datapoint_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+      transform:
+        remove:
+          - {datapoint_attribute: [http.method]}
+        add:
+          - {datapoint_attribute: [http.request.method], value: _OTHER}
+
+  - id: http-server-duration-protocol-version-2
+    name: net.protocol.version "2.0" on http.server.duration becomes "2"
+    metric:
+      match:
+        - {metric_field: name, exact: http.server.duration}
+        - {datapoint_attribute: [net.protocol.version], exact: "2.0"}
+      transform:
+        remove:
+          - {datapoint_attribute: [net.protocol.version]}
+        add:
+          - {datapoint_attribute: [network.protocol.version], value: "2"}
+
+  - id: http-server-duration-protocol-version-3
+    name: net.protocol.version "3.0" on http.server.duration becomes "3"
+    metric:
+      match:
+        - {metric_field: name, exact: http.server.duration}
+        - {datapoint_attribute: [net.protocol.version], exact: "3.0"}
+      transform:
+        remove:
+          - {datapoint_attribute: [net.protocol.version]}
+        add:
+          - {datapoint_attribute: [network.protocol.version], value: "3"}
+
+  - id: http-client-duration
+    name: 1.20 http.client.duration (ms) becomes http.client.request.duration (s)
+    metric:
+      match:
+        - {metric_field: name, exact: http.client.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+      transform:
+        remove:
+          - {datapoint_attribute: [net.sock.peer.addr]}
+        scale:
+          - {metric_field: unit, from: ms, to: s}
+        rename:
+          - {metric_field: name, to: http.client.request.duration}
+          - {datapoint_attribute: [http.method], to: http.request.method}
+          - {datapoint_attribute: [http.status_code], to: http.response.status_code}
+          - {datapoint_attribute: [net.peer.name], to: server.address}
+          - {datapoint_attribute: [net.peer.port], to: server.port}
+          - {datapoint_attribute: [net.protocol.name], to: network.protocol.name}
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
+
+  - id: http-client-duration-method-other
+    name: Unknown http.method on http.client.duration becomes http.request.method=_OTHER
+    metric:
+      match:
+        - {metric_field: name, exact: http.client.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+        - {datapoint_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+      transform:
+        remove:
+          - {datapoint_attribute: [http.method]}
+        add:
+          - {datapoint_attribute: [http.request.method], value: _OTHER}
+
+  - id: http-client-duration-protocol-version-2
+    name: net.protocol.version "2.0" on http.client.duration becomes "2"
+    metric:
+      match:
+        - {metric_field: name, exact: http.client.duration}
+        - {datapoint_attribute: [net.protocol.version], exact: "2.0"}
+      transform:
+        remove:
+          - {datapoint_attribute: [net.protocol.version]}
+        add:
+          - {datapoint_attribute: [network.protocol.version], value: "2"}
+
+  - id: http-client-duration-protocol-version-3
+    name: net.protocol.version "3.0" on http.client.duration becomes "3"
+    metric:
+      match:
+        - {metric_field: name, exact: http.client.duration}
+        - {datapoint_attribute: [net.protocol.version], exact: "3.0"}
+      transform:
+        remove:
+          - {datapoint_attribute: [net.protocol.version]}
+        add:
+          - {datapoint_attribute: [network.protocol.version], value: "3"}
+
+  # --- 1.21 intermediate metric shape (not in the guide) -----------------
+  - id: http-server-duration-v121
+    name: 1.21 http.server.duration (already s, stable attributes) becomes http.server.request.duration
+    description: >-
+      No scale: 1.21 changed the unit to s under the old name. The registry
+      can hold only one unit per name (ms), so backends that derive unit
+      suffixes from it name this partition wrongly.
+    metric:
+      match:
+        - {metric_field: name, exact: http.server.duration}
+        - {datapoint_attribute: [http.request.method], exists: true}
+      transform:
+        rename:
+          - {metric_field: name, to: http.server.request.duration}
+
+  - id: http-client-duration-v121
+    name: 1.21 http.client.duration (already s, stable attributes) becomes http.client.request.duration
+    metric:
+      match:
+        - {metric_field: name, exact: http.client.duration}
+        - {datapoint_attribute: [http.request.method], exists: true}
+      transform:
+        remove:
+          - {datapoint_attribute: [server.socket.address]}
+        rename:
+          - {metric_field: name, to: http.client.request.duration}
