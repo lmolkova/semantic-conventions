@@ -11,7 +11,7 @@ groups:
         requirement_level: required
       - ref: webengine.version
         role: identifying
-        requirement_level: recommended
+        requirement_level: required
       - ref: webengine.description
         role: descriptive
         requirement_level: recommended

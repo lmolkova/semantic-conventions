@@ -10,7 +10,7 @@ groups:
     attributes:
       - ref: otel.scope.name
         role: identifying
-        requirement_level: recommended
+        requirement_level: required
       - ref: otel.scope.version
         role: identifying
-        requirement_level: recommended
+        requirement_level: required

@@ -8,6 +8,7 @@ groups:
     attributes:
       - ref: cloudfoundry.system.id
         role: identifying
+        requirement_level: required
       - ref: cloudfoundry.system.instance.id
         role: descriptive
   - id: entity.cloudfoundry.app
@@ -19,6 +20,7 @@ groups:
     attributes:
       - ref: cloudfoundry.app.id
         role: identifying
+        requirement_level: required
       - ref: cloudfoundry.app.name
         role: descriptive
   - id: entity.cloudfoundry.space
@@ -30,6 +32,7 @@ groups:
     attributes:
       - ref: cloudfoundry.space.id
         role: identifying
+        requirement_level: required
       - ref: cloudfoundry.space.name
         role: descriptive
   - id: entity.cloudfoundry.org
@@ -41,6 +44,7 @@ groups:
     attributes:
       - ref: cloudfoundry.org.id
         role: identifying
+        requirement_level: required
       - ref: cloudfoundry.org.name
         role: descriptive
   - id: entity.cloudfoundry.process
@@ -52,5 +56,6 @@ groups:
     attributes:
       - ref: cloudfoundry.process.id
         role: identifying
+        requirement_level: required
       - ref: cloudfoundry.process.type
         role: descriptive
