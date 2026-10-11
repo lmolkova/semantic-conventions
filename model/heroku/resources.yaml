@@ -1,8 +1,12 @@
-groups:
-  - id: entity.heroku
-    type: entity
+# yaml-language-server: $schema=https://raw.githubusercontent.com/open-telemetry/weaver/v0.26.1/schemas/semconv.schema.v2.json
+file_format: definition/2
+attribute_groups:
+  - id: heroku
+    visibility: public
     stability: development
-    name: heroku
+    annotations:
+      compatibility:
+        policy_exceptions: [entity_missing]
     brief: >
       [Heroku dyno metadata](https://devcenter.heroku.com/articles/dyno-metadata)
     attributes:
