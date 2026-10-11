@@ -1,4 +1,4 @@
 change_type: enhancement
 component: heroku
 note: Convert the Heroku entity to a public attribute group, preserving opt-in attribute requirements.
-issues: [3808]
+issues: [4190]
