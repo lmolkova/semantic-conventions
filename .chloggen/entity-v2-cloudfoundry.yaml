@@ -1,0 +1,4 @@
+change_type: enhancement
+component: cloudfoundry
+note: Define required identifying attributes for cloudfoundry entities for Weaver schema v2 migration.
+issues: [3808]
