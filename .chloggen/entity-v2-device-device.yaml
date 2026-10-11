@@ -1,4 +1,4 @@
 change_type: enhancement
 component: device
-note: Define identifying attributes for device entities for Weaver schema v2 migration.
+note: Convert the device entity to a public attribute group.
 issues: [4166]
