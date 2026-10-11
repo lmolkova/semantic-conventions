@@ -12,5 +12,5 @@ groups:
         role: identifying
         requirement_level: required
       - ref: otel.scope.version
-        role: identifying
-        requirement_level: required
+        role: descriptive
+        requirement_level: recommended

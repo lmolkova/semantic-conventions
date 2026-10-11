@@ -10,8 +10,8 @@ groups:
         role: identifying
         requirement_level: required
       - ref: webengine.version
-        role: identifying
-        requirement_level: required
+        role: descriptive
+        requirement_level: recommended
       - ref: webengine.description
         role: descriptive
         requirement_level: recommended
