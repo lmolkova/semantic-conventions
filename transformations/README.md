@@ -143,14 +143,18 @@ matches:
   - {log_field: event_name, equals: gen_ai.client.inference.operation.details}
 ```
 
-| Operator | Meaning |
-|---|---|
-| `equals` | The value equals a scalar. Typed: the YAML scalar type is the value type, so `equals: 0` matches the int `0` and `equals: "0"` matches the string `"0"`. |
-| `in` | The value equals any entry of a list. A string entry may be a glob. |
-| `glob` | The whole string matches the pattern: `*` is any run of characters (including none), `?` is exactly one character. There's no escape and no character class. |
-| `exists` | `true`: the field is present. `false`: it's absent. |
-| `contains` | An array element, or a substring of a string. |
-| `gt`, `gte`, `lt`, `lte` | Numeric comparison. Defined by #865; not used in these files. |
+| Operator | Meaning | Defined by |
+|---|---|---|
+| `equals` | The value equals a scalar. Typed: the YAML scalar type is the value type, so `equals: 0` matches the int `0` and `equals: "0"` matches the string `"0"`. | #865 |
+| `in` | The value equals any entry of a list. A string entry may be a glob. | **proposed**, not in #865 |
+| `glob` | The whole string matches the pattern: `*` is any run of characters (including none), `?` is exactly one character. There's no escape and no character class. Same wildcard syntax as [Declarative Configuration](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/schema-guidelines.md). | **proposed**, not in #865 |
+| `exists` | `true`: the field is present. `false`: it's absent. | #865 |
+| `contains` | An array element, or a substring of a string. | #865 |
+| `gt`, `gte`, `lt`, `lte` | Numeric comparison. Not used in these files. | #865 |
+
+#865 also defines `regex` (RE2). These files don't use it: `in` and `glob` cover
+every case, and they're the proposed replacement for `regex` in #865, because
+RE2 is hard to support in every SDK and hard to analyze statically.
 
 - `negate: true` inverts any operator. `negate` on an absent attribute matches. For example,
   `{span_attribute: [gen_ai.operation.name], equals: retrieval, negate: true}`
