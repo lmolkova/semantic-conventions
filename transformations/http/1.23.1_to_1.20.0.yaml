@@ -34,7 +34,7 @@ policies:
       network.protocol.version "2"/"3" are fixed by
       http-span-protocol-version-*-rev.
     trace:
-      match:
+      matches:
         - {span_attribute: [http.request.method], exists: true}
       transform:
         rename:
@@ -50,8 +50,8 @@ policies:
   - id: http-span-method-other-rev
     name: http.request.method=_OTHER takes http.method from http.request.method_original
     trace:
-      match:
-        - {span_attribute: [http.request.method], exact: _OTHER}
+      matches:
+        - {span_attribute: [http.request.method], equals: _OTHER}
         - {span_attribute: [http.request.method_original], exists: true}
       transform:
         remove:
@@ -63,9 +63,9 @@ policies:
     name: network.protocol.version "2" becomes net.protocol.version "2.0"
     description: Assumes 1.20 producers reported HTTP/2 as "2.0" (the 1.20 examples); see README.md.
     trace:
-      match:
+      matches:
         - {span_attribute: [http.request.method], exists: true}
-        - {span_attribute: [network.protocol.version], exact: "2"}
+        - {span_attribute: [network.protocol.version], equals: "2"}
       transform:
         remove:
           - {span_attribute: [network.protocol.version]}
@@ -75,9 +75,9 @@ policies:
   - id: http-span-protocol-version-3-rev
     name: network.protocol.version "3" becomes net.protocol.version "3.0"
     trace:
-      match:
+      matches:
         - {span_attribute: [http.request.method], exists: true}
-        - {span_attribute: [network.protocol.version], exact: "3"}
+        - {span_attribute: [network.protocol.version], equals: "3"}
       transform:
         remove:
           - {span_attribute: [network.protocol.version]}
@@ -91,7 +91,7 @@ policies:
       version is set, so absence + version means http. 1.20 recommended
       net.protocol.name always.
     trace:
-      match:
+      matches:
         - {span_attribute: [http.request.method], exists: true}
         - {span_attribute: [network.protocol.name], exists: false}
         - {span_attribute: [network.protocol.version], exists: true}
@@ -102,7 +102,7 @@ policies:
   - id: http-span-client-rev
     name: Stable HTTP client span attributes renamed back
     trace:
-      match:
+      matches:
         - {span_kind: client}
         - {span_attribute: [http.request.method], exists: true}
       transform:
@@ -119,7 +119,7 @@ policies:
       http.client_ip is also set when there was no forwarding header (1.20
       left it unset). url.path/url.query can't be joined into http.target.
     trace:
-      match:
+      matches:
         - {span_kind: server}
         - {span_attribute: [http.request.method], exists: true}
       transform:
@@ -141,13 +141,10 @@ policies:
       metrics. Only 1.20 data is target-shaped: 1.21 producers also emit
       http.server.duration, but in s.
     metric:
-      match:
-        - {metric_field: name, exact: http.server.request.duration}
+      matches:
+        - {metric_field: name, equals: http.server.request.duration}
       transform:
-        scale:
-          - {metric_field: unit, from: s, to: ms}
         rename:
-          - {metric_field: name, to: http.server.duration}
           - {datapoint_attribute: [http.request.method], to: http.method}
           - {datapoint_attribute: [http.response.status_code], to: http.status_code}
           - {datapoint_attribute: [url.scheme], to: http.scheme}
@@ -155,36 +152,42 @@ policies:
           - {datapoint_attribute: [network.protocol.version], to: net.protocol.version}
           - {datapoint_attribute: [server.address], to: net.host.name}
           - {datapoint_attribute: [server.port], to: net.host.port}
+        add:
+          - {metric_field: name, value: http.server.duration, upsert: true}
+
+  - id: http-server-request-duration-rev-view
+    name: http.server.request.duration unit s -> ms (view for http-server-request-duration-rev)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: http.server.request.duration}
+      view:
+        scale: [{metric_field: unit, from: s, to: ms}]
 
   - id: http-server-request-duration-protocol-version-2-rev
     name: network.protocol.version "2" on http.server.request.duration becomes "2.0"
     metric:
-      match:
-        - {metric_field: name, exact: http.server.request.duration}
-        - {datapoint_attribute: [network.protocol.version], exact: "2"}
+      matches:
+        - {metric_field: name, equals: http.server.request.duration}
+        - {datapoint_attribute: [network.protocol.version], equals: "2"}
       transform:
-        remove:
-          - {datapoint_attribute: [network.protocol.version]}
         add:
-          - {datapoint_attribute: [net.protocol.version], value: "2.0"}
+          - {datapoint_attribute: [net.protocol.version], value: "2.0", upsert: true}
 
   - id: http-server-request-duration-protocol-version-3-rev
     name: network.protocol.version "3" on http.server.request.duration becomes "3.0"
     metric:
-      match:
-        - {metric_field: name, exact: http.server.request.duration}
-        - {datapoint_attribute: [network.protocol.version], exact: "3"}
+      matches:
+        - {metric_field: name, equals: http.server.request.duration}
+        - {datapoint_attribute: [network.protocol.version], equals: "3"}
       transform:
-        remove:
-          - {datapoint_attribute: [network.protocol.version]}
         add:
-          - {datapoint_attribute: [net.protocol.version], value: "3.0"}
+          - {datapoint_attribute: [net.protocol.version], value: "3.0", upsert: true}
 
   - id: http-server-request-duration-protocol-name-rev
     name: Absent network.protocol.name with a version on http.server.request.duration means http
     metric:
-      match:
-        - {metric_field: name, exact: http.server.request.duration}
+      matches:
+        - {metric_field: name, equals: http.server.request.duration}
         - {datapoint_attribute: [network.protocol.name], exists: false}
         - {datapoint_attribute: [network.protocol.version], exists: true}
       transform:
@@ -194,49 +197,52 @@ policies:
   - id: http-client-request-duration-rev
     name: http.client.request.duration (s) becomes http.client.duration (ms)
     metric:
-      match:
-        - {metric_field: name, exact: http.client.request.duration}
+      matches:
+        - {metric_field: name, equals: http.client.request.duration}
       transform:
-        scale:
-          - {metric_field: unit, from: s, to: ms}
         rename:
-          - {metric_field: name, to: http.client.duration}
           - {datapoint_attribute: [http.request.method], to: http.method}
           - {datapoint_attribute: [http.response.status_code], to: http.status_code}
           - {datapoint_attribute: [server.address], to: net.peer.name}
           - {datapoint_attribute: [server.port], to: net.peer.port}
           - {datapoint_attribute: [network.protocol.name], to: net.protocol.name}
           - {datapoint_attribute: [network.protocol.version], to: net.protocol.version}
+        add:
+          - {metric_field: name, value: http.client.duration, upsert: true}
+
+  - id: http-client-request-duration-rev-view
+    name: http.client.request.duration unit s -> ms (view for http-client-request-duration-rev)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: http.client.request.duration}
+      view:
+        scale: [{metric_field: unit, from: s, to: ms}]
 
   - id: http-client-request-duration-protocol-version-2-rev
     name: network.protocol.version "2" on http.client.request.duration becomes "2.0"
     metric:
-      match:
-        - {metric_field: name, exact: http.client.request.duration}
-        - {datapoint_attribute: [network.protocol.version], exact: "2"}
+      matches:
+        - {metric_field: name, equals: http.client.request.duration}
+        - {datapoint_attribute: [network.protocol.version], equals: "2"}
       transform:
-        remove:
-          - {datapoint_attribute: [network.protocol.version]}
         add:
-          - {datapoint_attribute: [net.protocol.version], value: "2.0"}
+          - {datapoint_attribute: [net.protocol.version], value: "2.0", upsert: true}
 
   - id: http-client-request-duration-protocol-version-3-rev
     name: network.protocol.version "3" on http.client.request.duration becomes "3.0"
     metric:
-      match:
-        - {metric_field: name, exact: http.client.request.duration}
-        - {datapoint_attribute: [network.protocol.version], exact: "3"}
+      matches:
+        - {metric_field: name, equals: http.client.request.duration}
+        - {datapoint_attribute: [network.protocol.version], equals: "3"}
       transform:
-        remove:
-          - {datapoint_attribute: [network.protocol.version]}
         add:
-          - {datapoint_attribute: [net.protocol.version], value: "3.0"}
+          - {datapoint_attribute: [net.protocol.version], value: "3.0", upsert: true}
 
   - id: http-client-request-duration-protocol-name-rev
     name: Absent network.protocol.name with a version on http.client.request.duration means http
     metric:
-      match:
-        - {metric_field: name, exact: http.client.request.duration}
+      matches:
+        - {metric_field: name, equals: http.client.request.duration}
         - {datapoint_attribute: [network.protocol.name], exists: false}
         - {datapoint_attribute: [network.protocol.version], exists: true}
       transform:

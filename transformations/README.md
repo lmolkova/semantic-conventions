@@ -33,6 +33,7 @@ target gives the same result as running the rewritten query on the original data
   - [Matchers](#matchers)
   - [Keep](#keep)
   - [Transform](#transform)
+  - [Metric views](#metric-views)
   - [Entities](#entities)
   - [Evaluation](#evaluation)
   - [Safety](#safety)
@@ -65,7 +66,9 @@ nothing can undo a `remove`, and a change that can be bridged one way often can'
 ## Syntax
 
 The rule syntax and evaluation model come from
-[OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md).
+[OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md),
+with the operator and field names of
+[opentelemetry-proto#865](https://github.com/open-telemetry/opentelemetry-proto/pull/865).
 This section summarizes them and lists what transformation sets add.
 MUST, MUST NOT, SHOULD and MAY follow RFC 2119.
 
@@ -77,24 +80,38 @@ source_schema_url: https://opentelemetry.io/schemas/1.20.0   # required
 target_schema_url: https://opentelemetry.io/schemas/1.23.1   # required, must differ
 
 policies:
-  - id: http-metric-server-duration          # required, unique in the set
+  - id: http-server-duration                 # required, unique in the set
     name: http.server.duration becomes http.server.request.duration   # required
     description: Optional. Why, and caveats.
     metric:                                  # exactly one target
-      match:
-        - {metric_field: name, exact: http.server.duration}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
         - {datapoint_attribute: [http.method], exists: true}
       transform:
+        rename: [{datapoint_attribute: [http.method], to: http.request.method}]
+        add: [{metric_field: name, value: http.server.request.duration, upsert: true}]
+
+  - id: http-server-duration-view
+    name: http.server.duration ms -> s
+    metric_view:                             # aggregation changes live in a view
+      matches:
+        - {metric_field: name, equals: http.server.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+      view:
         scale: [{metric_field: unit, from: ms, to: s}]
-        rename: [{metric_field: name, to: http.server.request.duration}]
 ```
 
-`policies` is a list of OTEP #4738 `Policy` objects: `id` and `name` (required),
+The header is a thin wrapper. It carries what a policy set can't: the source and
+target versions. The wrapper never changes what a policy means: `policies` on its
+own is a valid policy set that SDKs and the Collector can run.
+
+`policies` is a list of `Policy` objects: `id` and `name` (required),
 `description`, `enabled` and `labels` (optional), and exactly one target:
 
 | Target | Defined by | Applies to |
 |---|---|---|
-| `metric` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Metrics |
+| `metric` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Metric name and datapoint attributes. Only `rename` and `add`. |
+| `metric_view` | transformation sets | Metric streams: dropping attributes (re-aggregation) and unit scaling. See [Metric views](#metric-views). |
 | `trace` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Spans |
 | `log` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Log records and events. Events match on `log_field: event_name`. |
 | `entity` | transformation sets | Resources (resource attributes) |
@@ -112,28 +129,41 @@ and duplicate ids are an error. Parsers MUST reject unknown top-level keys.
 
 ### Matchers
 
-Matchers are [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md)'s, unchanged.
-`match` is a non-empty list, and all entries must hold. Each entry names one field and one operator:
+`matches` is a non-empty list, and all entries must hold. Each entry names one
+field and one operator:
 
 ```yaml
-match:
-  - {metric_field: name, exact: gen_ai.client.token.usage}
-  - {datapoint_attribute: [gen_ai.token.type], exact: input}
+matches:
+  - {metric_field: name, equals: gen_ai.client.token.usage}
+  - {datapoint_attribute: [gen_ai.token.type], equals: input}
   - {span_kind: client}
-  - {trace_field: name, starts_with: "Sent."}
-  - {span_attribute: [db.system], regex: "^(postgresql|oracle)$", negate: true}
-  - {log_field: event_name, exact: gen_ai.client.inference.operation.details}
+  - {trace_field: name, glob: "Sent.*"}
+  - {span_attribute: [db.system], in: [postgresql, oracle], negate: true}
+  - {span_attribute: [rpc.grpc.status_code], equals: 0}
+  - {log_field: event_name, equals: gen_ai.client.inference.operation.details}
 ```
 
-- Operators: `exact`, `regex` (RE2, unanchored), `exists` (`true`/`false`), `starts_with`, `ends_with`, `contains`.
-- Modifiers: `negate`, `case_insensitive`.
-- `negate` on an absent attribute matches. For example,
-  `{ span_attribute: [gen_ai.operation.name], exact: retrieval, negate: true }`
+| Operator | Meaning |
+|---|---|
+| `equals` | The value equals a scalar. Typed: the YAML scalar type is the value type, so `equals: 0` matches the int `0` and `equals: "0"` matches the string `"0"`. |
+| `in` | The value equals any entry of a list. A string entry may be a glob. |
+| `glob` | The whole string matches the pattern: `*` is any run of characters (including none), `?` is exactly one character. There's no escape and no character class. |
+| `exists` | `true`: the field is present. `false`: it's absent. |
+| `contains` | An array element, or a substring of a string. |
+| `gt`, `gte`, `lt`, `lte` | Numeric comparison. Defined by #865; not used in these files. |
+
+- `negate: true` inverts any operator. `negate` on an absent attribute matches. For example,
+  `{span_attribute: [gen_ai.operation.name], equals: retrieval, negate: true}`
   holds for spans without `gen_ai.operation.name`.
+- There are no regular expressions and no case-insensitive matching. Every operator
+  translates directly into PromQL label matchers and SQL predicates, and inverts exactly.
+  A case-insensitive match is written as an `in` list of the spellings that occur, for
+  example `in: [ok, OK]`.
+- `{span_kind: client}` is shorthand for a span kind `equals` matcher.
 
 | Target | Fields |
 |---|---|
-| `metric` | `metric_field` (`name`, `unit`, ...), `metric_type`, `datapoint_attribute` |
+| `metric`, `metric_view` | `metric_field` (`name`, `unit`, ...), `metric_type`, `datapoint_attribute` |
 | `trace` | `trace_field` (`name`, ...), `span_kind`, `span_status`, `span_attribute`, `event_name`, `event_attribute` |
 | `log` | `log_field` (including `event_name`), `log_attribute` |
 | `entity` | `entity_field` (`type`), `resource_attribute` |
@@ -148,25 +178,25 @@ means "this data has no equivalent in the target". Sampling values MUST NOT
 appear: a migration either converts data or doesn't. A dropping policy MUST NOT
 have a `transform`.
 
-The files in this folder don't drop anything. Data without an equivalent is
-left as-is, because its names don't collide with anything in the target.
+Only one policy in these files drops data: `rev-k8s-namespace-phase-drop-other`,
+which drops the stable per-phase `k8s.namespace.phase` series that the old
+value-encoded metric can't represent. Other data without an equivalent is left
+as-is, because its names don't collide with anything in the target.
 
 ### Transform
 
 The transform shape is [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md)'s `LogTransform`:
-one list per operation, each entry naming one field. OTEP #4738 defines it for
-logs. Transformation sets use the same shape for every target and add `convert`,
-`scale` and `set_role`.
+one list per operation, each entry naming one field. Transformation sets use the
+same shape for every target, and add `set_role` for entities.
 
 ```yaml
 transform:
-  remove: [{span_attribute: [net.sock.family]}]
+  remove: [{span_attribute: [net.sock.family]}]                     # not on metrics
   redact: [{span_attribute: [db.statement], replacement: "[REDACTED]"}]
-  convert: [{span_attribute: [gen_ai.request.top_k], type: int}]    # int | double | bool | string
-  scale: [{metric_field: unit, from: ms, to: s}]                 # metric only
   rename: [{span_attribute: [http.method], to: http.request.method, upsert: false},
-             {metric_field: name, to: http.server.request.duration}]
-  add: [{span_attribute: [rpc.system.name], value: grpc, upsert: false}]
+           {span_attribute: [db.redis.database_index], to: db.namespace, convert: string}]
+  add: [{span_attribute: [rpc.grpc.status_code], value: 0},
+        {metric_field: name, value: http.server.request.duration, upsert: true}]
   set_role: [{resource_attribute: [k8s.pod.uid], role: identifying}] # entity only
 ```
 
@@ -175,13 +205,55 @@ Every field reference uses the **source** name, except `to` and the field set by
 
 | Order | Op | Defined by | Meaning |
 |---|---|---|---|
-| 1 | `remove` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Removes the field. For metrics, points that end up with identical attributes are aggregated (exact for sums and histograms). Sets SHOULD NOT remove gauge attributes. |
+| 1 | `remove` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Removes the attribute. Not allowed on `metric`: dropping a metric attribute merges series, so it's a [view](#metric-views) operation. |
 | 2 | `redact` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Replaces the value with `replacement` (default `[REDACTED]`). |
-| 3 | `convert` | transformation sets | Changes the value's type. A value that doesn't convert is removed. |
-| 4 | `scale` | transformation sets | Metrics only. Changes the unit from `from` to `to` (UCUM). Multiplies values, sums, min/max and explicit bucket bounds by the factor. |
-| 5 | `rename` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Moves the value to `to`. If `to` already has a value, `upsert: true` overwrites it and `upsert: false` (default) keeps it. Either way the old key goes away. `metric_field: name` and `log_field: event_name` rename the signal itself. |
-| 6 | `add` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Sets the field to `value`, honoring `upsert` (default `false`). |
-| 7 | `set_role` | transformation sets | Entities only. Moves a resource attribute between the entity's identifying and descriptive attributes. |
+| 3 | `rename` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Moves an attribute's value to the key `to`, atomically. If `to` already has a value, `upsert: true` overwrites it and `upsert: false` (default) keeps it. Either way the old key goes away. Only for attribute keys: signal names are set with `add`. |
+| 4 | `add` | [OTEP #4738](https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/4738-telemetry-policy.md) | Sets an attribute, or a scalar field such as `metric_field: name` or `log_field: event_name`, to `value`, honoring `upsert` (default `false`). |
+| 5 | `set_role` | transformation sets | Entities only. Moves a resource attribute between the entity's identifying and descriptive attributes. |
+
+- **Type conversion is a `rename` option.** `convert: int | double | bool | string`
+  changes the value's type as part of the move. It fails open: a value that
+  doesn't convert isn't moved and keeps its key and type. An in-place type change
+  is a `rename` whose `to` equals the source key:
+  `{span_attribute: [gen_ai.request.top_k], to: gen_ai.request.top_k, convert: int}`.
+- **`add` values are typed.** The YAML scalar type is the attribute type:
+  `value: 0` writes an int, `value: "2"` writes a string. Values follow the
+  attribute's type in the target conventions.
+- **Signal names are scalar fields.** A metric or event changes its name with
+  `add: [{metric_field: name, value: <new name>, upsert: true}]`, not with `rename`.
+  The policy's matchers still see the input name (see [Evaluation](#evaluation)).
+
+### Metric views
+
+`metric_view` policies hold the operations that change aggregation or values.
+They map to SDK Views and Collector aggregation, not to record transforms:
+
+```yaml
+- id: rpc-server-duration-view
+  name: rpc.server.duration ms -> s, rpc.service and network.* dropped
+  metric_view:
+    matches: [{metric_field: name, equals: rpc.server.duration}]   # same matchers as metric
+    view:
+      drop_attributes:
+        - {datapoint_attribute: [rpc.service]}
+        - {datapoint_attribute: [network.transport]}
+        - {datapoint_attribute: [network.type]}
+      scale: [{metric_field: unit, from: ms, to: s}]
+```
+
+| Op | Meaning |
+|---|---|
+| `drop_attributes` | Re-aggregates the stream without the listed attributes. Points that end up with identical attributes are aggregated (exact for sums and histograms). Sets SHOULD NOT drop gauge attributes. |
+| `scale` | Changes the unit from `from` to `to` (UCUM, same dimension). Multiplies values, sums, min/max and explicit bucket bounds by the factor. |
+
+A view applies to the stream after the record transforms of the same set, so
+`drop_attributes` names the attribute as it is after the transforms. In these
+files a view never drops a key that a transform renames. A view policy's id ends
+in `-view`; when it splits off from a `metric` policy, it repeats that policy's matchers.
+
+Keeping views separate means record transforms are always rewritable query by
+query, and only view policies need a per-query decision (for example, PromQL can't
+rescale histogram buckets).
 
 ### Entities
 
@@ -189,7 +261,7 @@ Every field reference uses the **source** name, except `to` and the field set by
 - id: k8s-replicationcontroller-name
   name: k8s.replication_controller.name becomes k8s.replicationcontroller.name
   entity:
-    match: [{resource_attribute: [k8s.replication_controller.name], exists: true}]
+    matches: [{resource_attribute: [k8s.replication_controller.name], exists: true}]
     transform:
       rename: [{resource_attribute: [k8s.replication_controller.name], to: k8s.replicationcontroller.name}]
 ```
@@ -205,14 +277,15 @@ No policy runs before another, and no policy sees another policy's output. For e
 
 1. Find every enabled policy whose matchers hold on the **input** record.
 2. If any of them drops the record, it's removed.
-3. Otherwise, collect the operations of all matching policies and run them by operation type, in the order above.
+3. Otherwise, collect the transform operations of all matching policies and run them by operation type, in the order above.
+4. For metrics, apply the matching `metric_view` policies to the result.
 
 Commutativity, idempotency and determinism are MUSTs. Where OTEP #4738 settles two
 policies writing the same field by policy-id order, transformation sets forbid
 the case instead: two policies that can match the same record MUST NOT apply the
 same operation to the same field with different parameters. Different operations
 on the same field are fine, because the fixed order settles them. For example,
-a `remove` and a `rename` of the same key: `remove` runs first, so the rename finds nothing.
+a `remove` and a `rename` of the same span attribute: `remove` runs first, so the rename finds nothing.
 
 This makes two patterns safe, and the files use both:
 
@@ -222,16 +295,21 @@ This makes two patterns safe, and the files use both:
 - id: rpc-span-system-rename
   name: rpc.system renamed to rpc.system.name
   trace:
-    match: [{span_attribute: [rpc.system], exists: true}]
+    matches: [{span_attribute: [rpc.system], exists: true}]
     transform:
       rename: [{span_attribute: [rpc.system], to: rpc.system.name}]
 - id: rpc-span-system-value-dubbo
   name: rpc.system apache_dubbo becomes rpc.system.name dubbo
   trace:
-    match: [{span_attribute: [rpc.system], exact: apache_dubbo}]
+    matches: [{span_attribute: [rpc.system], equals: apache_dubbo}]
     transform:
       add: [{span_attribute: [rpc.system.name], value: dubbo, upsert: true}]
 ```
+
+On metrics this is how a single attribute value is fixed: a rename plus an `add`
+with `upsert: true`, never `remove` + `add`. If the value policy matches records
+the general rename policy doesn't, it carries the same rename itself (identical
+parameters, so the two don't conflict).
 
 Data mode fails open, as in OTEP #4738: a policy that can't be parsed or applied
 is skipped, and the telemetry passes through. Schema mode fails closed: a query
@@ -255,19 +333,30 @@ Some changes would have to touch target-shaped data, so they can't be policies:
 
 ### What can't be expressed
 
-These changes need operations that don't exist yet. The files leave them out and
-list them in their header comments:
+The files leave these changes out and list them in their header comments.
 
-| Needed operation | Examples |
+**Planned additive extensions.** These would close most of the gaps. Each one
+keeps moves atomic and reads the pre-move state, so it fits the operation order above:
+
+| Extension | Examples it unlocks |
 |---|---|
-| Value map (exact, with a reverse) | `db.system` values, gRPC status codes. Emulated today with one policy per value. |
-| Concatenate / split | `rpc.service` + `rpc.method`, `http.target` → `url.path` + `url.query`, `grpc.target` ↔ `server.address`/`server.port` |
-| Derive | `error.type` from a status code or an exception |
-| Templated keys | `k8s.pod.label.<key>`, `http.request.header.<key>` |
-| Span name rewrite, span status and other span fields | DB span names, gRPC `Sent.`/`Recv.` prefixes, gRPC span status |
-| Value ↔ attribute | K8s phase and condition metrics |
-| Instrument change, fan-out | GenAI `gen_ai.client.token.usage` → usage counters, K8s gauge → up-down counter |
-| Moves between signals | exception span events → log events |
+| Value map on `rename` (`map`, with `unmapped: keep \| skip \| default`) | `db.system` values, gRPC status codes, HTTP methods → `_OTHER`, `rpc.system` values, protocol version `2.0` → `2`. Emulated today with one policy per value. |
+| Copy (`keep_source` on `rename`) | `error.type` from a status code, the HTTP `client.address` fallback, MCP `error.type` |
+| Split (one key into two, on a literal delimiter) | `http.target` → `url.path` + `url.query`, `rpc.method` → `rpc.service` + `rpc.method`, the `Sent.`/`Recv.` span-name prefixes |
+| Concatenate (several keys into one) | `rpc.service` + `rpc.method`, `url.path` + `url.query` → `http.target`, `db.namespace` for SQL Server instances, `code.namespace` + `code.function` |
+| Prefix rename (templated keys) | `http.request.header.<key>`, `rpc.request.header.<key>`, `k8s.pod.label.<key>`, `db.operation.parameter.<key>` |
+
+**Not goals for policies.** These won't become policy operations:
+
+- URI parsing (`grpc.target` → `server.address` + `server.port`);
+- JSON content edits (GenAI `system_instructions` filtering, `finish_reason` back-fill);
+- metric fan-out, histogram → counter and other instrument changes, cross-metric arithmetic
+  (GenAI `gen_ai.client.token.usage` → usage counters);
+- moves between signals (exception span events → log events);
+- cross-span aggregation (GenAI cache token counts on internal agent spans);
+- value ↔ attribute encodings (K8s phase and condition metrics), at least for now.
+
+Span name rewrites and span status changes aren't covered by either list yet.
 
 ## Conventions used in these files
 
@@ -327,21 +416,21 @@ policies: applied to the pinned target, they would move target-shaped data. Once
     Inference calls with a custom gen_ai.operation.name can't be told apart
     from other operations, so they stay on gen_ai.client.operation.duration.
   metric:
-    match:
-      - {metric_field: name, exact: gen_ai.client.operation.duration}
-      - {datapoint_attribute: [gen_ai.operation.name], regex: "^(chat|generate_content|text_completion)$"}
+    matches:
+      - {metric_field: name, equals: gen_ai.client.operation.duration}
+      - {datapoint_attribute: [gen_ai.operation.name], in: [chat, generate_content, text_completion]}
     transform:
-      rename: [{metric_field: name, to: gen_ai.client.inference.duration}]
+      add: [{metric_field: name, value: gen_ai.client.inference.duration, upsert: true}]
 - id: genai-521-ttfc
   name: time_to_first_chunk renamed
   metric:
-    match: [{metric_field: name, exact: gen_ai.client.operation.time_to_first_chunk}]
+    matches: [{metric_field: name, equals: gen_ai.client.operation.time_to_first_chunk}]
     transform:
-      rename: [{metric_field: name, to: gen_ai.client.inference.time_to_first_chunk}]
+      add: [{metric_field: name, value: gen_ai.client.inference.time_to_first_chunk, upsert: true}]
 - id: genai-521-tpoc
   name: time_per_output_chunk renamed
   metric:
-    match: [{metric_field: name, exact: gen_ai.client.operation.time_per_output_chunk}]
+    matches: [{metric_field: name, equals: gen_ai.client.operation.time_per_output_chunk}]
     transform:
-      rename: [{metric_field: name, to: gen_ai.client.inference.time_per_output_chunk}]
+      add: [{metric_field: name, value: gen_ai.client.inference.time_per_output_chunk, upsert: true}]
 ```

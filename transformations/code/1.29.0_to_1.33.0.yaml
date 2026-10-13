@@ -32,7 +32,7 @@ policies:
       code.lineno, so the rule doesn't touch it. With code/dup emission the
       existing code.line.number wins (upsert false) and code.lineno is dropped.
     trace:
-      match:
+      matches:
         - {span_attribute: [code.lineno], exists: true}
       transform:
         rename:
@@ -42,7 +42,7 @@ policies:
     name: code.column becomes code.column.number on spans
     description: Renamed in 1.30.0, same type (int) and meaning.
     trace:
-      match:
+      matches:
         - {span_attribute: [code.column], exists: true}
       transform:
         rename:
@@ -52,7 +52,7 @@ policies:
     name: code.filepath becomes code.file.path on spans
     description: Renamed in 1.30.0, same type (string) and meaning.
     trace:
-      match:
+      matches:
         - {span_attribute: [code.filepath], exists: true}
       transform:
         rename:
@@ -63,7 +63,7 @@ policies:
     name: code.lineno becomes code.line.number on log records
     description: Renamed in 1.30.0, same type (int) and meaning.
     log:
-      match:
+      matches:
         - {log_attribute: [code.lineno], exists: true}
       transform:
         rename:
@@ -73,7 +73,7 @@ policies:
     name: code.column becomes code.column.number on log records
     description: Renamed in 1.30.0, same type (int) and meaning.
     log:
-      match:
+      matches:
         - {log_attribute: [code.column], exists: true}
       transform:
         rename:
@@ -83,7 +83,7 @@ policies:
     name: code.filepath becomes code.file.path on log records
     description: Renamed in 1.30.0, same type (string) and meaning.
     log:
-      match:
+      matches:
         - {log_attribute: [code.filepath], exists: true}
       transform:
         rename:

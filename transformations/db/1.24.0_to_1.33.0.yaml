@@ -34,7 +34,7 @@ policies:
       guidance for db.operation.name / db.collection.name means values may
       differ in case between producers.
     trace:
-      match:
+      matches:
         - {span_attribute: [db.system], exists: true}
       transform:
         remove:
@@ -61,9 +61,9 @@ policies:
       and SQL Server spans with db.mssql.instance_name (v1.33 uses
       {instance}|{database}, which needs concatenation).
     trace:
-      match:
+      matches:
         - {span_attribute: [db.system], exists: true}
-        - {span_attribute: [db.system], regex: "^(redis|elasticsearch|postgresql|oracle)$", negate: true}
+        - {span_attribute: [db.system], in: [redis, elasticsearch, postgresql, oracle], negate: true}
         - {span_attribute: [db.mssql.instance_name], exists: false}
       transform:
         rename:
@@ -78,8 +78,8 @@ policies:
       not know the other components. Filters on fully qualified values won't
       match migrated data.
     trace:
-      match:
-        - {span_attribute: [db.system], regex: "^(postgresql|oracle)$"}
+      matches:
+        - {span_attribute: [db.system], in: [postgresql, oracle]}
       transform:
         rename:
           - {span_attribute: [db.name], to: db.namespace}
@@ -87,20 +87,18 @@ policies:
   - id: db-span-namespace-redis
     name: db.redis.database_index (int) becomes db.namespace (string)
     trace:
-      match:
-        - {span_attribute: [db.system], exact: redis}
+      matches:
+        - {span_attribute: [db.system], equals: redis}
       transform:
-        convert:
-          - {span_attribute: [db.redis.database_index], type: string}
         rename:
-          - {span_attribute: [db.redis.database_index], to: db.namespace}
+          - {span_attribute: [db.redis.database_index], to: db.namespace, convert: string}
 
   - id: db-span-namespace-elasticsearch
     name: db.elasticsearch.cluster.name becomes db.namespace
     description: Not in the guide's table; schema 1.27.0 renames it.
     trace:
-      match:
-        - {span_attribute: [db.system], exact: elasticsearch}
+      matches:
+        - {span_attribute: [db.system], equals: elasticsearch}
       transform:
         rename:
           - {span_attribute: [db.elasticsearch.cluster.name], to: db.namespace}
@@ -115,9 +113,10 @@ policies:
       values; v1.33 producers may report these as other_sql or a custom
       value, so filters on them are best effort.
     trace:
-      match:
+      matches:
         - {span_attribute: [db.system], exists: true}
-        - {span_attribute: [db.system], regex: "^(adabas|cache|intersystems_cache|cosmosdb|db2|dynamodb|firebird|h2|hanadb|informix|ingres|maxdb|mssql|netezza|oracle|redshift|spanner)$", negate: true}
+        - {span_attribute: [db.system], in: [adabas, cache, intersystems_cache, cosmosdb, db2, dynamodb, firebird, h2, hanadb, informix,
+                                             ingres, maxdb, mssql, netezza, oracle, redshift, spanner], negate: true}
       transform:
         rename:
           - {span_attribute: [db.system], to: db.system.name}
@@ -127,8 +126,8 @@ policies:
   - id: db-span-system-adabas
     name: db.system=adabas becomes db.system.name=softwareag.adabas
     trace:
-      match:
-        - {span_attribute: [db.system], exact: adabas}
+      matches:
+        - {span_attribute: [db.system], equals: adabas}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -141,8 +140,8 @@ policies:
       InterSystems Caché value (intersystems_cache did not exist yet), so the
       mapping is exact.
     trace:
-      match:
-        - {span_attribute: [db.system], exact: cache}
+      matches:
+        - {span_attribute: [db.system], equals: cache}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -152,8 +151,8 @@ policies:
     name: db.system=intersystems_cache becomes intersystems.cache
     description: Value introduced after v1.24 (intermediate versions only).
     trace:
-      match:
-        - {span_attribute: [db.system], exact: intersystems_cache}
+      matches:
+        - {span_attribute: [db.system], equals: intersystems_cache}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -162,8 +161,8 @@ policies:
   - id: db-span-system-cosmosdb
     name: db.system=cosmosdb becomes azure.cosmosdb
     trace:
-      match:
-        - {span_attribute: [db.system], exact: cosmosdb}
+      matches:
+        - {span_attribute: [db.system], equals: cosmosdb}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -172,8 +171,8 @@ policies:
   - id: db-span-system-db2
     name: db.system=db2 becomes ibm.db2
     trace:
-      match:
-        - {span_attribute: [db.system], exact: db2}
+      matches:
+        - {span_attribute: [db.system], equals: db2}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -182,8 +181,8 @@ policies:
   - id: db-span-system-dynamodb
     name: db.system=dynamodb becomes aws.dynamodb
     trace:
-      match:
-        - {span_attribute: [db.system], exact: dynamodb}
+      matches:
+        - {span_attribute: [db.system], equals: dynamodb}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -192,8 +191,8 @@ policies:
   - id: db-span-system-firebird
     name: db.system=firebird becomes firebirdsql
     trace:
-      match:
-        - {span_attribute: [db.system], exact: firebird}
+      matches:
+        - {span_attribute: [db.system], equals: firebird}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -202,8 +201,8 @@ policies:
   - id: db-span-system-h2
     name: db.system=h2 becomes h2database
     trace:
-      match:
-        - {span_attribute: [db.system], exact: h2}
+      matches:
+        - {span_attribute: [db.system], equals: h2}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -212,8 +211,8 @@ policies:
   - id: db-span-system-hanadb
     name: db.system=hanadb becomes sap.hana
     trace:
-      match:
-        - {span_attribute: [db.system], exact: hanadb}
+      matches:
+        - {span_attribute: [db.system], equals: hanadb}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -222,8 +221,8 @@ policies:
   - id: db-span-system-informix
     name: db.system=informix becomes ibm.informix
     trace:
-      match:
-        - {span_attribute: [db.system], exact: informix}
+      matches:
+        - {span_attribute: [db.system], equals: informix}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -232,8 +231,8 @@ policies:
   - id: db-span-system-ingres
     name: db.system=ingres becomes actian.ingres
     trace:
-      match:
-        - {span_attribute: [db.system], exact: ingres}
+      matches:
+        - {span_attribute: [db.system], equals: ingres}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -242,8 +241,8 @@ policies:
   - id: db-span-system-maxdb
     name: db.system=maxdb becomes sap.maxdb
     trace:
-      match:
-        - {span_attribute: [db.system], exact: maxdb}
+      matches:
+        - {span_attribute: [db.system], equals: maxdb}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -252,8 +251,8 @@ policies:
   - id: db-span-system-mssql
     name: db.system=mssql becomes microsoft.sql_server
     trace:
-      match:
-        - {span_attribute: [db.system], exact: mssql}
+      matches:
+        - {span_attribute: [db.system], equals: mssql}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -262,8 +261,8 @@ policies:
   - id: db-span-system-netezza
     name: db.system=netezza becomes ibm.netezza
     trace:
-      match:
-        - {span_attribute: [db.system], exact: netezza}
+      matches:
+        - {span_attribute: [db.system], equals: netezza}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -272,8 +271,8 @@ policies:
   - id: db-span-system-oracle
     name: db.system=oracle becomes oracle.db
     trace:
-      match:
-        - {span_attribute: [db.system], exact: oracle}
+      matches:
+        - {span_attribute: [db.system], equals: oracle}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -282,8 +281,8 @@ policies:
   - id: db-span-system-redshift
     name: db.system=redshift becomes aws.redshift
     trace:
-      match:
-        - {span_attribute: [db.system], exact: redshift}
+      matches:
+        - {span_attribute: [db.system], equals: redshift}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -292,8 +291,8 @@ policies:
   - id: db-span-system-spanner
     name: db.system=spanner becomes gcp.spanner
     trace:
-      match:
-        - {span_attribute: [db.system], exact: spanner}
+      matches:
+        - {span_attribute: [db.system], equals: spanner}
         - {span_attribute: [db.system.name], exists: false}
       transform:
         rename: [{span_attribute: [db.system], to: db.system.name}]
@@ -305,90 +304,114 @@ policies:
   - id: db-conn-usage
     name: db.client.connections.usage becomes db.client.connection.count
     metric:
-      match: [{metric_field: name, exact: db.client.connections.usage}]
+      matches: [{metric_field: name, equals: db.client.connections.usage}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.count}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
           - {datapoint_attribute: [state], to: db.client.connection.state}
+        add:
+          - {metric_field: name, value: db.client.connection.count, upsert: true}
 
   - id: db-conn-idle-max
     name: db.client.connections.idle.max becomes db.client.connection.idle.max
     metric:
-      match: [{metric_field: name, exact: db.client.connections.idle.max}]
+      matches: [{metric_field: name, equals: db.client.connections.idle.max}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.idle.max}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.idle.max, upsert: true}
 
   - id: db-conn-idle-min
     name: db.client.connections.idle.min becomes db.client.connection.idle.min
     metric:
-      match: [{metric_field: name, exact: db.client.connections.idle.min}]
+      matches: [{metric_field: name, equals: db.client.connections.idle.min}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.idle.min}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.idle.min, upsert: true}
 
   - id: db-conn-max
     name: db.client.connections.max becomes db.client.connection.max
     metric:
-      match: [{metric_field: name, exact: db.client.connections.max}]
+      matches: [{metric_field: name, equals: db.client.connections.max}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.max}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.max, upsert: true}
 
   - id: db-conn-pending-requests
     name: db.client.connections.pending_requests becomes db.client.connection.pending_requests
     metric:
-      match: [{metric_field: name, exact: db.client.connections.pending_requests}]
+      matches: [{metric_field: name, equals: db.client.connections.pending_requests}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.pending_requests}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.pending_requests, upsert: true}
 
   - id: db-conn-timeouts
     name: db.client.connections.timeouts becomes db.client.connection.timeouts
     metric:
-      match: [{metric_field: name, exact: db.client.connections.timeouts}]
+      matches: [{metric_field: name, equals: db.client.connections.timeouts}]
       transform:
         rename:
-          - {metric_field: name, to: db.client.connection.timeouts}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.timeouts, upsert: true}
 
   - id: db-conn-create-time
     name: db.client.connections.create_time (ms) becomes db.client.connection.create_time (s)
     metric:
-      match: [{metric_field: name, exact: db.client.connections.create_time}]
+      matches: [{metric_field: name, equals: db.client.connections.create_time}]
       transform:
-        scale:
-          - {metric_field: unit, from: ms, to: s}
         rename:
-          - {metric_field: name, to: db.client.connection.create_time}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.create_time, upsert: true}
+
+  - id: db-conn-create-time-view
+    name: db.client.connections.create_time unit ms -> s (view for db-conn-create-time)
+    metric_view:
+      matches: [{metric_field: name, equals: db.client.connections.create_time}]
+      view:
+        scale: [{metric_field: unit, from: ms, to: s}]
 
   - id: db-conn-wait-time
     name: db.client.connections.wait_time (ms) becomes db.client.connection.wait_time (s)
     metric:
-      match: [{metric_field: name, exact: db.client.connections.wait_time}]
+      matches: [{metric_field: name, equals: db.client.connections.wait_time}]
       transform:
-        scale:
-          - {metric_field: unit, from: ms, to: s}
         rename:
-          - {metric_field: name, to: db.client.connection.wait_time}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.wait_time, upsert: true}
+
+  - id: db-conn-wait-time-view
+    name: db.client.connections.wait_time unit ms -> s (view for db-conn-wait-time)
+    metric_view:
+      matches: [{metric_field: name, equals: db.client.connections.wait_time}]
+      view:
+        scale: [{metric_field: unit, from: ms, to: s}]
 
   - id: db-conn-use-time
     name: db.client.connections.use_time (ms) becomes db.client.connection.use_time (s)
     metric:
-      match: [{metric_field: name, exact: db.client.connections.use_time}]
+      matches: [{metric_field: name, equals: db.client.connections.use_time}]
       transform:
-        scale:
-          - {metric_field: unit, from: ms, to: s}
         rename:
-          - {metric_field: name, to: db.client.connection.use_time}
           - {datapoint_attribute: [pool.name], to: db.client.connection.pool.name}
+        add:
+          - {metric_field: name, value: db.client.connection.use_time, upsert: true}
+
+  - id: db-conn-use-time-view
+    name: db.client.connections.use_time unit ms -> s (view for db-conn-use-time)
+    metric_view:
+      matches: [{metric_field: name, equals: db.client.connections.use_time}]
+      view:
+        scale: [{metric_field: unit, from: ms, to: s}]
 
   # --- v1.26.0 intermediate shape ------------------------------------------
   # v1.26 already used the new metric names (and seconds) but attribute keys
@@ -398,7 +421,7 @@ policies:
   - id: db-conn-v126-count
     name: v1.26 db.client.connection.count attribute keys
     metric:
-      match: [{metric_field: name, exact: db.client.connection.count}]
+      matches: [{metric_field: name, equals: db.client.connection.count}]
       transform:
         rename:
           - {datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}
@@ -407,55 +430,55 @@ policies:
   - id: db-conn-v126-idle-max
     name: v1.26 db.client.connection.idle.max pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.idle.max}]
+      matches: [{metric_field: name, equals: db.client.connection.idle.max}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-idle-min
     name: v1.26 db.client.connection.idle.min pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.idle.min}]
+      matches: [{metric_field: name, equals: db.client.connection.idle.min}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-max
     name: v1.26 db.client.connection.max pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.max}]
+      matches: [{metric_field: name, equals: db.client.connection.max}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-pending-requests
     name: v1.26 db.client.connection.pending_requests pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.pending_requests}]
+      matches: [{metric_field: name, equals: db.client.connection.pending_requests}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-timeouts
     name: v1.26 db.client.connection.timeouts pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.timeouts}]
+      matches: [{metric_field: name, equals: db.client.connection.timeouts}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-create-time
     name: v1.26 db.client.connection.create_time pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.create_time}]
+      matches: [{metric_field: name, equals: db.client.connection.create_time}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-wait-time
     name: v1.26 db.client.connection.wait_time pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.wait_time}]
+      matches: [{metric_field: name, equals: db.client.connection.wait_time}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]
 
   - id: db-conn-v126-use-time
     name: v1.26 db.client.connection.use_time pool key
     metric:
-      match: [{metric_field: name, exact: db.client.connection.use_time}]
+      matches: [{metric_field: name, equals: db.client.connection.use_time}]
       transform:
         rename: [{datapoint_attribute: [db.client.connections.pool.name], to: db.client.connection.pool.name}]

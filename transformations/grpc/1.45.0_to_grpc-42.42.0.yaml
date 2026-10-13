@@ -30,31 +30,40 @@ policies:
     description: >
       Same instrument (histogram) and unit (s). rpc.system.name and error.type
       are dropped; server.address and server.port are dropped too, because grpc.target can't be built without a concatenate op.
-      Removing labels merges series, which is exact for histograms under
-      rate/increase.
+      The drops are in otel-client-call-duration-view: dropping labels merges
+      series, which is exact for histograms under rate/increase.
     metric:
-      match:
-        - {metric_field: name, exact: rpc.client.call.duration}
-        - {datapoint_attribute: [rpc.system.name], exact: grpc}
+      matches:
+        - {metric_field: name, equals: rpc.client.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
       transform:
-        remove:
+        rename:
+          - {datapoint_attribute: [rpc.method], to: grpc.method}
+          - {datapoint_attribute: [rpc.status_code], to: grpc.status}
+        add:
+          - {metric_field: name, value: grpc.client.call.duration, upsert: true}
+
+  - id: otel-client-call-duration-view
+    name: rpc.system.name, error.type, server.address, server.port dropped from rpc.client.call.duration (view for otel-client-call-duration)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: rpc.client.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
+      view:
+        drop_attributes:
           - {datapoint_attribute: [rpc.system.name]}
           - {datapoint_attribute: [error.type]}
           - {datapoint_attribute: [server.address]}
           - {datapoint_attribute: [server.port]}
-        rename:
-          - {metric_field: name, to: grpc.client.call.duration}
-          - {datapoint_attribute: [rpc.method], to: grpc.method}
-          - {datapoint_attribute: [rpc.status_code], to: grpc.status}
 
   - id: otel-client-call-duration-method-other
     name: rpc.method "_OTHER" becomes grpc.method "other"
     description: Single-value emulation of a value map (exact).
     metric:
-      match:
-        - {metric_field: name, exact: rpc.client.call.duration}
-        - {datapoint_attribute: [rpc.system.name], exact: grpc}
-        - {datapoint_attribute: [rpc.method], exact: _OTHER}
+      matches:
+        - {metric_field: name, equals: rpc.client.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
+        - {datapoint_attribute: [rpc.method], equals: _OTHER}
       transform:
         add: [{datapoint_attribute: [grpc.method], value: other, upsert: true}]
 
@@ -62,30 +71,38 @@ policies:
     name: rpc.server.call.duration (grpc) becomes grpc.server.call.duration
     description: >
       Same instrument (histogram) and unit (s). rpc.system.name and error.type
-      are dropped.
-      Removing labels merges series, which is exact for histograms under
-      rate/increase.
+      are dropped by otel-server-call-duration-view: dropping labels merges
+      series, which is exact for histograms under rate/increase.
     metric:
-      match:
-        - {metric_field: name, exact: rpc.server.call.duration}
-        - {datapoint_attribute: [rpc.system.name], exact: grpc}
+      matches:
+        - {metric_field: name, equals: rpc.server.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
       transform:
-        remove:
-          - {datapoint_attribute: [rpc.system.name]}
-          - {datapoint_attribute: [error.type]}
         rename:
-          - {metric_field: name, to: grpc.server.call.duration}
           - {datapoint_attribute: [rpc.method], to: grpc.method}
           - {datapoint_attribute: [rpc.status_code], to: grpc.status}
+        add:
+          - {metric_field: name, value: grpc.server.call.duration, upsert: true}
+
+  - id: otel-server-call-duration-view
+    name: rpc.system.name, error.type dropped from rpc.server.call.duration (view for otel-server-call-duration)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: rpc.server.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
+      view:
+        drop_attributes:
+          - {datapoint_attribute: [rpc.system.name]}
+          - {datapoint_attribute: [error.type]}
 
   - id: otel-server-call-duration-method-other
     name: rpc.method "_OTHER" becomes grpc.method "other"
     description: Single-value emulation of a value map (exact).
     metric:
-      match:
-        - {metric_field: name, exact: rpc.server.call.duration}
-        - {datapoint_attribute: [rpc.system.name], exact: grpc}
-        - {datapoint_attribute: [rpc.method], exact: _OTHER}
+      matches:
+        - {metric_field: name, equals: rpc.server.call.duration}
+        - {datapoint_attribute: [rpc.system.name], equals: grpc}
+        - {datapoint_attribute: [rpc.method], equals: _OTHER}
       transform:
         add: [{datapoint_attribute: [grpc.method], value: other, upsert: true}]
 
@@ -98,7 +115,7 @@ policies:
       rpc.request.header.*, rpc.response.header.*, rpc.response.trailer.* and
       rpc.method_original are kept, as the guide says.
     trace:
-      match: [{span_attribute: [rpc.system.name], exact: grpc}]
+      matches: [{span_attribute: [rpc.system.name], equals: grpc}]
       transform:
         remove:
           - {span_attribute: [rpc.system.name]}

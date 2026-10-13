@@ -19,8 +19,10 @@
 # even when it's the default port, network.peer.port captured even when it
 # equals server.port, url.scheme / server.address now from forwarding headers).
 #
-# Operation order (remove, redact, convert, scale, rename, add) is relied on:
-# a `remove` in one policy runs before a `rename` of the same key in another.
+# Operation order (remove, redact, rename, add) is relied on: a `remove` in
+# one span policy runs before a `rename` of the same key in another, and a
+# value policy's `add` (upsert true) runs after the general policy's `rename`.
+# Unit changes live in metric_view policies (ids ending in -view).
 file_format: transform/2.0
 source_schema_url: https://opentelemetry.io/schemas/1.20.0
 target_schema_url: https://opentelemetry.io/schemas/1.23.1
@@ -36,7 +38,7 @@ policies:
       http-span-protocol-version-2/3 (their remove runs before this rename).
       net.sock.family and net.sock.peer.name have no stable equivalent.
     trace:
-      match:
+      matches:
         - {span_attribute: [http.method], exists: true}
       transform:
         remove:
@@ -57,8 +59,8 @@ policies:
       Stable captures only the well-known methods by default (configurable);
       everything else becomes _OTHER (see http-span-method-other).
     trace:
-      match:
-        - {span_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$"}
+      matches:
+        - {span_attribute: [http.method], in: [CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE]}
       transform:
         rename:
           - {span_attribute: [http.method], to: http.request.method}
@@ -70,9 +72,9 @@ policies:
       with extra known methods emit them as-is in stable; this policy still
       maps them to _OTHER.
     trace:
-      match:
+      matches:
         - {span_attribute: [http.method], exists: true}
-        - {span_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+        - {span_attribute: [http.method], in: [CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE], negate: true}
       transform:
         rename:
           - {span_attribute: [http.method], to: http.request.method_original}
@@ -82,9 +84,9 @@ policies:
   - id: http-span-protocol-version-2
     name: net.protocol.version "2.0" becomes network.protocol.version "2"
     trace:
-      match:
+      matches:
         - {span_attribute: [http.method], exists: true}
-        - {span_attribute: [net.protocol.version], exact: "2.0"}
+        - {span_attribute: [net.protocol.version], equals: "2.0"}
       transform:
         remove:
           - {span_attribute: [net.protocol.version]}
@@ -94,9 +96,9 @@ policies:
   - id: http-span-protocol-version-3
     name: net.protocol.version "3.0" becomes network.protocol.version "3"
     trace:
-      match:
+      matches:
         - {span_attribute: [http.method], exists: true}
-        - {span_attribute: [net.protocol.version], exact: "3.0"}
+        - {span_attribute: [net.protocol.version], equals: "3.0"}
       transform:
         remove:
           - {span_attribute: [net.protocol.version]}
@@ -106,7 +108,7 @@ policies:
   - id: http-span-client
     name: HTTP client span attributes renamed
     trace:
-      match:
+      matches:
         - {span_kind: client}
         - {span_attribute: [http.method], exists: true}
       transform:
@@ -123,7 +125,7 @@ policies:
       is not expressible. When http.client_ip is absent, stable would also put
       the peer address in client.address; copying isn't expressible either.
     trace:
-      match:
+      matches:
         - {span_kind: server}
         - {span_attribute: [http.method], exists: true}
       transform:
@@ -142,7 +144,7 @@ policies:
       1.21 used server.socket.* for the peer of a client span; 1.22 moved it
       to network.peer.*. server.socket.domain has no stable equivalent.
     trace:
-      match:
+      matches:
         - {span_kind: client}
         - {span_attribute: [http.request.method], exists: true}
       transform:
@@ -156,7 +158,7 @@ policies:
   - id: http-span-server-v121
     name: 1.21 HTTP server socket attributes renamed to network.peer.* / network.local.*
     trace:
-      match:
+      matches:
         - {span_kind: server}
         - {span_attribute: [http.request.method], exists: true}
       transform:
@@ -171,18 +173,16 @@ policies:
   # ===================================================================
   # 1.20 http.server.duration is in ms and has http.method (Required).
   # 1.21 http.server.duration is already in s and has http.request.method,
-  # so the scale must be guarded by the http.method matcher.
+  # so the unit scale (http-server-duration-view) must be guarded by the
+  # http.method matcher.
   - id: http-server-duration
     name: 1.20 http.server.duration (ms) becomes http.server.request.duration (s)
     metric:
-      match:
-        - {metric_field: name, exact: http.server.duration}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
         - {datapoint_attribute: [http.method], exists: true}
       transform:
-        scale:
-          - {metric_field: unit, from: ms, to: s}
         rename:
-          - {metric_field: name, to: http.server.request.duration}
           - {datapoint_attribute: [http.method], to: http.request.method}
           - {datapoint_attribute: [http.status_code], to: http.response.status_code}
           - {datapoint_attribute: [http.scheme], to: url.scheme}
@@ -190,127 +190,149 @@ policies:
           - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
           - {datapoint_attribute: [net.host.name], to: server.address}
           - {datapoint_attribute: [net.host.port], to: server.port}
+        add:
+          - {metric_field: name, value: http.server.request.duration, upsert: true}
+
+  - id: http-server-duration-view
+    name: http.server.duration unit ms -> s (view for http-server-duration)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: http.server.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+      view:
+        scale: [{metric_field: unit, from: ms, to: s}]
 
   - id: http-server-duration-method-other
     name: Unknown http.method on http.server.duration becomes http.request.method=_OTHER
     description: >-
-      The remove runs before http-server-duration's rename, so the rename is a
-      no-op on these series. Exact for the default known-method list.
+      http-server-duration renames http.method to http.request.method; this
+      policy overwrites the value with _OTHER (add runs after rename, upsert
+      true). Exact for the default known-method list.
     metric:
-      match:
-        - {metric_field: name, exact: http.server.duration}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
         - {datapoint_attribute: [http.method], exists: true}
-        - {datapoint_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+        - {datapoint_attribute: [http.method], in: [CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE], negate: true}
       transform:
-        remove:
-          - {datapoint_attribute: [http.method]}
         add:
-          - {datapoint_attribute: [http.request.method], value: _OTHER}
+          - {datapoint_attribute: [http.request.method], value: _OTHER, upsert: true}
 
   - id: http-server-duration-protocol-version-2
     name: net.protocol.version "2.0" on http.server.duration becomes "2"
     metric:
-      match:
-        - {metric_field: name, exact: http.server.duration}
-        - {datapoint_attribute: [net.protocol.version], exact: "2.0"}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
+        - {datapoint_attribute: [net.protocol.version], equals: "2.0"}
       transform:
-        remove:
-          - {datapoint_attribute: [net.protocol.version]}
+        rename:
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
         add:
-          - {datapoint_attribute: [network.protocol.version], value: "2"}
+          - {datapoint_attribute: [network.protocol.version], value: "2", upsert: true}
 
   - id: http-server-duration-protocol-version-3
     name: net.protocol.version "3.0" on http.server.duration becomes "3"
     metric:
-      match:
-        - {metric_field: name, exact: http.server.duration}
-        - {datapoint_attribute: [net.protocol.version], exact: "3.0"}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
+        - {datapoint_attribute: [net.protocol.version], equals: "3.0"}
       transform:
-        remove:
-          - {datapoint_attribute: [net.protocol.version]}
+        rename:
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
         add:
-          - {datapoint_attribute: [network.protocol.version], value: "3"}
+          - {datapoint_attribute: [network.protocol.version], value: "3", upsert: true}
 
   - id: http-client-duration
     name: 1.20 http.client.duration (ms) becomes http.client.request.duration (s)
     metric:
-      match:
-        - {metric_field: name, exact: http.client.duration}
+      matches:
+        - {metric_field: name, equals: http.client.duration}
         - {datapoint_attribute: [http.method], exists: true}
       transform:
-        remove:
-          - {datapoint_attribute: [net.sock.peer.addr]}
-        scale:
-          - {metric_field: unit, from: ms, to: s}
         rename:
-          - {metric_field: name, to: http.client.request.duration}
           - {datapoint_attribute: [http.method], to: http.request.method}
           - {datapoint_attribute: [http.status_code], to: http.response.status_code}
           - {datapoint_attribute: [net.peer.name], to: server.address}
           - {datapoint_attribute: [net.peer.port], to: server.port}
           - {datapoint_attribute: [net.protocol.name], to: network.protocol.name}
           - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
+        add:
+          - {metric_field: name, value: http.client.request.duration, upsert: true}
+
+  - id: http-client-duration-view
+    name: http.client.duration unit ms -> s and net.sock.peer.addr dropped (view for http-client-duration)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: http.client.duration}
+        - {datapoint_attribute: [http.method], exists: true}
+      view:
+        drop_attributes: [{datapoint_attribute: [net.sock.peer.addr]}]
+        scale: [{metric_field: unit, from: ms, to: s}]
 
   - id: http-client-duration-method-other
     name: Unknown http.method on http.client.duration becomes http.request.method=_OTHER
     metric:
-      match:
-        - {metric_field: name, exact: http.client.duration}
+      matches:
+        - {metric_field: name, equals: http.client.duration}
         - {datapoint_attribute: [http.method], exists: true}
-        - {datapoint_attribute: [http.method], regex: "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$", negate: true}
+        - {datapoint_attribute: [http.method], in: [CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE], negate: true}
       transform:
-        remove:
-          - {datapoint_attribute: [http.method]}
         add:
-          - {datapoint_attribute: [http.request.method], value: _OTHER}
+          - {datapoint_attribute: [http.request.method], value: _OTHER, upsert: true}
 
   - id: http-client-duration-protocol-version-2
     name: net.protocol.version "2.0" on http.client.duration becomes "2"
     metric:
-      match:
-        - {metric_field: name, exact: http.client.duration}
-        - {datapoint_attribute: [net.protocol.version], exact: "2.0"}
+      matches:
+        - {metric_field: name, equals: http.client.duration}
+        - {datapoint_attribute: [net.protocol.version], equals: "2.0"}
       transform:
-        remove:
-          - {datapoint_attribute: [net.protocol.version]}
+        rename:
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
         add:
-          - {datapoint_attribute: [network.protocol.version], value: "2"}
+          - {datapoint_attribute: [network.protocol.version], value: "2", upsert: true}
 
   - id: http-client-duration-protocol-version-3
     name: net.protocol.version "3.0" on http.client.duration becomes "3"
     metric:
-      match:
-        - {metric_field: name, exact: http.client.duration}
-        - {datapoint_attribute: [net.protocol.version], exact: "3.0"}
+      matches:
+        - {metric_field: name, equals: http.client.duration}
+        - {datapoint_attribute: [net.protocol.version], equals: "3.0"}
       transform:
-        remove:
-          - {datapoint_attribute: [net.protocol.version]}
+        rename:
+          - {datapoint_attribute: [net.protocol.version], to: network.protocol.version}
         add:
-          - {datapoint_attribute: [network.protocol.version], value: "3"}
+          - {datapoint_attribute: [network.protocol.version], value: "3", upsert: true}
 
   # --- 1.21 intermediate metric shape (not in the guide) -----------------
   - id: http-server-duration-v121
     name: 1.21 http.server.duration (already s, stable attributes) becomes http.server.request.duration
     description: >-
-      No scale: 1.21 changed the unit to s under the old name. The registry
+      No unit scale: 1.21 changed the unit to s under the old name. The registry
       can hold only one unit per name (ms), so backends that derive unit
       suffixes from it name this partition wrongly.
     metric:
-      match:
-        - {metric_field: name, exact: http.server.duration}
+      matches:
+        - {metric_field: name, equals: http.server.duration}
         - {datapoint_attribute: [http.request.method], exists: true}
       transform:
-        rename:
-          - {metric_field: name, to: http.server.request.duration}
+        add:
+          - {metric_field: name, value: http.server.request.duration, upsert: true}
 
   - id: http-client-duration-v121
     name: 1.21 http.client.duration (already s, stable attributes) becomes http.client.request.duration
     metric:
-      match:
-        - {metric_field: name, exact: http.client.duration}
+      matches:
+        - {metric_field: name, equals: http.client.duration}
         - {datapoint_attribute: [http.request.method], exists: true}
       transform:
-        remove:
-          - {datapoint_attribute: [server.socket.address]}
-        rename:
-          - {metric_field: name, to: http.client.request.duration}
+        add:
+          - {metric_field: name, value: http.client.request.duration, upsert: true}
+
+  - id: http-client-duration-v121-view
+    name: server.socket.address dropped from http.client.duration (view for http-client-duration-v121)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: http.client.duration}
+        - {datapoint_attribute: [http.request.method], exists: true}
+      view:
+        drop_attributes: [{datapoint_attribute: [server.socket.address]}]

@@ -40,7 +40,7 @@ policies:
       invoke_agent spans, genai-internal-agent-removed removes the key first
       (remove runs before rename), so it isn't renamed there.
     trace:
-      match: [{span_attribute: [gen_ai.usage.cache_creation.input_tokens], exists: true}]
+      matches: [{span_attribute: [gen_ai.usage.cache_creation.input_tokens], exists: true}]
       transform:
         rename: [{span_attribute: [gen_ai.usage.cache_creation.input_tokens], to: gen_ai.usage.cache_write.input_tokens}]
 
@@ -51,8 +51,8 @@ policies:
       attributes.gen_ai.inference.client; target: ref_group
       span.gen_ai.inference.client), so the rename applies to the event too.
     log:
-      match:
-        - {log_field: event_name, exact: gen_ai.client.inference.operation.details}
+      matches:
+        - {log_field: event_name, equals: gen_ai.client.inference.operation.details}
         - {log_attribute: [gen_ai.usage.cache_creation.input_tokens], exists: true}
       transform:
         rename: [{log_attribute: [gen_ai.usage.cache_creation.input_tokens], to: gen_ai.usage.cache_write.input_tokens}]
@@ -61,18 +61,21 @@ policies:
   - id: genai-217-request-top-k-int
     name: gen_ai.request.top_k is an int (non-retrieval spans)
     description: >
-      Target-safe: target values are already int, so convert changes nothing.
-      Matches any non-retrieval span with the key, including inference spans
-      that use a custom operation name. Caveat: a fractional double has no
-      exact int (the SQL view yields null for it). top_k is integral by
-      definition, so v1.41 producers shouldn't send fractional values. Producers that wrongly put OpenAI top_logprobs
+      An in-place type change: a rename to the same key with convert int.
+      Target-safe: target values are already int, so the conversion changes
+      nothing. Matches any non-retrieval span with the key, including
+      inference spans that use a custom operation name. Caveat: convert is
+      fail-open, so a fractional double has no exact int and stays a double.
+      top_k is integral by definition, so v1.41 producers shouldn't send
+      fractional values. Producers that wrongly put OpenAI top_logprobs
       here can't be detected (#217 clarification).
     trace:
-      match:
+      matches:
         - {span_attribute: [gen_ai.request.top_k], exists: true}
-        - {span_attribute: [gen_ai.operation.name], exact: retrieval, negate: true}
+        - {span_attribute: [gen_ai.operation.name], equals: retrieval, negate: true}
       transform:
-        convert: [{span_attribute: [gen_ai.request.top_k], type: int}]
+        rename:
+          - {span_attribute: [gen_ai.request.top_k], to: gen_ai.request.top_k, convert: int}
 
   - id: genai-217-retrieval-top-k
     name: gen_ai.request.top_k becomes gen_ai.retrieval.top_k (int) on retrieval spans
@@ -81,12 +84,11 @@ policies:
       Disjoint from genai-217-request-top-k-int because of the operation.name
       matcher.
     trace:
-      match:
-        - {span_attribute: [gen_ai.operation.name], exact: retrieval}
+      matches:
+        - {span_attribute: [gen_ai.operation.name], equals: retrieval}
         - {span_attribute: [gen_ai.request.top_k], exists: true}
       transform:
-        convert: [{span_attribute: [gen_ai.request.top_k], type: int}]
-        rename: [{span_attribute: [gen_ai.request.top_k], to: gen_ai.retrieval.top_k}]
+        rename: [{span_attribute: [gen_ai.request.top_k], to: gen_ai.retrieval.top_k, convert: int}]
 
   # --- #242, #322, #289, #469: removed from internal invoke_agent spans -------
   - id: genai-internal-agent-removed
@@ -99,9 +101,9 @@ policies:
       gen_ai.usage.cache_creation.input_tokens is listed under its source name,
       and remove runs before genai-440's rename.
     trace:
-      match:
+      matches:
         - {span_kind: internal}
-        - {span_attribute: [gen_ai.operation.name], exact: invoke_agent}
+        - {span_attribute: [gen_ai.operation.name], equals: invoke_agent}
       transform:
         remove:
           - {span_attribute: [gen_ai.agent.id]}
@@ -115,28 +117,46 @@ policies:
     name: gen_ai.client.token.usage with token.type=input becomes gen_ai.client.inference.operation.input_tokens
     description: >
       Same instrument (histogram), same unit ({token}), same attributes minus
-      gen_ai.token.type. Target-safe: matches a source-only metric name.
+      gen_ai.token.type, which genai-374-input-tokens-view drops (it's pinned
+      by the matcher, so no series merge). Target-safe: matches a source-only
+      metric name.
       The deprecated token.type value `completion` has the value "output",
       so input/output covers every defined value. The derived
       gen_ai.client.inference.usage.input_tokens counter needs fan-out plus an
       instrument change and isn't produced.
     metric:
-      match:
-        - {metric_field: name, exact: gen_ai.client.token.usage}
-        - {datapoint_attribute: [gen_ai.token.type], exact: input}
+      matches:
+        - {metric_field: name, equals: gen_ai.client.token.usage}
+        - {datapoint_attribute: [gen_ai.token.type], equals: input}
       transform:
-        remove: [{datapoint_attribute: [gen_ai.token.type]}]
-        rename: [{metric_field: name, to: gen_ai.client.inference.operation.input_tokens}]
+        add: [{metric_field: name, value: gen_ai.client.inference.operation.input_tokens, upsert: true}]
+
+  - id: genai-374-input-tokens-view
+    name: gen_ai.token.type dropped from gen_ai.client.token.usage (view for genai-374-input-tokens)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: gen_ai.client.token.usage}
+        - {datapoint_attribute: [gen_ai.token.type], equals: input}
+      view:
+        drop_attributes: [{datapoint_attribute: [gen_ai.token.type]}]
 
   - id: genai-374-output-tokens
     name: gen_ai.client.token.usage with token.type=output becomes gen_ai.client.inference.operation.output_tokens
     metric:
-      match:
-        - {metric_field: name, exact: gen_ai.client.token.usage}
-        - {datapoint_attribute: [gen_ai.token.type], exact: output}
+      matches:
+        - {metric_field: name, equals: gen_ai.client.token.usage}
+        - {datapoint_attribute: [gen_ai.token.type], equals: output}
       transform:
-        remove: [{datapoint_attribute: [gen_ai.token.type]}]
-        rename: [{metric_field: name, to: gen_ai.client.inference.operation.output_tokens}]
+        add: [{metric_field: name, value: gen_ai.client.inference.operation.output_tokens, upsert: true}]
+
+  - id: genai-374-output-tokens-view
+    name: gen_ai.token.type dropped from gen_ai.client.token.usage (view for genai-374-output-tokens)
+    metric_view:
+      matches:
+        - {metric_field: name, equals: gen_ai.client.token.usage}
+        - {datapoint_attribute: [gen_ai.token.type], equals: output}
+      view:
+        drop_attributes: [{datapoint_attribute: [gen_ai.token.type]}]
 
   # --- #389 (not in the guide): MCP server no longer flags client-side errors -
   - id: mcp-389-server-client-errors-span
@@ -148,19 +168,21 @@ policies:
       server spans never carry error.type with these values. Partial: span
       status stays ERROR, because there's no op to change span status.
     trace:
-      match:
+      matches:
         - {span_kind: server}
         - {span_attribute: [mcp.method.name], exists: true}
-        - {span_attribute: [error.type], regex: "^(-32700|-32600|-32601|-32602|-32002)$"}
+        - {span_attribute: [error.type], in: ["-32700", "-32600", "-32601", "-32602", "-32002"]}
       transform:
         remove: [{span_attribute: [error.type]}]
 
-  - id: mcp-389-server-client-errors-metric
+  - id: mcp-389-server-client-errors-metric-view
     name: error.type removed from mcp.server.operation.duration for client-side JSON-RPC error codes
-    description: Same as the span policy. Target-safe for the same reason.
-    metric:
-      match:
-        - {metric_field: name, exact: mcp.server.operation.duration}
-        - {datapoint_attribute: [error.type], regex: "^(-32700|-32600|-32601|-32602|-32002)$"}
-      transform:
-        remove: [{datapoint_attribute: [error.type]}]
+    description: >
+      Same as the span policy. Target-safe for the same reason. Dropping
+      error.type merges these series with the non-error ones, so it's a view.
+    metric_view:
+      matches:
+        - {metric_field: name, equals: mcp.server.operation.duration}
+        - {datapoint_attribute: [error.type], in: ["-32700", "-32600", "-32601", "-32602", "-32002"]}
+      view:
+        drop_attributes: [{datapoint_attribute: [error.type]}]
