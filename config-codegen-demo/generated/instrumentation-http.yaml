@@ -89,6 +89,11 @@ $defs:
           This is a full override of the default known methods, not a list of known methods in addition to the defaults.
           Equivalent to the OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS environment variable.
         defaultBehavior: "CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE are known"
+      request_body_size_metric:
+        type: [boolean, "null"]
+        description: |
+          Set to `true` to record the `http.server.request.body.size` metric.
+        defaultBehavior: "`false` is used"
       request_capture_body_content:
         type: [boolean, "null"]
         description: |

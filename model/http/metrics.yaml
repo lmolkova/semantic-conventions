@@ -113,6 +113,7 @@ groups:
   - id: metric.http.server.request.body.size
     type: metric
     metric_name: http.server.request.body.size
+    requirement_level: opt_in
     annotations:
       code_generation:
         metric_value_type: int
@@ -121,6 +122,10 @@ groups:
         properties:
           semconv_experimental:
             type: toggle
+          request_body_size_metric:
+            type: toggle
+            description: |
+              Set to `true` to record the `http.server.request.body.size` metric.
     stability: development
     brief: "Size of HTTP server request bodies."
     instrument: histogram

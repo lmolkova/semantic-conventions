@@ -35,7 +35,8 @@ public final class HttpServerRequestBodySizeMetric {
     private final List<String> knownMethods;
 
     private State(DeclarativeConfigProperties config) {
-      this.enabled = Config.experimental(config, "http");
+      this.enabled = Config.experimental(config, "http")
+          && Config.at(config, SCOPE).getBoolean("request_body_size_metric", false);
       this.knownMethods = Config.stringList(
           Config.at(config, SCOPE), "known_methods", HTTP_REQUEST_METHOD_DEFAULT);
     }
