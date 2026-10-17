@@ -1,0 +1,4 @@
+file_format: definition_manifest/2.0
+schema_url: https://opentelemetry.io/schemas/0.0.0-dev
+description: Registry of core semantic conventions for OpenTelemetry.
+stability: development
