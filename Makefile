@@ -357,6 +357,29 @@ check-dead-yaml:
 		/home/weaver/target
 	$(TOOLS_DIR)/scripts/find-dead-yaml.sh $(PWD)/internal/tools/bin/signal-groups.txt $(PWD)/docs
 
+DEV_SCHEMA_OUTPUT ?= $(TOOLS_DIR)/bin/schema-dev/$(VERSION)-dev
+.PHONY: generate-schema-dev
+generate-schema-dev:
+	$(if $(strip $(RESOLVED_REGISTRY_URI)),,$(error Set RESOLVED_REGISTRY_URI to the future release artifact URL))
+	@echo '$(VERSION)' | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || \
+		{ echo 'Set VERSION to the release version, e.g. make generate-schema-dev VERSION=1.45.0'; exit 1; }
+	mkdir -p "$(DEV_SCHEMA_OUTPUT)"
+	@set -eu; \
+	model_dir=$$(mktemp -d); \
+	trap 'rm -rf "$$model_dir"' EXIT; \
+	cp -R "$(PWD)/model" "$$model_dir/model"; \
+	sed 's|^schema_url:.*$$|schema_url: https://opentelemetry.io/schemas/$(VERSION)-dev|' \
+		"$(PWD)/model/manifest.yaml" > "$$model_dir/model/manifest.yaml"; \
+	$(DOCKER_RUN) --rm \
+		$(DOCKER_USER_IS_HOST_USER_ARG) \
+		--mount "type=bind,source=$$model_dir/model,target=/home/weaver/source,readonly" \
+		--mount 'type=bind,source=$(abspath $(DEV_SCHEMA_OUTPUT)),target=/home/weaver/target' \
+		$(WEAVER_CONTAINER) registry package \
+		--v2 \
+		--registry=/home/weaver/source \
+		--resolved-registry-uri='$(RESOLVED_REGISTRY_URI)' \
+		--output=/home/weaver/target
+
 NEXT_SEMCONV_VERSION ?= next
 .PHONY: generate-schema-next
 generate-schema-next:
