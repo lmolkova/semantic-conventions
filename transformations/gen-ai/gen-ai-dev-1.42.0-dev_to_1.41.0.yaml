@@ -21,8 +21,10 @@
 #   - MCP server span status for client-side JSON-RPC errors (#389): needs a
 #     span-status op. Only error.type is restored here.
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/gen-ai-dev/1.42.0-dev
-target_schema_url: https://opentelemetry.io/schemas/1.41.0
+source:
+  schema_url: https://opentelemetry.io/schemas/gen-ai-dev/1.42.0-dev
+target:
+  schema_url: https://opentelemetry.io/schemas/1.41.0
 
 policies:
   # --- #440: cache_write -> cache_creation (spans and the details event) ------

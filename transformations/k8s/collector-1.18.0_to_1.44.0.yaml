@@ -29,8 +29,10 @@
 #   - k8s.{pod,node,namespace}.{labels,annotations}.<key>: templated keys
 #   - k8s.volume.{name,type}: resource attributes -> datapoint attributes
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.18.0
-target_schema_url: https://opentelemetry.io/schemas/1.44.0
+source:
+  schema_url: https://opentelemetry.io/schemas/1.18.0
+target:
+  schema_url: https://opentelemetry.io/schemas/1.44.0
 
 policies:
   # --- Network metrics (kubeletstats): attribute renames, same metric name --

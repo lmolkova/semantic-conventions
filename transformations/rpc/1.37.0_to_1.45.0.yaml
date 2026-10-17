@@ -23,8 +23,10 @@
 #     `scale` in metric_view policies (ids ending in -view); PromQL rejects
 #     queries that would need to rescale histograms.
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.37.0
-target_schema_url: https://opentelemetry.io/schemas/1.45.0
+source:
+  schema_url: https://opentelemetry.io/schemas/1.37.0
+target:
+  schema_url: https://opentelemetry.io/schemas/1.45.0
 
 policies:
   # --- Spans: rpc.system -> rpc.system.name ----------------------------------

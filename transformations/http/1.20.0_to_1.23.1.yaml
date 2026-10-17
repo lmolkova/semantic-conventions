@@ -24,8 +24,10 @@
 # value policy's `add` (upsert true) runs after the general policy's `rename`.
 # Unit changes live in metric_view policies (ids ending in -view).
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.20.0
-target_schema_url: https://opentelemetry.io/schemas/1.23.1
+source:
+  schema_url: https://opentelemetry.io/schemas/1.20.0
+target:
+  schema_url: https://opentelemetry.io/schemas/1.23.1
 
 policies:
   # ===================================================================

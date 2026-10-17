@@ -23,8 +23,10 @@
 #     rpc.status_code on non-gRPC/Connect/JSON-RPC spans, rpc.status_code on
 #     metrics) are left in place; old queries don't read them.
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.45.0
-target_schema_url: https://opentelemetry.io/schemas/1.37.0
+source:
+  schema_url: https://opentelemetry.io/schemas/1.45.0
+target:
+  schema_url: https://opentelemetry.io/schemas/1.37.0
 
 policies:
   # --- Spans: rpc.system.name -> rpc.system ----------------------------------

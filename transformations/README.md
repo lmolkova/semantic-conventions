@@ -76,8 +76,11 @@ MUST, MUST NOT, SHOULD and MAY follow RFC 2119.
 
 ```yaml
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.20.0   # required
-target_schema_url: https://opentelemetry.io/schemas/1.23.1   # required, must differ
+source:
+  schema_url: https://opentelemetry.io/schemas/1.20.0   # required
+  registry_path: https://github.com/open-telemetry/semantic-conventions@v1.20.0[model]   # optional
+target:
+  schema_url: https://opentelemetry.io/schemas/1.23.1   # required, must differ from source
 
 policies:
   - id: http-server-duration                 # required, unique in the set
@@ -104,6 +107,19 @@ policies:
 The header is a thin wrapper. It carries what a policy set can't: the source and
 target versions. The wrapper never changes what a policy means: `policies` on its
 own is a valid policy set that SDKs and the Collector can run.
+
+`source` and `target` have the same shape as a dependency in a Weaver manifest:
+
+| Field | Required | Meaning |
+|---|---|---|
+| `schema_url` | yes | Identifies the schema and its version. It must follow the OTel schema URL format and include a version, but doesn't have to be fetchable. |
+| `registry_path` | no | Where the schema's files are, as a Weaver [virtual directory](https://github.com/open-telemetry/weaver/blob/main/docs/vdir.md) string (local directory or archive, remote archive or manifest, Git repository). When omitted, the schema is resolved from `schema_url`. |
+
+`.weaver.toml` `[resolve.schema_url_overrides]` can point any schema URL to a local
+checkout without editing the file. So a transformation from telemetry that isn't
+defined with Weaver yet (for example native gRPC) can describe that telemetry as a
+local Weaver schema and point to it with `registry_path`; its schema URL doesn't
+need to be published.
 
 `policies` is a list of `Policy` objects: `id` and `name` (required),
 `description`, `enabled` and `labels` (optional), and exactly one target:

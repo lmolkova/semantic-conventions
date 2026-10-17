@@ -33,8 +33,10 @@
 #   - error.type for failures without a status code (exceptions) can't be
 #     derived. Instrumentations may also configure other error-code sets.
 file_format: transform/2.0
-source_schema_url: https://grpc.io/schemas/42.42.0
-target_schema_url: https://opentelemetry.io/schemas/1.45.0
+source:
+  schema_url: https://grpc.io/schemas/42.42.0
+target:
+  schema_url: https://opentelemetry.io/schemas/1.45.0
 
 policies:
   # --- grpc.client.call.duration ---------------------------------------------

@@ -19,8 +19,10 @@
 #   error.type, client.port, network.transport, url.scheme on client
 #   spans/metrics.
 file_format: transform/2.0
-source_schema_url: https://opentelemetry.io/schemas/1.23.1
-target_schema_url: https://opentelemetry.io/schemas/1.20.0
+source:
+  schema_url: https://opentelemetry.io/schemas/1.23.1
+target:
+  schema_url: https://opentelemetry.io/schemas/1.20.0
 
 policies:
   # ===================================================================
