@@ -1,7 +1,7 @@
-groups:
-  - id: metric.db.client.connections.usage
-    type: metric
-    metric_name: db.client.connections.usage
+file_format: definition/2
+
+metrics:
+  - name: db.client.connections.usage
     annotations:
       code_generation:
         metric_value_type: int
@@ -18,9 +18,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.idle.max
-    type: metric
-    metric_name: db.client.connections.idle.max
+  - name: db.client.connections.idle.max
     annotations:
       code_generation:
         metric_value_type: int
@@ -35,9 +33,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.idle.min
-    type: metric
-    metric_name: db.client.connections.idle.min
+  - name: db.client.connections.idle.min
     annotations:
       code_generation:
         metric_value_type: int
@@ -52,9 +48,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.max
-    type: metric
-    metric_name: db.client.connections.max
+  - name: db.client.connections.max
     annotations:
       code_generation:
         metric_value_type: int
@@ -69,9 +63,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connection.max
-    type: metric
-    metric_name: db.client.connection.max
+  - name: db.client.connection.max
     annotations:
       code_generation:
         metric_value_type: int
@@ -86,9 +78,7 @@ groups:
       - ref: db.client.connection.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.pending_requests
-    type: metric
-    metric_name: db.client.connections.pending_requests
+  - name: db.client.connections.pending_requests
     annotations:
       code_generation:
         metric_value_type: int
@@ -103,9 +93,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.timeouts
-    type: metric
-    metric_name: db.client.connections.timeouts
+  - name: db.client.connections.timeouts
     annotations:
       code_generation:
         metric_value_type: int
@@ -120,9 +108,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.create_time
-    type: metric
-    metric_name: db.client.connections.create_time
+  - name: db.client.connections.create_time
     annotations:
       code_generation:
         metric_value_type: double
@@ -137,9 +123,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.wait_time
-    type: metric
-    metric_name: db.client.connections.wait_time
+  - name: db.client.connections.wait_time
     annotations:
       code_generation:
         metric_value_type: double
@@ -154,9 +138,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.connections.use_time
-    type: metric
-    metric_name: db.client.connections.use_time
+  - name: db.client.connections.use_time
     annotations:
       code_generation:
         metric_value_type: double
@@ -171,9 +153,7 @@ groups:
       - ref: db.client.connections.pool.name
         requirement_level: required
 
-  - id: metric.db.client.cosmosdb.operation.request_charge
-    type: metric
-    metric_name: db.client.cosmosdb.operation.request_charge
+  - name: db.client.cosmosdb.operation.request_charge
     annotations:
       code_generation:
         metric_value_type: double
@@ -209,9 +189,7 @@ groups:
         requirement_level:
           recommended: If available
 
-  - id: metric.db.client.cosmosdb.active_instance.count
-    type: metric
-    metric_name: db.client.cosmosdb.active_instance.count
+  - name: db.client.cosmosdb.active_instance.count
     annotations:
       code_generation:
         metric_value_type: int
@@ -222,4 +200,5 @@ groups:
     instrument: updowncounter
     unit: "{instance}"
     stability: development
-    extends: attributes.db.client.connection
+    attributes:
+      - ref_group: db.client.connection

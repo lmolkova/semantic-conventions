@@ -1,7 +1,15 @@
-groups:
-  - id: metric.azure.cosmosdb.client.operation.request_charge
-    type: metric
-    metric_name: azure.cosmosdb.client.operation.request_charge
+file_format: definition/2
+
+attribute_groups:
+  - id: azure.cosmosdb.client.metrics
+    visibility: internal
+    attributes:
+      - ref: azure.cosmosdb.operation.contacted_regions
+        requirement_level:
+          recommended: If available
+
+metrics:
+  - name: azure.cosmosdb.client.operation.request_charge
     annotations:
       code_generation:
         metric_value_type: double
@@ -9,20 +17,17 @@ groups:
     instrument: histogram
     unit: "{request_unit}"
     stability: development
-    extends: attributes.azure.cosmosdb.minimal
     attributes:
-      - ref: azure.cosmosdb.operation.contacted_regions
+      - ref_group: db.client.connection
+      - ref: server.port
         requirement_level:
-          recommended: If available
-      - ref: db.collection.name
-        brief: >
-          Cosmos DB container name.
-        note: >
-          It is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization.
+          conditionally_required: If not default (443).
+      - ref_group: azure.cosmosdb.client.response
+      - ref_group: azure.cosmosdb.client.connection
+      - ref_group: azure.cosmosdb.client.operation
+      - ref_group: azure.cosmosdb.client.metrics
 
-  - id: metric.azure.cosmosdb.client.active_instance.count
-    type: metric
-    metric_name: azure.cosmosdb.client.active_instance.count
+  - name: azure.cosmosdb.client.active_instance.count
     annotations:
       code_generation:
         metric_value_type: int
@@ -30,5 +35,45 @@ groups:
     instrument: updowncounter
     unit: "{instance}"
     stability: development
-    extends: attributes.db.client.connection
-    # TODO: add db.system.name once https://github.com/open-telemetry/weaver/issues/479 is possible
+    attributes:
+      - ref_group: db.client.connection
+      - ref: server.port
+        requirement_level:
+          conditionally_required: If not default (443).
+      - ref_group: azure.cosmosdb.client.connection
+
+metric_refinements:
+  - id: metric.azure.cosmosdb.client.operation.duration
+    ref: db.client.operation.duration
+    brief: Total time taken by an Azure Cosmos DB operation.
+    attributes:
+      - unref: db.query.summary
+      - unref: db.query.text
+      - unref: db.stored_procedure.name
+      - unref: network.peer.address
+      - unref: network.peer.port
+      - ref_group: db.client.connection
+      - ref: server.port
+        requirement_level:
+          conditionally_required: If not default (443).
+      - ref_group: azure.cosmosdb.client.response
+      - ref_group: azure.cosmosdb.client.connection
+      - ref_group: azure.cosmosdb.client.operation
+      - ref_group: azure.cosmosdb.client.metrics
+
+  - id: metric.azure.cosmosdb.client.response.returned_rows
+    ref: db.client.response.returned_rows
+    brief: Number of items returned by a query or feed operation in Azure Cosmos DB.
+    attributes:
+      - unref: db.query.summary
+      - unref: db.query.text
+      - unref: network.peer.address
+      - unref: network.peer.port
+      - ref_group: db.client.connection
+      - ref: server.port
+        requirement_level:
+          conditionally_required: If not default (443).
+      - ref_group: azure.cosmosdb.client.response
+      - ref_group: azure.cosmosdb.client.connection
+      - ref_group: azure.cosmosdb.client.operation
+      - ref_group: azure.cosmosdb.client.metrics
