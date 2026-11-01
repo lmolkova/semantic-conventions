@@ -4,7 +4,7 @@ linkTitle: EKS
 
 # AWS EKS
 
-**Status**: [Development][DocumentStatus]
+**Status**: [Deprecated][DocumentStatus]
 
 An AWS Elastic Kubernetes Service (EKS) cluster is reported as a
 [cloud resource](/docs/resource/cloud.md), with its cluster ARN in
