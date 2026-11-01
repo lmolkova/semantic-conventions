@@ -274,9 +274,7 @@ several key differences between the two:
     but also another entity, like `k8s.container`, `host`, etc.
 - An Entity may be conceptually similar to another (which we
   call an "is-a" relationship).
-  - A company might define an `acme.compute.cluster` entity for Kubernetes
-    clusters managed by its platform, with company-specific properties and
-    an additional identity.
+  - For example, a company might define an `acme.compute.cluster` entity with additional company-specific identifying attributes for Kubernetes clusters managed by its platform.
   - In this case, a Resource could contain both the
     `acme.compute.cluster` entity and the `k8s.cluster` entity.
 
