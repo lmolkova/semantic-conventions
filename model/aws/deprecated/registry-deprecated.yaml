@@ -1,0 +1,16 @@
+groups:
+  - id: registry.aws.eks.deprecated
+    type: attribute_group
+    display_name: Deprecated Amazon EKS Attributes
+    brief: >
+      Deprecated attributes for AWS Elastic Kubernetes Service (EKS).
+    attributes:
+      - id: aws.eks.cluster.arn
+        deprecated:
+          reason: uncategorized
+          note: Use `cloud.resource_id` to identify the EKS cluster and Kubernetes cluster attributes to describe its Kubernetes identity.
+        type: string
+        stability: development
+        brief: >
+          The ARN of an EKS cluster.
+        examples: ["arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster"]

@@ -7,7 +7,6 @@
 - [Amazon Bedrock Attributes](#amazon-bedrock-attributes)
 - [Amazon DynamoDB Attributes](#amazon-dynamodb-attributes)
 - [Amazon ECS Attributes](#amazon-ecs-attributes)
-- [Amazon EKS Attributes](#amazon-eks-attributes)
 - [Amazon Kinesis Attributes](#amazon-kinesis-attributes)
 - [Amazon Lambda Attributes](#amazon-lambda-attributes)
 - [Amazon Logs Attributes](#amazon-logs-attributes)
@@ -16,6 +15,7 @@
 - [Amazon SNS Attributes](#amazon-sns-attributes)
 - [Amazon SQS Attributes](#amazon-sqs-attributes)
 - [Amazon Step Functions Attributes](#amazon-step-functions-attributes)
+- [Deprecated Amazon EKS Attributes](#deprecated-amazon-eks-attributes)
 
 ## General AWS Attributes
 
@@ -96,16 +96,6 @@ This document defines attributes for AWS Elastic Container Service (ECS).
 | --- | --- | --- |
 | `ec2` | Amazon EC2 | ![Development](https://img.shields.io/badge/-development-blue) |
 | `fargate` | Amazon Fargate | ![Development](https://img.shields.io/badge/-development-blue) |
-
-## Amazon EKS Attributes
-
-This document defines attributes for AWS Elastic Kubernetes Service (EKS).
-
-**Attributes:**
-
-| Key | Stability | Value Type | Description | Example Values |
-| --- | --- | --- | --- | --- |
-| <a id="aws-eks-cluster-arn" href="#aws-eks-cluster-arn">`aws.eks.cluster.arn`</a> | ![Development](https://img.shields.io/badge/-development-blue) | string | The ARN of an EKS cluster. | `arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster` |
 
 ## Amazon Kinesis Attributes
 
@@ -250,3 +240,13 @@ This document defines attributes for AWS Step Functions.
 | --- | --- | --- | --- | --- |
 | <a id="aws-step-functions-activity-arn" href="#aws-step-functions-activity-arn">`aws.step_functions.activity.arn`</a> | ![Development](https://img.shields.io/badge/-development-blue) | string | The ARN of the AWS Step Functions Activity. | `arn:aws:states:us-east-1:123456789012:activity:get-greeting` |
 | <a id="aws-step-functions-state-machine-arn" href="#aws-step-functions-state-machine-arn">`aws.step_functions.state_machine.arn`</a> | ![Development](https://img.shields.io/badge/-development-blue) | string | The ARN of the AWS Step Functions State Machine. | `arn:aws:states:us-east-1:123456789012:stateMachine:myStateMachine:1` |
+
+## Deprecated Amazon EKS Attributes
+
+Deprecated attributes for AWS Elastic Kubernetes Service (EKS).
+
+**Attributes:**
+
+| Key | Stability | Value Type | Description | Example Values |
+| --- | --- | --- | --- | --- |
+| <a id="aws-eks-cluster-arn" href="#aws-eks-cluster-arn">`aws.eks.cluster.arn`</a> | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Use `cloud.resource_id` to identify the EKS cluster and Kubernetes cluster attributes to describe its Kubernetes identity. | string | The ARN of an EKS cluster. | `arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster` |

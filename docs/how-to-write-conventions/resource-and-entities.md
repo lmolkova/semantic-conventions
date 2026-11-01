@@ -275,11 +275,10 @@ several key differences between the two:
 - An Entity may be conceptually similar to another (which we
   call an "is-a" relationship).
   - For example, the `k8s.cluster` entity generically
-    represents Kubernetes clusters, while the `aws.eks.cluster`
-    entity would represent the AWS specific concept of an
-    Elastic Kubernetes cluster.
-  - In this case, a Resource from EKS could contain both the
-    `aws.eks.cluster` entity and the `k8s.cluster` entity.
+    represents Kubernetes clusters, while the `example.k8s.cluster`
+    entity would represent a custom Kubernetes cluster type defined by a vendor.
+  - In this case, a Resource could contain both the
+    `example.k8s.cluster` entity and the `k8s.cluster` entity.
 
 There are two key principles that are important for Entities
 and Resource in OpenTelemetry:
@@ -312,8 +311,8 @@ namespace when modelling concepts on top of `k8s`.
 Expansion to existing concepts is done through "is-a" relationships.
 These are relationships where one entity is known to represent the same
 concept as another entity, but in some new scoped context. For example,
-an `aws.eks.cluster` is a `k8s.cluster`, but not all `k8s.cluster`
-entities are `aws.eks.cluster` entities.
+an `example.k8s.cluster` is a `k8s.cluster`, but not all `k8s.cluster`
+entities are `example.k8s.cluster` entities.
 
 ### Telescoping Identity
 
