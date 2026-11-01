@@ -23,6 +23,7 @@ exclude = ["compatibility_span_missing"]
 signal_type = "span"
 signal_names = [
     "aws.client",
+    "aws.lambda.server",
     "cicd.pipeline.run.server",
     "cicd.pipeline.task.internal",
     "cli.client",
@@ -49,5 +50,13 @@ signal_names = [
     "messaging.servicebus.generic.client",
     "messaging.settle.client",
     "rpc.call.client",
-    "rpc.call.server"
+    "rpc.call.server",
+    "rpc.connect_rpc.call.client",
+    "rpc.connect_rpc.call.server",
+    "rpc.dubbo.call.client",
+    "rpc.dubbo.call.server",
+    "rpc.grpc.call.client",
+    "rpc.grpc.call.server",
+    "rpc.jsonrpc.call.client",
+    "rpc.jsonrpc.call.server"
 ]
