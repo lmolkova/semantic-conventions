@@ -140,7 +140,8 @@ to multiple products or concepts.
 ## Name reuse prohibition
 
 Two attributes, two metrics, or two events MUST NOT share the same name.
-Two span definitions MUST NOT share the same span type.
+Two span definitions MUST NOT share the same span type; span refinements are not
+separate span definitions.
 Different kinds of definitions (attribute and metric, metric and event, span and metric)
 MAY share the same identifier.
 
@@ -418,9 +419,9 @@ Examples include `http.client.request`, `db.client.operation`,
 `messaging.producer.send`, and `cicd.pipeline.task` for an internal span representing
 task execution in a CI/CD pipeline.
 
-A span type and the names of metric instruments describing the same operation
-SHOULD share a prefix where applicable, such as `http.client.request` and
-`http.client.request.duration`.
+A span type and the names of metric instruments describing the same operation at
+the same scope and level of detail SHOULD share a prefix, such as
+`http.client.request` and `http.client.request.duration`.
 
 System-specific refinements of a span retain its type. For example, a PostgreSQL
 refinement of `db.client.operation` uses that type rather than defining a new one.
