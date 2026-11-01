@@ -1,7 +1,7 @@
 file_format: definition/2
 
 span_refinements:
-  - id: span.db.mysql.client
+  - id: db.mysql.client
     ref: db.client.operation
     stability: stable
     brief: >

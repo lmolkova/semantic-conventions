@@ -13,7 +13,7 @@ attribute_groups:
         examples: ['connectrpc']
 
 span_refinements:
-  - id: span.rpc.connect_rpc.call.client
+  - id: rpc.connect_rpc.call.client
     ref: rpc.client.call
     annotations:
       compatibility:
@@ -122,7 +122,7 @@ span_refinements:
         requirement_level:
           conditionally_required: if available.
 
-  - id: span.rpc.connect_rpc.call.server
+  - id: rpc.connect_rpc.call.server
     ref: rpc.server.call
     annotations:
       compatibility:
