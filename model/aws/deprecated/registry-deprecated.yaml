@@ -7,8 +7,8 @@ groups:
     attributes:
       - id: aws.eks.cluster.arn
         deprecated:
-          reason: uncategorized
-          note: Use `cloud.resource_id` to identify the EKS cluster and Kubernetes cluster attributes to describe its Kubernetes identity.
+          reason: renamed
+          renamed_to: cloud.resource_id
         type: string
         stability: development
         brief: >

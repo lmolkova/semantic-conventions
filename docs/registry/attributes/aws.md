@@ -249,4 +249,4 @@ Deprecated attributes for AWS Elastic Kubernetes Service (EKS).
 
 | Key | Stability | Value Type | Description | Example Values |
 | --- | --- | --- | --- | --- |
-| <a id="aws-eks-cluster-arn" href="#aws-eks-cluster-arn">`aws.eks.cluster.arn`</a> | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Use `cloud.resource_id` to identify the EKS cluster and Kubernetes cluster attributes to describe its Kubernetes identity. | string | The ARN of an EKS cluster. | `arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster` |
+| <a id="aws-eks-cluster-arn" href="#aws-eks-cluster-arn">`aws.eks.cluster.arn`</a> | ![Deprecated](https://img.shields.io/badge/-deprecated-red)<br>Replaced by `cloud.resource_id`. | string | The ARN of an EKS cluster. | `arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster` |
