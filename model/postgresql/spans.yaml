@@ -1,7 +1,7 @@
 file_format: definition/2
 
 span_refinements:
-  - id: db.postgresql.client
+  - id: postgresql.client.operation
     ref: db.client.operation
     stability: stable
     brief: >

@@ -1,7 +1,7 @@
 file_format: definition/2
 
 span_refinements:
-  - id: db.sql_server.client
+  - id: microsoft.sql_server.client.operation
     ref: db.client.operation
     stability: stable
     brief: >

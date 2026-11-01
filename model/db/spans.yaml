@@ -62,7 +62,7 @@ spans:
         sampling_relevant: true
 
 span_refinements:
-  - id: db.sql.client
+  - id: db.client.sql.operation
     ref: db.client.operation
     stability: stable
     brief: >

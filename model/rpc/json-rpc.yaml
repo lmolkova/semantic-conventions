@@ -13,7 +13,7 @@ attribute_groups:
         examples: ['jsonrpc']
 
 span_refinements:
-  - id: rpc.jsonrpc.call.client
+  - id: jsonrpc.client.call
     ref: rpc.client.call
     annotations:
       compatibility:
@@ -68,7 +68,7 @@ span_refinements:
             address from it SHOULD set this attribute.
         note: ""
 
-  - id: rpc.jsonrpc.call.server
+  - id: jsonrpc.server.call
     ref: rpc.server.call
     annotations:
       compatibility:

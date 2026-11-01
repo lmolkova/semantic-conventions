@@ -216,7 +216,7 @@ attribute_groups:
           - Dubbo2: None (the protocol does not support response trailers).
 
 span_refinements:
-  - id: rpc.dubbo.call.client
+  - id: dubbo.client.call
     ref: rpc.client.call
     annotations:
       compatibility:
@@ -236,7 +236,7 @@ span_refinements:
       - ref_group: rpc.dubbo.attributes.span
       - unref: rpc.response.header
 
-  - id: rpc.dubbo.call.server
+  - id: dubbo.server.call
     ref: rpc.server.call
     annotations:
       compatibility:

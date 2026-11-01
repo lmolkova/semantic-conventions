@@ -1,6 +1,6 @@
 change_type: breaking
 component: spans
-note: Harmonize active span types to use `{area}.{kind}.{name}`, omitting kind for internal spans.
+note: Harmonize relevant span types to use `{area}.{kind}.{name}`, omitting kind for internal spans.
 issues: [4241]
 subtext: |
   Update span refinement references and document the span type naming convention.

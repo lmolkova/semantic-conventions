@@ -1,7 +1,7 @@
 file_format: definition/2
 
 span_refinements:
-  - id: db.elasticsearch.client
+  - id: elasticsearch.client.operation
     ref: db.client.operation
     stability: development
     brief: >
