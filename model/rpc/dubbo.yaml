@@ -217,7 +217,7 @@ attribute_groups:
 
 span_refinements:
   - id: span.rpc.dubbo.call.client
-    ref: rpc.call.client
+    ref: rpc.client.call
     annotations:
       compatibility:
         policy_exceptions: [span_missing]
@@ -237,7 +237,7 @@ span_refinements:
       - unref: rpc.response.header
 
   - id: span.rpc.dubbo.call.server
-    ref: rpc.call.server
+    ref: rpc.server.call
     annotations:
       compatibility:
         policy_exceptions: [span_missing]

@@ -2,7 +2,7 @@ file_format: definition/2
 
 span_refinements:
   - id: span.messaging.gcp_pubsub.create.producer
-    ref: messaging.create.producer
+    ref: messaging.producer.create
     stability: development
     brief: Describes a message being created for publishing to Google Cloud Pub/Sub.
     attributes:
@@ -24,7 +24,7 @@ span_refinements:
         examples: ['create']
 
   - id: span.messaging.gcp_pubsub.send.producer
-    ref: messaging.send.producer
+    ref: messaging.producer.send
     stability: development
     brief: Describes a producer publishing one or more messages to Google Cloud Pub/Sub.
     attributes:
@@ -46,7 +46,7 @@ span_refinements:
         examples: ['send']
 
   - id: span.messaging.gcp_pubsub.send.client
-    ref: messaging.send.client
+    ref: messaging.client.send
     stability: development
     brief: Describes a producer publishing one or more messages to Google Cloud Pub/Sub.
     attributes:
@@ -68,7 +68,7 @@ span_refinements:
         examples: ['send']
 
   - id: span.messaging.gcp_pubsub.receive.client
-    ref: messaging.receive.client
+    ref: messaging.client.receive
     stability: development
     brief: Describes a consumer receiving one or more messages from Google Cloud Pub/Sub (pull-based).
     attributes:
@@ -95,7 +95,7 @@ span_refinements:
         examples: ['receive']
 
   - id: span.messaging.gcp_pubsub.process.consumer
-    ref: messaging.process.consumer
+    ref: messaging.consumer.process
     stability: development
     brief: Describes a consumer processing one or more messages from Google Cloud Pub/Sub (push-based).
     attributes:
@@ -124,7 +124,7 @@ span_refinements:
         examples: ['subscribe']
 
   - id: span.messaging.gcp_pubsub.settle.client
-    ref: messaging.settle.client
+    ref: messaging.client.settle
     stability: development
     brief: Describes settling (ack/nack/modack) one or more Google Cloud Pub/Sub messages.
     attributes:

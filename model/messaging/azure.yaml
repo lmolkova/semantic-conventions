@@ -3,7 +3,7 @@ file_format: definition/2
 span_refinements:
   # Azure Service Bus
   - id: span.messaging.servicebus.create.producer
-    ref: messaging.create.producer
+    ref: messaging.producer.create
     stability: development
     brief: Describes a message being created for sending to Azure Service Bus.
     attributes:
@@ -24,7 +24,7 @@ span_refinements:
         examples: ['create']
 
   - id: span.messaging.servicebus.send.producer
-    ref: messaging.send.producer
+    ref: messaging.producer.send
     stability: development
     brief: Describes a producer sending one or more messages to Azure Service Bus.
     attributes:
@@ -48,7 +48,7 @@ span_refinements:
         examples: ['send', 'schedule']
 
   - id: span.messaging.servicebus.send.client
-    ref: messaging.send.client
+    ref: messaging.client.send
     stability: development
     brief: Describes a producer sending one or more messages to Azure Service Bus.
     attributes:
@@ -72,7 +72,7 @@ span_refinements:
         examples: ['send', 'schedule']
 
   - id: span.messaging.servicebus.receive.client
-    ref: messaging.receive.client
+    ref: messaging.client.receive
     stability: development
     brief: Describes a consumer receiving one or more messages from Azure Service Bus.
     attributes:
@@ -107,7 +107,7 @@ span_refinements:
         examples: ['receive', 'peek', 'receive_deferred']
 
   - id: span.messaging.servicebus.process.consumer
-    ref: messaging.process.consumer
+    ref: messaging.consumer.process
     stability: development
     brief: Describes a consumer processing one or more messages from Azure Service Bus (push-based).
     attributes:
@@ -137,7 +137,7 @@ span_refinements:
         examples: ['process']
 
   - id: span.messaging.servicebus.settle.client
-    ref: messaging.settle.client
+    ref: messaging.client.settle
     stability: development
     brief: Describes settling (complete/abandon/defer/dead-letter) one or more Azure Service Bus messages.
     attributes:
@@ -173,7 +173,7 @@ span_refinements:
         examples: ['complete', 'abandon', 'dead_letter']
 
   - id: span.messaging.eventhubs.create.producer
-    ref: messaging.create.producer
+    ref: messaging.producer.create
     stability: development
     brief: Describes a message being created for sending to Azure Event Hubs.
     attributes:
@@ -196,7 +196,7 @@ span_refinements:
         note: SHOULD be set to `create`.
 
   - id: span.messaging.eventhubs.send.producer
-    ref: messaging.send.producer
+    ref: messaging.producer.send
     stability: development
     brief: Describes a producer sending one or more messages to Azure Event Hubs.
     attributes:
@@ -219,7 +219,7 @@ span_refinements:
         note: SHOULD be set to `send`.
 
   - id: span.messaging.eventhubs.send.client
-    ref: messaging.send.client
+    ref: messaging.client.send
     stability: development
     brief: Describes a producer sending one or more messages to Azure Event Hubs.
     attributes:
@@ -242,7 +242,7 @@ span_refinements:
         note: SHOULD be set to `send`.
 
   - id: span.messaging.eventhubs.receive.client
-    ref: messaging.receive.client
+    ref: messaging.client.receive
     stability: development
     brief: Describes a consumer receiving one or more messages from Azure Event Hubs (pull-based).
     attributes:
@@ -271,7 +271,7 @@ span_refinements:
         note: SHOULD be set to `receive`.
 
   - id: span.messaging.eventhubs.process.consumer
-    ref: messaging.process.consumer
+    ref: messaging.consumer.process
     stability: development
     brief: Describes a consumer processing one or more messages from Azure Event Hubs (push-based).
     attributes:
@@ -300,7 +300,7 @@ span_refinements:
         note: SHOULD be set to `process`.
 
   - id: span.messaging.eventhubs.settle.client
-    ref: messaging.settle.client
+    ref: messaging.client.settle
     stability: development
     brief: Describes checkpointing (settling) processed messages in Azure Event Hubs.
     attributes:
@@ -331,7 +331,7 @@ span_refinements:
 
 # Azure operations that do not map to a generic messaging operation type.
 spans:
-  - type: messaging.servicebus.generic.client
+  - type: messaging.client.servicebus.generic
     kind: client
     requirement_level: recommended
     stability: development
@@ -383,7 +383,7 @@ spans:
       - ref: server.port
         sampling_relevant: true
 
-  - type: messaging.eventhubs.generic.client
+  - type: messaging.client.eventhubs.generic
     kind: client
     requirement_level: recommended
     stability: development

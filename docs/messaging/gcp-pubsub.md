@@ -66,9 +66,9 @@ Describes a message being created for publishing to Google Cloud Pub/Sub.
 
 "Create" spans always refer to a single message and are used to provide a unique
 creation context for messages in batch sending scenarios. A "Create" span is only
-used together with a client "Send" span (`messaging.send.client`) that links to it;
+used together with a client "Send" span (`messaging.client.send`) that links to it;
 when the "Send" span itself serves as the creation context, use the producer "Send"
-span (`messaging.send.producer`) instead and omit the "Create" span. See
+span (`messaging.producer.send`) instead and omit the "Create" span. See
 [Producer spans](/docs/messaging/messaging-spans.md#producer-spans) for details.
 
 **Span kind** SHOULD be `PRODUCER`.

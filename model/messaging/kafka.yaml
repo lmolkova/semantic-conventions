@@ -17,7 +17,7 @@ attribute_groups:
 
 span_refinements:
   - id: span.messaging.kafka.create.producer
-    ref: messaging.create.producer
+    ref: messaging.producer.create
     stability: development
     brief: Describes a message being created for sending to Apache Kafka.
     attributes:
@@ -39,7 +39,7 @@ span_refinements:
           conditionally_required: If value is `true`. When missing, the value is assumed to be `false`.
 
   - id: span.messaging.kafka.send.producer
-    ref: messaging.send.producer
+    ref: messaging.producer.send
     stability: development
     brief: Describes a producer sending one or more messages to Apache Kafka.
     attributes:
@@ -58,7 +58,7 @@ span_refinements:
       - ref_group: messaging.kafka.attributes.common
 
   - id: span.messaging.kafka.send.client
-    ref: messaging.send.client
+    ref: messaging.client.send
     stability: development
     brief: Describes a producer sending one or more messages to Apache Kafka.
     attributes:
@@ -77,7 +77,7 @@ span_refinements:
       - ref_group: messaging.kafka.attributes.common
 
   - id: span.messaging.kafka.receive.client
-    ref: messaging.receive.client
+    ref: messaging.client.receive
     stability: development
     brief: Describes a consumer receiving one or more messages from Apache Kafka (pull-based).
     attributes:
@@ -102,7 +102,7 @@ span_refinements:
       - ref_group: messaging.kafka.attributes.common
 
   - id: span.messaging.kafka.settle.client
-    ref: messaging.settle.client
+    ref: messaging.client.settle
     stability: development
     brief: Describes a consumer committing offsets (settling) one or more messages from Apache Kafka.
     attributes:
@@ -129,7 +129,7 @@ span_refinements:
           recommended: If span describes operation on a single message.
 
   - id: span.messaging.kafka.process.consumer
-    ref: messaging.process.consumer
+    ref: messaging.consumer.process
     stability: development
     brief: Describes a consumer processing one or more messages from Apache Kafka (push-based).
     attributes:

@@ -14,7 +14,7 @@ attribute_groups:
 
 span_refinements:
   - id: span.rpc.jsonrpc.call.client
-    ref: rpc.call.client
+    ref: rpc.client.call
     annotations:
       compatibility:
         policy_exceptions: [span_missing]
@@ -69,7 +69,7 @@ span_refinements:
         note: ""
 
   - id: span.rpc.jsonrpc.call.server
-    ref: rpc.call.server
+    ref: rpc.server.call
     annotations:
       compatibility:
         policy_exceptions: [span_missing]

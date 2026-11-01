@@ -15,6 +15,7 @@ aliases: [/docs/specs/semconv/general/how-to-define-semantic-conventions]
     - [Defining attributes](#defining-attributes)
     - [Defining enum attribute members](#defining-enum-attribute-members)
     - [Defining spans](#defining-spans)
+      - [Span type](#span-type)
       - [What operation does this span represent](#what-operation-does-this-span-represent)
       - [Naming pattern](#naming-pattern)
       - [Status](#status)
@@ -248,6 +249,24 @@ When not to define spans:
 A span definition should describe the [operation it represents](#what-operation-does-this-span-represent),
 the [naming pattern](#naming-pattern), considerations for setting span [status](#status),
 the [span kind](#kind), and the list of applicable [attributes](#attributes).
+
+##### Span type
+
+Use `{area}.{kind}.{name}` for span types:
+
+- `area` identifies the domain, such as `http`, `db`, or `messaging`.
+- `kind` matches the span kind in lowercase: `client`, `server`, `producer`, or `consumer`.
+  Omit this segment for `INTERNAL` spans.
+- `name` describes the operation and can contain multiple dot-separated segments.
+
+For example, use `http.client.request`, `db.client.operation`,
+`messaging.producer.send`, or `gen_ai.execute_tool` for an internal tool execution.
+Use a shared prefix for a span type and metrics that describe the same operation
+where applicable, such as `http.client.request` and `http.client.request.duration`.
+
+The span type identifies the operation category. The span name describes an
+individual execution using the [naming pattern](#naming-pattern).
+Span refinements inherit the span type through their `ref`; their IDs do not define new span types.
 
 ##### What operation does this span represent
 

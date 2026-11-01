@@ -3,7 +3,7 @@ file_format: definition/2
 
 span_refinements:
   - id: span.dynamodb.batchgetitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.BatchGetItem` call.
     note: >
@@ -16,7 +16,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.batchwriteitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.BatchWriteItem` call.
     note: >
@@ -31,7 +31,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.createtable.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.CreateTable` call.
     note: >
@@ -57,7 +57,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.deleteitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.DeleteItem` call.
     note: >
@@ -75,7 +75,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.deletetable.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.DeleteTable` call.
     note: >
@@ -89,7 +89,7 @@ span_refinements:
           - Users
 
   - id: span.dynamodb.describetable.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.DescribeTable` call.
     note: >
@@ -103,7 +103,7 @@ span_refinements:
           - Users
 
   - id: span.dynamodb.getitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.GetItem` call.
     note: >
@@ -123,7 +123,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.listtables.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.ListTables` call.
     note: >
@@ -138,7 +138,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.putitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.PutItem` call.
     note: >
@@ -153,7 +153,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.query.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.Query` call.
     note: >
@@ -183,7 +183,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.scan.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.Scan` call.
     note: >
@@ -219,7 +219,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.updateitem.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.UpdateItem` call.
     note: >
@@ -237,7 +237,7 @@ span_refinements:
         requirement_level: recommended
 
   - id: span.dynamodb.updatetable.client
-    ref: aws.client
+    ref: aws.client.call
     brief: >
       This span represents a `DynamoDB.UpdateTable` call.
     note: >
