@@ -9,6 +9,32 @@
 
 <!-- next version -->
 
+## v0.0.3
+
+### 🛑 Breaking changes 🛑
+
+- `aws`: Remove the `aws.eks` entity. Use the `k8s.cluster` entity for EKS clusters; `aws.eks.cluster.arn` remains available as an attribute. ([#4284](https://github.com/open-telemetry/semantic-conventions/issues/4284))
+- `browser`: Remove the `browser` entity. The `browser.*` resource attributes remain defined in the registry. ([#4172](https://github.com/open-telemetry/semantic-conventions/issues/4172))
+- `cloud`: Remove the `cloud` entity in favor of the `cloud.resource` entity and define required identifying attributes for cloud entities for Weaver schema v2 migration. ([#4169](https://github.com/open-telemetry/semantic-conventions/issues/4169))
+- `device`: Remove the `device` entity. The `device.*` resource attributes remain defined in the registry. ([#4166](https://github.com/open-telemetry/semantic-conventions/issues/4166))
+- `faas`: Remove the `faas` entity in favor of the `faas.instance` entity and define required identifying attributes for faas entities for Weaver schema v2 migration. ([#4169](https://github.com/open-telemetry/semantic-conventions/issues/4169))
+- `heroku`: Remove the `heroku` entity in favor of the opt-in `heroku.app` entity, with required identifying `heroku.app.id` and recommended descriptive release attributes. ([#4169](https://github.com/open-telemetry/semantic-conventions/issues/4169))
+- `spans`: Harmonize span types to use `{area}.{kind}.{name}`, omitting kind for internal spans. Update span refinement IDs accordingly. ([#4241](https://github.com/open-telemetry/semantic-conventions/issues/4241))
+
+### 🚩 Deprecations 🚩
+
+- `k8s`: Rename `k8s.hpa.scaletargetref.*` attributes to `k8s.hpa.scale_target_ref.*`. ([#1755](https://github.com/open-telemetry/semantic-conventions/issues/1755))
+  `scaleTargetRef` is a Kubernetes API field rather than a resource name.
+  Rename `k8s.hpa.scaletargetref.kind`, `k8s.hpa.scaletargetref.name`, and
+  `k8s.hpa.scaletargetref.api_version` to `k8s.hpa.scale_target_ref.kind`,
+  `k8s.hpa.scale_target_ref.name`, and `k8s.hpa.scale_target_ref.api_version`.
+  The old attributes are deprecated.
+  
+
+### 💡 Enhancements 💡
+
+- `schemas`: Publish the development v2 resolved schema and manifest as release artifacts. ([#4221](https://github.com/open-telemetry/semantic-conventions/issues/4221))
+
 ## v1.45.0
 
 ### 🛑 Breaking changes 🛑

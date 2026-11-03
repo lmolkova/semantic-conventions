@@ -1,0 +1,5 @@
+file_format: manifest/2.0
+schema_url: https://opentelemetry.io/schemas/semconv-dev/0.0.3-dev
+description: Registry of core semantic conventions for OpenTelemetry.
+stability: development
+resolved_registry_uri: https://github.com/lmolkova/semantic-conventions/releases/download/v0.0.3/resolved.yaml
